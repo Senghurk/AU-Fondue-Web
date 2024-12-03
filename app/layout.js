@@ -1,4 +1,5 @@
 import './globals.css';
+import Link from 'next/link';
 
 export const metadata = {
   title: 'AU Fondue',
@@ -16,19 +17,19 @@ export default function RootLayout({ children }) {
             <nav>
               <ul className="flex space-x-4">
                 <li>
-                  <a href="/" className="hover:underline">
+                  <Link href="/" className="hover:underline">
                     Dashboard
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a href="/users" className="hover:underline">
+                  <Link href="/users" className="hover:underline">
                     Users
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a href="/settings" className="hover:underline">
+                  <Link href="/settings" className="hover:underline">
                     Settings
-                  </a>
+                  </Link>
                 </li>
               </ul>
             </nav>
@@ -42,27 +43,27 @@ export default function RootLayout({ children }) {
       
                 <ul className="space-y-4">
                   <li>
-                    <a href="/" className="block text-gray-700 hover:text-gray-900">
+                    <Link href="/" className="block text-gray-700 hover:text-gray-900">
                       Home
-                    </a>
+                    </Link>
                   </li>
                   <li>
-                    <a href="/reports" className="block text-gray-700 hover:text-gray-900">
+                    <Link href="/reports" className="block text-gray-700 hover:text-gray-900">
                       Reports
-                    </a>
+                    </Link>
                   </li>
                   <li>
-                    <a
+                    <Link
                       href="/assignedReports"
                       className="block text-gray-700 hover:text-gray-900"
                     >
                       Assigned Reports
-                    </a>
+                    </Link>
                   </li>
                   <li>
-                    <a href="/updates" className="block text-gray-700 hover:text-gray-900">
+                    <Link href="/updates" className="block text-gray-700 hover:text-gray-900">
                       Updates
-                    </a>
+                    </Link>
                   </li>
                 </ul>
               </nav>
