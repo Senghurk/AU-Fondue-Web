@@ -13,6 +13,7 @@ nav ul li a {
 }
 
 /* Top Bar Styling */
+
 nav ul li {
   @apply text-white hover:underline;
 }
