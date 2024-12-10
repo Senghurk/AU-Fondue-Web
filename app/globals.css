@@ -2,18 +2,71 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Body Styling */
-body {
-  @apply bg-gray-50 text-gray-800;
+
+
+
+
+
+/* Sidebar container */
+
+
+.sidebar {
+  @apply w-1/4 bg-blue-50 p-4 rounded-xl;
+  @apply h-[calc(90vh-3rem)] ;
 }
 
-/* Sidebar Styling */
-nav ul li a {
-  @apply text-gray-700 hover:text-gray-900;
+/* Navigation list and spacing between items */
+.sidebar-nav {
+  @apply space-y-4;
 }
+
+/* Navigation links */
+.sidebar-link {
+  @apply block text-gray-700 hover:text-gray-900;
+}
+
+/* Home menu section */
+.sidebar-home-menu {
+  @apply flex items-center justify-between cursor-pointer text-gray-700 hover:text-gray-900;
+}
+
+/* Collapsible sub-menu */
+.sidebar-submenu {
+  @apply ml-4 mt-2 space-y-2;
+}
+
+/* Sub-menu links */
+.sidebar-submenu-link {
+  @apply block text-gray-600 hover:text-gray-800;
+}
+
+
+
+
+.main-content {
+  @apply rounded-xl w-3/4 p-6 bg-blue-50 overflow-auto;
+}
+
+
 
 /* Top Bar Styling */
-
-nav ul li {
-  @apply text-white hover:underline;
+.topbar {
+  @apply flex items-center justify-between bg-white text-black p-4 shadow-lg; /* Shadow added */
 }
+
+.topbar-title {
+  @apply text-xl font-bold;
+}
+
+.topbar-nav {
+  @apply flex space-x-6 items-center;
+}
+
+.topbar-link {
+  @apply text-sm font-medium text-gray-700 hover:text-gray-900;
+}
+
+.topbar-link:hover {
+  @apply underline;
+}
+
