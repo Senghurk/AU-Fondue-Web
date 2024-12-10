@@ -33,7 +33,7 @@ export default function ReportsPage() {
   };
 
   return (
-    <div className="flex-1 bg-blue-50 p-6">
+    <div className="flex-1 p-6">
       {/* Header Section */}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Reported Issues</h1>
