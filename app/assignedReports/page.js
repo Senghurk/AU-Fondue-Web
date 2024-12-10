@@ -27,7 +27,7 @@ export default function AssignedReportsPage() {
   ];
 
   return (
-    <div className="flex-1 bg-gray-100 p-6">
+    <div className="flex-1 p-6">
       {/* Page Header */}
       <h1 className="text-3xl font-bold mb-6">Assigned Reports</h1>
       <p className="text-gray-600 mb-4">
