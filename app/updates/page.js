@@ -1,3 +1,5 @@
+"use client";
+
 export default function UpdatesPage() {
   // Mock data for updates
   const updates = [

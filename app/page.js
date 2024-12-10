@@ -15,8 +15,9 @@ export default function HomePage() {
       <div className="mb-8">
         <h1 className="text-4xl font-bold text-gray-800">Welcome, Admin 👋</h1>
         <p className="text-gray-600 mt-2">
-          Here's an overview of the system. Navigate through reports, assigned tasks, and updates.
+          Here&apos;s an overview of the system. Navigate through reports, assigned tasks, and updates.
         </p>
+
       </div>
 
       {/* Quick Stats */}
