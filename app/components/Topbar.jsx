@@ -1,6 +1,6 @@
 import Link from 'next/link';
 
-export default function TopBar() {
+export default function Topbar() {
   return (
     <div className="topbar">
       {/* App Title */}

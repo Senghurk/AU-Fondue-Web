@@ -1,6 +1,6 @@
 import './globals.css';
-import Sidebar from './components/Sidebar.jsx';
-import TopBar from './components/TopBar.jsx';
+import Sidebar from './components/Sidebar';
+import TopBar from './components/Topbar.';
 
 export const metadata = {
   title: 'AU Fondue',
