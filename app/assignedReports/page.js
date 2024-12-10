@@ -1,3 +1,5 @@
+"use client";
+
 export default function AssignedReportsPage() {
   // Mock data for assigned reports
   const assignedReports = [
