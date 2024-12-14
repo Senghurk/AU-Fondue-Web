@@ -1,13 +1,24 @@
 "use client";
 
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation"; // Import useRouter for navigation
 import "./globals.css";
 import Link from "next/link";
 
 export default function RootLayout({ children }) {
   const pathname = usePathname(); // Get the current route
+  const router = useRouter(); // Router for navigation
 
   const isLoginPage = pathname === "/"; // Check if it's the login page
+
+  // Logout handler
+  const handleLogout = (e) => {
+    e.preventDefault(); // Prevent default link behavior
+    // Clear any stored session-related information (if necessary)
+    // For example: localStorage.removeItem("userSession");
+
+    // Redirect to the login page
+    router.push("/");
+  };
 
   return (
     <html lang="en">
@@ -36,6 +47,15 @@ export default function RootLayout({ children }) {
                     <Link href="/settings" className="hover:underline">
                       Settings
                     </Link>
+                  </li>
+                  <li>
+                    <a
+                      href="/logout"
+                      onClick={handleLogout}
+                      className="hover:underline"
+                    >
+                      Logout
+                    </a>
                   </li>
                 </ul>
               </nav>
