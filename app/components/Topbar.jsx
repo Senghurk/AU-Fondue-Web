@@ -1,12 +1,13 @@
 "use client";
 import Link from 'next/link';
-import { useState } from 'react';
-export default function Topbar({router}) {
+export default function Topbar({router, activeTopLink, setActiveTopLink, setActiveLink }) {
 
-  const [activeTopLink, setActiveTopLink] = useState(null); // Tracks the active link
 
   const handleLinkClick = (link) => {
     setActiveTopLink(link); // Update the active link
+  };
+  const handleDefaultLink =(link) => {
+    setActiveLink(link); //Handles the bolding of the default link
   };
 
   //LogOut Handler
@@ -29,19 +30,23 @@ export default function Topbar({router}) {
       <nav>
         <ul className="topbar-nav">
           <li>
-            <Link href="/dashboard" className={`topbar-link ${
-                activeTopLink === '/dashboard' || activeTopLink === null ? '!font-bold' : '' 
-              }`}>
+            <Link href="/pages/dashboard" className={`topbar-link ${
+                activeTopLink === '/pages/dashboard' || activeTopLink === "/" ? '!text-lg !text-red-600 !font-bold' : '' 
+              }`} onClick={() => {handleLinkClick("/pages/dashboard"); handleDefaultLink("/pages/dashboard"); }}>  
               Dashboard
             </Link>
           </li>
           <li>
-            <Link href="/users" className="topbar-link">
+            <Link href="/pages/user-list" className={`topbar-link ${
+                activeTopLink === '/pages/user-list' ? '!text-lg !text-red-600 !font-bold' : '' 
+              }`} onClick={() => {handleLinkClick("/pages/user-list"); handleDefaultLink("/pages/user-list"); }}>
               Users
             </Link>
           </li>
           <li>
-            <Link href="/settings" className="topbar-link">
+            <Link href="/pages/general-settings" className={`topbar-link ${
+                activeTopLink === '/pages/general-settings' ? '!text-lg !text-red-600 !font-bold' : '' 
+              }`} onClick={() => {handleLinkClick("/pages/general-settings"); handleDefaultLink("/pages/general-settings"); }}>
               Settings
             </Link>
           </li>
