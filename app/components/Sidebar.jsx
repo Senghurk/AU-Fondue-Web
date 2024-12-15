@@ -18,11 +18,11 @@ export default function Sidebar() {
           {/* Home */}
           <li>
             <Link
-              href="/"
+              href="/dashboard"
               className={`sidebar-link ${
-                activeLink === '/' || activeLink === null ? '!text-red-500 !font-bold' : '' // Because this is Home button, it will be displayed at first
+                activeLink === '/dashboard' || activeLink === null ? '!text-red-600 !font-bold' : '' // Because this is Home button, it will be displayed at first
               }`}
-              onClick={() => handleLinkClick('/')}
+              onClick={() => handleLinkClick('/dashboard')}
             >
               Home
             </Link>
@@ -59,17 +59,6 @@ export default function Sidebar() {
                     onClick={() => handleLinkClick('/urgents')}
                   >
                     Urgent
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/comments"
-                    className={`sidebar-submenu-link ${
-                      activeLink === '/comments' ? '!text-red-500 !font-bold' : ''
-                    }`}
-                    onClick={() => handleLinkClick('/comments')}
-                  >
-                    Comments
                   </Link>
                 </li>
               </ul>

@@ -44,7 +44,7 @@
 
 
 .main-content {
-  @apply rounded-xl w-3/4 p-6 bg-blue-50 overflow-auto;
+  @apply rounded-xl p-6 bg-blue-50 overflow-auto;
 }
 
 
