@@ -30,23 +30,23 @@ export default function Topbar({router, activeTopLink, setActiveTopLink, setActi
       <nav>
         <ul className="topbar-nav">
           <li>
-            <Link href="/pages/dashboard" className={`topbar-link ${
-                activeTopLink === '/pages/dashboard' || activeTopLink === "/" ? '!text-lg !text-red-600 !font-bold' : '' 
-              }`} onClick={() => {handleLinkClick("/pages/dashboard"); handleDefaultLink("/pages/dashboard"); }}>  
+            <Link href="/dashboard" className={`topbar-link ${
+                activeTopLink === '/dashboard' || activeTopLink === "/" ? '!text-lg !text-red-600 !font-bold' : '' 
+              }`} onClick={() => {handleLinkClick("/dashboard"); handleDefaultLink("/dashboard"); }}>  
               Dashboard
             </Link>
           </li>
           <li>
-            <Link href="/pages/user-list" className={`topbar-link ${
-                activeTopLink === '/pages/user-list' ? '!text-lg !text-red-600 !font-bold' : '' 
-              }`} onClick={() => {handleLinkClick("/pages/user-list"); handleDefaultLink("/pages/user-list"); }}>
+            <Link href="/user-list" className={`topbar-link ${
+                activeTopLink === '/user-list' ? '!text-lg !text-red-600 !font-bold' : '' 
+              }`} onClick={() => {handleLinkClick("/user-list"); handleDefaultLink("/user-list"); }}>
               Users
             </Link>
           </li>
           <li>
-            <Link href="/pages/general-settings" className={`topbar-link ${
-                activeTopLink === '/pages/general-settings' ? '!text-lg !text-red-600 !font-bold' : '' 
-              }`} onClick={() => {handleLinkClick("/pages/general-settings"); handleDefaultLink("/pages/general-settings"); }}>
+            <Link href="/general-settings" className={`topbar-link ${
+                activeTopLink === '/general-settings' ? '!text-lg !text-red-600 !font-bold' : '' 
+              }`} onClick={() => {handleLinkClick("/general-settings"); handleDefaultLink("/general-settings"); }}>
               Settings
             </Link>
           </li>

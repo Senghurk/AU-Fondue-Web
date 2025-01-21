@@ -12,16 +12,16 @@ export default function Sidebar({activeTopLink, activeLink,setActiveLink }) {
 
   const renderLinks = () => {
     switch (activeTopLink) {
-      case "/pages/user-list":
+      case "/user-list":
         return (
           <ul className="sidebar-nav">
             <li>
               <Link
-                href="/pages/user-list"
+                href="/user-list"
                 className={`sidebar-link ${
-                  activeLink === "/pages/user-list" ? "!text-red-600 !font-bold" : ""
+                  activeLink === "/user-list" ? "!text-red-600 !font-bold" : ""
                 }`}
-                onClick={() => handleLinkClick("/pages/user-list")}
+                onClick={() => handleLinkClick("/user-list")}
               >
                 User List
               </Link>
@@ -29,11 +29,11 @@ export default function Sidebar({activeTopLink, activeLink,setActiveLink }) {
 
             <li>
               <Link
-                href="/pages/admins"
+                href="/admins"
                 className={`sidebar-link ${
-                  activeLink === "/pages/admins" ? "!text-red-600 !font-bold" : ""
+                  activeLink === "/admins" ? "!text-red-600 !font-bold" : ""
                 }`}
-                onClick={() => handleLinkClick("/pages/admins")}
+                onClick={() => handleLinkClick("/admins")}
               >
                 Admin List
               </Link>
@@ -41,14 +41,14 @@ export default function Sidebar({activeTopLink, activeLink,setActiveLink }) {
           </ul>
         );
 
-      case "/pages/general-settings":
+      case "/general-settings":
         return (
           <ul className="sidebar-nav">
             <li>
               <Link
-                href="/pages/general-settings"
+                href="/general-settings"
                 className={`sidebar-link ${
-                  activeLink === "/pages/general-settings" ? "!text-red-600 !font-bold" : ""
+                  activeLink === "/general-settings" ? "!text-red-600 !font-bold" : ""
                 }`}
                 onClick={() => handleLinkClick("/pages/general-settings")}
               >
@@ -57,11 +57,11 @@ export default function Sidebar({activeTopLink, activeLink,setActiveLink }) {
             </li>
             <li>
               <Link
-                href="/pages/notification-settings"
+                href="/notification-settings"
                 className={`sidebar-link ${
-                  activeLink === "/pages/notification-settings" ? "!text-red-600 !font-bold" : ""
+                  activeLink === "/notification-settings" ? "!text-red-600 !font-bold" : ""
                 }`}
-                onClick={() => handleLinkClick("/pages/notification-settings")}
+                onClick={() => handleLinkClick("/notification-settings")}
               >
                 Notification Settings
               </Link>
@@ -75,11 +75,11 @@ export default function Sidebar({activeTopLink, activeLink,setActiveLink }) {
           {/* Home */}
           <li>
             <Link
-              href="/pages/dashboard"
+              href="/dashboard"
               className={`sidebar-link ${
-                activeLink === '/pages/dashboard' || activeLink === "/" ? '!text-red-600 !font-bold' : '' // Because this is Home button, it will be displayed at first
+                activeLink === '/dashboard' || activeLink === "/" ? '!text-red-600 !font-bold' : '' // Because this is Home button, it will be displayed at first
               }`}
-              onClick={() => handleLinkClick('/pages/dashboard')}
+              onClick={() => handleLinkClick('/dashboard')}
             >
               Home
             </Link>
@@ -98,24 +98,24 @@ export default function Sidebar({activeTopLink, activeLink,setActiveLink }) {
               <ul className="sidebar-submenu">
                 <li>
                   <Link
-                    href="/pages/reports"
+                    href="/reports"
                     className={`sidebar-submenu-link ${
-                      activeLink === '/pages/reports' ? '!text-red-500 !font-bold' : ''
+                      activeLink === '/reports' ? '!text-red-500 !font-bold' : ''
                     }`}
-                    onClick={() => handleLinkClick('/pages/reports')}
+                    onClick={() => handleLinkClick('/reports')}
                   >
                     Reports
                   </Link>
                 </li>
                 <li>
                   <Link
-                    href="/pages/urgents"
+                    href="/assignedReports"
                     className={`sidebar-submenu-link ${
-                      activeLink === '/pages/urgents' ? '!text-red-500 !font-bold' : ''
+                      activeLink === '/assignedReports' ? '!text-red-500 !font-bold' : ''
                     }`}
-                    onClick={() => handleLinkClick('/pages/urgents')}
+                    onClick={() => handleLinkClick('/assignedReports')}
                   >
-                    Urgent
+                    Assigned Reports
                   </Link>
                 </li>
               </ul>
@@ -125,22 +125,11 @@ export default function Sidebar({activeTopLink, activeLink,setActiveLink }) {
           {/* Other Links */}
           <li>
             <Link
-              href="/pages/assignedReports"
+              href="/updates"
               className={`sidebar-link ${
-                activeLink === '/pages/assignedReports' ? '!text-red-500 !font-bold' : ''
+                activeLink === '/updates' ? '!text-red-500 !font-bold' : ''
               }`}
-              onClick={() => handleLinkClick('/pages/assignedReports')}
-            >
-              Assigned Reports
-            </Link>
-          </li>
-          <li>
-            <Link
-              href="/pages/updates"
-              className={`sidebar-link ${
-                activeLink === '/pages/updates' ? '!text-red-500 !font-bold' : ''
-              }`}
-              onClick={() => handleLinkClick('/pages/updates')}
+              onClick={() => handleLinkClick('/updates')}
             >
               Updates
             </Link>

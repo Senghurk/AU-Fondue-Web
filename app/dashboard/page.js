@@ -1,6 +1,10 @@
-"use client"; // Make this a Client Component
+"use client";
+
+import { useRouter } from "next/navigation";
 
 export default function HomePage() {
+  const router = useRouter();
+
   // Mock data for statistics
   const stats = [
     { label: "Total Reports", value: 152, color: "bg-blue-500" },
@@ -8,6 +12,33 @@ export default function HomePage() {
     { label: "Completed Tasks", value: 98, color: "bg-green-500" },
     { label: "Urgent Issues", value: 20, color: "bg-red-500" },
   ];
+
+  // Quick Links Data
+  const quickLinks = [
+    {
+      label: "View All Reports",
+      description: "Explore and manage all submitted reports.",
+      color: "bg-blue-100 text-blue-800 hover:bg-blue-200",
+      path: "/reports",
+    },
+    {
+      label: "Assigned Tasks",
+      description: "Monitor tasks assigned to team members.",
+      color: "bg-green-100 text-green-800 hover:bg-green-200",
+      path: "/assignedReports",
+    },
+    {
+      label: "View Updates",
+      description: "Stay updated on progress and announcements.",
+      color: "bg-yellow-100 text-yellow-800 hover:bg-yellow-200",
+      path: "/updates",
+    },
+  ];
+
+  // Navigate Function
+  const handleNavigate = (path) => {
+    router.push(path);
+  };
 
   return (
     <div className="flex-1 p-6">
@@ -17,7 +48,6 @@ export default function HomePage() {
         <p className="text-gray-600 mt-2">
           Here&apos;s an overview of the system. Navigate through reports, assigned tasks, and updates.
         </p>
-
       </div>
 
       {/* Quick Stats */}
@@ -37,27 +67,17 @@ export default function HomePage() {
       <div className="mb-8">
         <h2 className="text-2xl font-bold text-gray-800 mb-4">Quick Links</h2>
         <div className="grid grid-cols-3 gap-6">
-          <a
-            href="/reports"
-            className="block bg-blue-100 text-blue-800 rounded-lg shadow-md p-6 hover:bg-blue-200 transition"
-          >
-            <h3 className="text-lg font-semibold">View All Reports</h3>
-            <p className="mt-2">Explore and manage all submitted reports.</p>
-          </a>
-          <a
-            href="/assignedReports"
-            className="block bg-green-100 text-green-800 rounded-lg shadow-md p-6 hover:bg-green-200 transition"
-          >
-            <h3 className="text-lg font-semibold">Assigned Tasks</h3>
-            <p className="mt-2">Monitor tasks assigned to team members.</p>
-          </a>
-          <a
-            href="/updates"
-            className="block bg-yellow-100 text-yellow-800 rounded-lg shadow-md p-6 hover:bg-yellow-200 transition"
-          >
-            <h3 className="text-lg font-semibold">View Updates</h3>
-            <p className="mt-2">Stay updated on progress and announcements.</p>
-          </a>
+          {quickLinks.map((link, index) => (
+            <div
+              key={index}
+              onClick={() => handleNavigate(link.path)}
+              role="button"
+              className={`block p-6 rounded-lg shadow-md transition cursor-pointer ${link.color}`}
+            >
+              <h3 className="text-lg font-semibold">{link.label}</h3>
+              <p className="mt-2">{link.description}</p>
+            </div>
+          ))}
         </div>
       </div>
 

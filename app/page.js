@@ -22,7 +22,7 @@ export default function LoginPage() {
         {/* Login Button */}
         <div>
           <button
-            onClick={() => window.location.href = "/pages/dashboard"} // Redirects to dashboard
+            onClick={() => window.location.href = "/dashboard"} // Redirects to dashboard
             className="w-full flex items-center justify-center bg-blue-600 text-white py-3 px-4 rounded-lg text-lg font-semibold hover:bg-blue-700 transition"
           >
             <img
