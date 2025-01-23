@@ -1,17 +1,28 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link"; // Import Link for navigation
 
 export default function ReportsPage() {
   // Mock data for reported issues
   const reports = [
-    { id: 1, title: "Leaking Pipe in Dorm 3", category: "Plumbing" },
-    { id: 2, title: "Broken Window in Library", category: "Maintenance" },
-    { id: 3, title: "Flickering Lights in Hallway", category: "Electrical" },
-    { id: 4, title: "Blocked Sink in Cafeteria", category: "Plumbing" },
-    { id: 5, title: "Cracked Floor in Auditorium", category: "Maintenance" },
-    { id: 6, title: "Malfunctioning AC in Lab", category: "Electrical" },
+    {
+      id: 1,
+      description: "Leaking Pipe in Dorm 3",
+      category: "Plumbing",
+      reportedDate: "2024-12-10",
+    },
+    {
+      id: 2,
+      description: "Broken Window in Library",
+      category: "Maintenance",
+      reportedDate: "2024-12-11",
+    },
+    {
+      id: 3,
+      description: "Flickering Lights in Hallway",
+      category: "Electrical",
+      reportedDate: "2024-12-09",
+    },
   ];
 
   // Mock data for staff members
@@ -28,6 +39,10 @@ export default function ReportsPage() {
     reports.reduce((acc, report) => ({ ...acc, [report.id]: "" }), {})
   );
 
+  // Modal state
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedReport, setSelectedReport] = useState(null);
+
   // Function to update assigned staff
   const handleAssignStaff = (id, staffName) => {
     setAssignments((prev) => ({ ...prev, [id]: staffName }));
@@ -39,7 +54,13 @@ export default function ReportsPage() {
       alert("Please select a staff member before assigning!");
       return;
     }
-    alert(`Report ${id} assigned to ${assignments[id]}`);
+    alert(`Report "${id}" assigned to ${assignments[id]}`);
+  };
+
+  // Function to open the details modal
+  const handleOpenModal = (report) => {
+    setSelectedReport(report);
+    setIsModalOpen(true);
   };
 
   return (
@@ -71,8 +92,8 @@ export default function ReportsPage() {
             key={report.id}
             className="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition"
           >
-            {/* Report Title */}
-            <h2 className="text-lg font-semibold mb-2">{report.title}</h2>
+            {/* Report Description */}
+            <h2 className="text-lg font-semibold mb-2">{report.description}</h2>
             {/* Category */}
             <p className="text-sm text-gray-600">Category: {report.category}</p>
             {/* Staff Selector */}
@@ -96,21 +117,47 @@ export default function ReportsPage() {
             {/* Action Buttons */}
             <div className="flex gap-2 mt-4">
               <button
-                onClick={() => handleConfirmAssign(report.id)}
+                onClick={() => handleOpenModal(report)}
                 className="flex-1 px-4 py-2 bg-gray-200 text-sm font-medium rounded hover:bg-gray-300"
+              >
+                View
+              </button>
+              <button
+                onClick={() => handleConfirmAssign(report.id)}
+                className="flex-1 px-4 py-2 bg-blue-500 text-white text-sm font-medium rounded hover:bg-blue-600"
               >
                 Assign
               </button>
-              <Link
-                href={`/reports/${report.id}`} // Navigate to the Report Details page
-                className="flex-1 text-center px-4 py-2 bg-gray-200 text-sm font-medium rounded hover:bg-gray-300"
-              >
-                View
-              </Link>
             </div>
           </div>
         ))}
       </div>
+
+      {/* Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-1/3">
+            <h2 className="text-xl font-bold mb-4">Report Details</h2>
+            <p className="mb-2">
+              <strong>Description:</strong> {selectedReport.description}
+            </p>
+            <p className="mb-2">
+              <strong>Category:</strong> {selectedReport.category}
+            </p>
+            <p className="mb-2">
+              <strong>Reported Date:</strong> {selectedReport.reportedDate}
+            </p>
+            <div className="flex justify-end gap-4 mt-4">
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="px-4 py-2 bg-gray-300 text-sm font-medium rounded hover:bg-gray-400"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

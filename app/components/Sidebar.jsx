@@ -125,13 +125,13 @@ export default function Sidebar({activeTopLink, activeLink,setActiveLink }) {
           {/* Other Links */}
           <li>
             <Link
-              href="/updates"
+              href="/history"
               className={`sidebar-link ${
-                activeLink === '/updates' ? '!text-red-500 !font-bold' : ''
+                activeLink === '/history' ? '!text-red-500 !font-bold' : ''
               }`}
-              onClick={() => handleLinkClick('/updates')}
+              onClick={() => handleLinkClick('/history')}
             >
-              Updates
+              History
             </Link>
           </li>
         </ul>
