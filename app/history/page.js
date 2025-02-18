@@ -1,42 +1,28 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import * as XLSX from "xlsx";
 
+
 export default function HistoryPage() {
-  // Mock data for completed reports
-  const completedReports = [
-    {
-      id: 1,
-      description: "Leaking Pipe in Dorm 3",
-      assignedTo: "John Doe",
-      reportedDate: "2024-12-10",
-      completionDate: "2024-12-13",
-    },
-    {
-      id: 2,
-      description: "Broken Window in Library",
-      assignedTo: "Jane Smith",
-      reportedDate: "2024-12-12",
-      completionDate: "2024-12-16",
-    },
-    {
-      id: 3,
-      description: "Flickering Lights in Hallway",
-      assignedTo: "Michael Brown",
-      reportedDate: "2024-12-09",
-      completionDate: "2024-12-11",
-    },
-  ];
+  const [completedReports, setCompletedReports] = useState([]);
+  const backendUrl = "https://aufonduebackend.kindisland-399ef298.southeastasia.azurecontainerapps.io/api";
+  const fetchCompletedReports = () =>{
+    fetch(`${backendUrl}/issues/completed`)
+      .then((response) => response.json())
+      .then((data) => setCompletedReports(data))
+      .catch((error) => console.error("Error fetching Completed Reports", error));
+  }
+  
 
   // Function to export data to Excel
   const exportToExcel = () => {
     // Prepare the data for export
     const dataToExport = completedReports.map((report) => ({
       "Description": report.description,
-      "Assigned To": report.assignedTo,
-      "Reported Date": report.reportedDate,
-      "Completion Date": report.completionDate,
+      "Assigned To": report.assignedTo?.name,
+      "Reported Date": report.createdAt,
+      "Completion Date": report.updatedAt,
     }));
 
     // Create a worksheet and workbook
@@ -47,6 +33,11 @@ export default function HistoryPage() {
     // Export the Excel file
     XLSX.writeFile(workbook, "Completed_Reports.xlsx");
   };
+
+
+  useEffect(() => {
+    fetchCompletedReports();
+  }, []);
 
   return (
     <div className="flex-1 p-6">
@@ -87,12 +78,12 @@ export default function HistoryPage() {
               >
                 <td className="p-3 text-sm">{index + 1}</td>
                 <td className="p-3 text-sm">{report.description}</td>
-                <td className="p-3 text-sm">{report.assignedTo}</td>
+                <td className="p-3 text-sm">{report.assignedTo?.name}</td>
                 <td className="p-3 text-sm font-semibold text-green-600">
                   Completed
                 </td>
-                <td className="p-3 text-sm">{report.reportedDate}</td>
-                <td className="p-3 text-sm">{report.completionDate}</td>
+                <td className="p-3 text-sm">{ new Date(report.createdAt).toLocaleString()}</td>
+                <td className="p-3 text-sm">{ new Date(report.updatedAt).toLocaleString()}</td>
               </tr>
             ))}
           </tbody>

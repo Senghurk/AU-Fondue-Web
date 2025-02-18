@@ -1,45 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function AssignedReportsPage() {
-  // Mock data for assigned reports
-  const assignedReports = [
-    {
-      id: 1,
-      title: "Leaking Pipe in Dorm 3",
-      category: "Plumbing",
-      assignedTo: "John Doe",
-      status: "In Progress",
-      description: "A leaking pipe in Dorm 3 needs urgent repair.",
-      reportedDate: "2024-12-10",
-    },
-    {
-      id: 2,
-      title: "Broken Window in Library",
-      category: "Maintenance",
-      assignedTo: "Jane Smith",
-      status: "Pending",
-      description: "A window in the library is broken and needs replacement.",
-      reportedDate: "2024-12-11",
-    },
-    {
-      id: 3,
-      title: "Flickering Lights in Hallway",
-      category: "Electrical",
-      assignedTo: "Michael Brown",
-      status: "Completed",
-      description: "Flickering lights in the main hallway were fixed.",
-      reportedDate: "2024-12-09",
-    },
-  ];
-
+  const backendUrl = "https://aufonduebackend.kindisland-399ef298.southeastasia.azurecontainerapps.io/api";
+  const [reports, setReports] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false); // Modal state
   const [modalType, setModalType] = useState(""); // "details" or "update"
   const [selectedReport, setSelectedReport] = useState(null); // Current report being viewed or updated
   const [status, setStatus] = useState(""); // Updated status
   const [comments, setComments] = useState(""); // Textbox comments
   const [photos, setPhotos] = useState([]); // Uploaded photos
+  const [updates, setUpdates] = useState([]);
 
   // Open the modal with the selected report
   const handleOpenModal = (report, type) => {
@@ -49,6 +21,10 @@ export default function AssignedReportsPage() {
     setComments(""); // Clear any existing comments
     setPhotos([]); // Clear photos
     setIsModalOpen(true);
+
+    if (type === "details") {
+      fetchUpdates(report.id); // Fetch updates only when viewing details
+    }
   };
 
   // Handle photo uploads
@@ -58,13 +34,104 @@ export default function AssignedReportsPage() {
   };
 
   // Handle update action
-  const handleUpdate = () => {
-    alert(
-      `Report "${selectedReport.title}" updated with status "${status}" and comments: "${comments}".`
-    );
-    // Here, you can make an API call to save the updated report in the backend
-    setIsModalOpen(false); // Close the modal after updating
+  const handleUpdate = async () => {
+    if (!selectedReport) return;
+  
+    const formData = new FormData();
+    formData.append("issueId", selectedReport.id);
+    formData.append("status", status);
+    formData.append("comment", comments);
+  
+    photos.forEach((photo) => {
+      formData.append("photos", photo);
+    });
+  
+    try {
+      const response = await fetch(`${backendUrl}/issues/updates`, {
+        method: "POST",
+        body: formData,
+      });
+  
+      if (!response.ok) {
+        const errorDetails = await response.text(); // Read the error response body
+        throw new Error(`Failed to update report: ${response.status} - ${errorDetails}`);
+      }
+  
+      alert(`Report updated successfully.`);
+      setIsModalOpen(false);
+      fetchReports(); // Refresh the reports list after update
+    } catch (error) {
+      console.error("Error updating report:", error);
+      alert(`Failed to update the report: ${error.message}`);
+    }
   };
+  
+  // Fetch updates for a specific issue by issueId
+  const fetchUpdates = async (issueId) => {
+    try {
+      const response = await fetch(`${backendUrl}/issues/${issueId}/updates`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch updates");
+      }
+      const data = await response.json();
+      setUpdates(data); // Store the fetched updates in the state
+    } catch (error) {
+      console.error("Error fetching updates:", error);
+    }
+  };
+
+
+  // Function to fetch reports from the backend
+  const fetchReports = () => {
+    fetch(`${backendUrl}/issues/assigned`) // Adjust the endpoint as needed
+      .then((response) => response.json())
+      .then(data => setReports(data))
+      .catch((error) => console.error("Error fetching reports:", error));
+  };
+
+  useEffect(() => {
+    fetchReports();
+  }, []);
+
+  // Map
+  useEffect(() => {
+    if (isModalOpen && selectedReport && modalType === "details") {
+      const loadGoogleMaps = () => {
+        if (!window.google) {
+          const script = document.createElement("script");
+          script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyAsR5qRX8IB3xtGZCxzSoh62usnHTgOpTU`;
+          script.async = true;
+          script.defer = true;
+          script.onload = initializeMap;
+          document.body.appendChild(script);
+        } else {
+          initializeMap();
+        }
+      };
+  
+      const initializeMap = () => {
+        const location = {
+          lat: selectedReport.latitude || 0, 
+          lng: selectedReport.longitude || 0, 
+        };
+  
+        const mapDiv = document.getElementById("map");
+        if (!mapDiv) return; // ✅ Prevents crash if "map" div isn't found
+  
+        const map = new google.maps.Map(mapDiv, {
+          zoom: 14,
+          center: location,
+        });
+  
+        new google.maps.Marker({
+          position: location,
+          map: map,
+        });
+      };
+  
+      loadGoogleMaps();
+    }
+  }, [isModalOpen, selectedReport, modalType]);
 
   return (
     <div className="flex-1 p-6">
@@ -81,13 +148,13 @@ export default function AssignedReportsPage() {
 
       {/* Cards Grid */}
       <div className="grid grid-cols-3 gap-4">
-        {assignedReports.map((report) => (
+        {reports.map((report) => (
           <div
             key={report.id}
             className="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition"
           >
             {/* Report Title */}
-            <h2 className="text-lg font-semibold mb-2">{report.title}</h2>
+            <h2 className="text-lg font-semibold mb-2">{report.description}</h2>
             {/* Category */}
             <p className="text-sm text-gray-600">Category: {report.category}</p>
             {/* Status */}
@@ -95,9 +162,9 @@ export default function AssignedReportsPage() {
               Status:{" "}
               <span
                 className={`font-semibold ${
-                  report.status === "Completed"
+                  report.status === "COMPLETED"
                     ? "text-green-600"
-                    : report.status === "In Progress"
+                    : report.status === "IN PROGRESS"
                     ? "text-blue-600"
                     : "text-red-600"
                 }`}
@@ -105,9 +172,10 @@ export default function AssignedReportsPage() {
                 {report.status}
               </span>
             </p>
+          
             {/* Assigned To */}
             <p className="text-sm text-gray-600 mt-1">
-              Assigned To: {report.assignedTo}
+              Assigned To: {report.assignedTo?.name}
             </p>
             {/* Action Buttons */}
             <div className="flex gap-2 mt-4">
@@ -131,30 +199,31 @@ export default function AssignedReportsPage() {
       {/* Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg w-1/3">
+          <div  className="bg-white p-6 rounded-lg shadow-lg w-1/3 h-4/5 flex flex-col ">
+            <div className="flex-1" style={{ overflowY: "auto", maxHeight: "calc(100% - 20px)", /* Adjusting for padding*/ }}>                             
             {modalType === "details" ? (
               <>
                 {/* Details Modal */}
                 <h2 className="text-xl font-bold mb-4">Report Details</h2>
                 <p className="mb-2">
-                  <strong>Description:</strong> {selectedReport.title}
+                  <strong>Description:</strong> {selectedReport.description}
                 </p>
                 <p className="mb-2">
                   <strong>Category:</strong> {selectedReport.category}
                 </p>
                 <p className="mb-2">
-                  <strong>Assigned To:</strong> {selectedReport.assignedTo}
+                  <strong>Assigned To:</strong> {selectedReport.assignedTo?.name}
                 </p>
                 <p className="mb-2">
-                  <strong>Reported Date:</strong> {selectedReport.reportedDate}
+                  <strong>Reported Date:</strong> {selectedReport.createdAt}
                 </p>
                 <p className="mb-2">
                   <strong>Status:</strong>{" "}
                   <span
                     className={`font-semibold ${
-                      selectedReport.status === "Completed"
+                      selectedReport.status === "COMPLETED"
                         ? "text-green-600"
-                        : selectedReport.status === "In Progress"
+                        : selectedReport.status === "IN PROGRESS"
                         ? "text-blue-600"
                         : "text-red-600"
                     }`}
@@ -162,6 +231,59 @@ export default function AssignedReportsPage() {
                     {selectedReport.status}
                   </span>
                 </p>
+
+                {/* Google Map Section */}
+                <div id="map" className="w-full h-60 mt-4 rounded-lg border border-gray-300"></div>
+
+
+                {/* Update Details Section */}
+                <h4 className="text-lg font-semibold mb-2">Update Details</h4>
+                
+                {updates.length > 0 ? (
+                  <div className="space-y-4">
+                    {updates.map((update, index) => (
+                      <div key={index} className="bg-gray-100 p-4 rounded-lg shadow-md border border-gray-300">
+                        <div className="flex justify-between items-center mb-2">
+                          <p className="text-sm text-gray-600">
+                            <strong>Status:</strong> 
+                            <span className={`ml-2 font-semibold ${update.status === "COMPLETED" ? "text-green-600" : update.status === "IN PROGRESS" ? "text-blue-600" : "text-red-600"}`}>
+                              {update.status}
+                            </span>
+                          </p>
+                          <p className="text-xs text-gray-500">{new Date(update.updateTime).toLocaleString()}</p>
+                        </div>
+
+                        <p className="text-sm text-gray-800">
+                          <strong>Comment:</strong> {update.comment ? update.comment : "No comments"}
+                        </p>
+
+                        {update.photoUrls && update.photoUrls.length > 0 ? (
+                          <div className="mt-3">
+                            <strong className="text-sm">Photos:</strong>
+                            <div className="flex flex-wrap gap-2 mt-1">
+                              {update.photoUrls.map((photo, i) => (
+                                <img 
+                                  key={i} 
+                                  src={photo}  
+                                  alt={`Update Photo ${i + 1}`} 
+                                  className="w-20 h-20 rounded-md shadow-md border border-gray-200 object-cover"
+                                  onError={(e) => { e.target.src = "/placeholder.jpg"; }} // Handle broken URLs
+                                />
+                              ))}
+                            </div>
+                          </div>
+                        ) : (
+                          <p className="text-sm text-gray-500 mt-2"><strong>Photos:</strong> No photos</p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-gray-600">No updates yet.</p>
+                )}
+                
+                  
+
                 <div className="flex justify-end gap-4 mt-4">
                   <button
                     onClick={() => setIsModalOpen(false)}
@@ -175,7 +297,7 @@ export default function AssignedReportsPage() {
               <>
                 {/* Update Modal */}
                 <h2 className="text-xl font-bold mb-4">
-                  Update Report: {selectedReport.title}
+                  Update Report: {selectedReport.description}
                 </h2>
                 <div className="mb-4">
                   <label className="block text-sm font-semibold mb-2">
@@ -186,9 +308,9 @@ export default function AssignedReportsPage() {
                     onChange={(e) => setStatus(e.target.value)}
                     className="w-full px-3 py-2 border rounded focus:outline-none focus:ring focus:border-blue-300"
                   >
-                    <option value="Pending">Pending</option>
-                    <option value="In Progress">In Progress</option>
-                    <option value="Completed">Completed</option>
+                    <option value="PENDING">PENDING</option>
+                    <option value="IN PROGRESS">IN PROGRESS</option>
+                    <option value="COMPLETED">COMPLETED</option>
                   </select>
                 </div>
                 <div className="mb-4">
@@ -236,6 +358,23 @@ export default function AssignedReportsPage() {
                 </div>
               </>
             )}
+            </div>
+            <style>
+              {`
+                .flex-1::-webkit-scrollbar {
+                  width: 6px; /* Adjust the width of the scrollbar */
+                }
+
+                .flex-1::-webkit-scrollbar-thumb {
+                  background-color: rgba(0, 0, 0, 0.3); /* Thumb color */
+                  border-radius: 10px;
+                }
+
+                .flex-1::-webkit-scrollbar-track {
+                  background: transparent; /* Track color */
+                }
+              `}
+            </style>
           </div>
         </div>
       )}

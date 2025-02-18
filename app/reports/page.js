@@ -1,51 +1,51 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function ReportsPage() {
-  // Mock data for reported issues
-  const reports = [
-    {
-      id: 1,
-      description: "Leaking Pipe in Dorm 3",
-      category: "Plumbing",
-      reportedDate: "2024-12-10",
-    },
-    {
-      id: 2,
-      description: "Broken Window in Library",
-      category: "Maintenance",
-      reportedDate: "2024-12-11",
-    },
-    {
-      id: 3,
-      description: "Flickering Lights in Hallway",
-      category: "Electrical",
-      reportedDate: "2024-12-09",
-    },
-  ];
+  const backendUrl = "https://aufonduebackend.kindisland-399ef298.southeastasia.azurecontainerapps.io/api";
 
-  // Mock data for staff members
-  const staffMembers = [
-    "John Doe",
-    "Jane Smith",
-    "Michael Brown",
-    "Emily Davis",
-    "Chris Johnson",
-  ];
+  // State to store fetched reports
+  const [reports, setReports] = useState([]);
+  const [staffMembers, setStaffMembers] = useState([]);
 
   // State to manage assigned staff for each report
-  const [assignments, setAssignments] = useState(
-    reports.reduce((acc, report) => ({ ...acc, [report.id]: "" }), {})
-  );
+  const [assignments, setAssignments] = useState({});
 
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedReport, setSelectedReport] = useState(null);
 
+  // Function to fetch reports from the backend
+  const fetchReports = () => {
+    fetch(`${backendUrl}/issues/unassigned`)
+      .then((response) => response.json())
+      .then((data) => {
+        setReports(data);
+        // Initialize assignments for the fetched reports
+        setAssignments(
+          data.reduce((acc, report) => ({ ...acc, [report.id]: "" }), {})
+        );
+      })
+      .catch((error) => console.error("Error fetching reports:", error));
+  };
+
+  const fetchStaffMembers = () => {
+    fetch(`${backendUrl}/staff`)
+      .then((response) => response.json())
+      .then((data) => setStaffMembers(data))
+      .catch((error) => console.error("Error fetching staff members:", error));
+  };
+
+  // Fetch reports when the component loads
+  useEffect(() => {
+    fetchReports();
+    fetchStaffMembers();
+  }, []);
+
   // Function to update assigned staff
-  const handleAssignStaff = (id, staffName) => {
-    setAssignments((prev) => ({ ...prev, [id]: staffName }));
+  const handleAssignStaff = (id, staffId) => {
+    setAssignments((prev) => ({ ...prev, [id]: staffId }));
   };
 
   // Function to handle assigning a report
@@ -54,7 +54,20 @@ export default function ReportsPage() {
       alert("Please select a staff member before assigning!");
       return;
     }
-    alert(`Report "${id}" assigned to ${assignments[id]}`);
+  
+    // Make a POST request to the backend with staffId as a query parameter
+    fetch(`${backendUrl}/issues/${id}/assign?staffId=${assignments[id]}`, {
+      method: "POST",
+    })
+      .then((response) => {
+        if (response.ok) {
+          alert(`Report "${id}" successfully assigned to staff ID ${assignments[id]}`);
+          fetchReports(); // Refresh the reports list after assignment
+        } else {
+          alert("Failed to assign the report. Please try again.");
+        }
+      })
+      .catch((error) => console.error("Error assigning report:", error));
   };
 
   // Function to open the details modal
@@ -63,6 +76,43 @@ export default function ReportsPage() {
     setIsModalOpen(true);
   };
 
+  // Map
+  useEffect(() => {
+    if (isModalOpen && selectedReport) {
+      const loadGoogleMaps = () => {
+        if (!window.google) {
+          const script = document.createElement("script");
+          script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyAsR5qRX8IB3xtGZCxzSoh62usnHTgOpTU`;
+          script.async = true;
+          script.defer = true;
+          script.onload = initializeMap;
+          document.body.appendChild(script);
+        } else {
+          initializeMap();
+        }
+      };
+
+      const initializeMap = () => {
+        const location = {
+          lat: selectedReport.latitude || 0, 
+          lng: selectedReport.longitude || 0, 
+        };
+
+        const map = new google.maps.Map(document.getElementById("map"), {
+          zoom: 14,
+          center: location,
+        });
+
+        new google.maps.Marker({
+          position: location,
+          map: map,
+        });
+      };
+
+      loadGoogleMaps();
+    }
+  }, [isModalOpen, selectedReport]);
+
   return (
     <div className="flex-1 p-6">
       {/* Header Section */}
@@ -70,7 +120,10 @@ export default function ReportsPage() {
         <h1 className="text-3xl font-bold">Reported Issues</h1>
         <div className="flex items-center gap-2">
           {/* Refresh Button */}
-          <button className="px-4 py-2 bg-red-500 text-white text-sm font-medium rounded hover:bg-red-600">
+          <button
+            onClick={fetchReports}
+            className="px-4 py-2 bg-red-500 text-white text-sm font-medium rounded hover:bg-red-600"
+          >
             Refresh
           </button>
         </div>
@@ -103,14 +156,14 @@ export default function ReportsPage() {
               </label>
               <select
                 className="w-full px-3 py-2 border rounded focus:outline-none focus:ring focus:border-blue-300"
-                value={assignments[report.id]}
+                value={assignments[report.id] || ""}
                 onChange={(e) => handleAssignStaff(report.id, e.target.value)}
               >
                 <option value="">Select Staff Member</option>
-                {staffMembers.map((staff, index) => (
-                  <option key={index} value={staff}>
-                    {staff}
-                  </option>
+                {staffMembers.map((staff) => (
+                  <option key={staff.id} value={staff.id}>
+                  {staff.name} ({staff.email})
+                </option>
                 ))}
               </select>
             </div>
@@ -145,7 +198,17 @@ export default function ReportsPage() {
               <strong>Category:</strong> {selectedReport.category}
             </p>
             <p className="mb-2">
-              <strong>Reported Date:</strong> {selectedReport.reportedDate}
+              <strong>Location:</strong> {selectedReport.customLocation}
+            </p>
+
+            {/* Google Map Section */}
+            <div id="map" className="w-full h-60 mt-4 rounded-lg border border-gray-300"></div>
+            
+            <p className="mb-2">
+              <strong>Reported By:</strong> {selectedReport.reportedBy?.username } ({selectedReport.reportedBy?.id})
+            </p>
+            <p className="mb-2">
+              <strong>Reported Date:</strong> { new Date(selectedReport.createdAt).toLocaleString()}
             </p>
             <div className="flex justify-end gap-4 mt-4">
               <button
