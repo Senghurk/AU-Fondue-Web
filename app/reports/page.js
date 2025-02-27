@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 
 export default function ReportsPage() {
   const backendUrl = "https://aufonduebackend.kindisland-399ef298.southeastasia.azurecontainerapps.io/api";
-
+  const sastoken = "?sp=r&st=2025-02-27T14:24:36Z&se=2025-02-27T22:24:36Z&spr=https&sv=2022-11-02&sr=c&sig=NZ1zMoe4smf8HrFS4Kre5yaggX8pFMblhfJorUfReBU%3D";
   // State to store fetched reports
   const [reports, setReports] = useState([]);
   const [staffMembers, setStaffMembers] = useState([]);
@@ -78,7 +78,7 @@ export default function ReportsPage() {
 
   // Map
   useEffect(() => {
-    if (isModalOpen && selectedReport) {
+    if (isModalOpen && selectedReport && selectedReport.usingCustomLocation === false) {
       const loadGoogleMaps = () => {
         if (!window.google) {
           const script = document.createElement("script");
@@ -91,27 +91,31 @@ export default function ReportsPage() {
           initializeMap();
         }
       };
-
+  
       const initializeMap = () => {
+        const mapDiv = document.getElementById("map");
+        if (!mapDiv) return; // Prevent error if the div is missing
+  
         const location = {
           lat: selectedReport.latitude || 0, 
           lng: selectedReport.longitude || 0, 
         };
-
-        const map = new google.maps.Map(document.getElementById("map"), {
+  
+        const map = new google.maps.Map(mapDiv, {
           zoom: 14,
           center: location,
         });
-
+  
         new google.maps.Marker({
           position: location,
           map: map,
         });
       };
-
+  
       loadGoogleMaps();
     }
   }, [isModalOpen, selectedReport]);
+  
 
   return (
     <div className="flex-1 p-6">
@@ -189,38 +193,77 @@ export default function ReportsPage() {
       {/* Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg w-1/3">
-            <h2 className="text-xl font-bold mb-4">Report Details</h2>
-            <p className="mb-2">
-              <strong>Description:</strong> {selectedReport.description}
-            </p>
-            <p className="mb-2">
-              <strong>Category:</strong> {selectedReport.category}
-            </p>
-            <p className="mb-2">
-              <strong>Location:</strong> {selectedReport.customLocation}
-            </p>
+          <div className="bg-white p-6 rounded-lg shadow-lg w-1/3 h-4/5 flex flex-col ">
+            <div className="flex-1" style={{ overflowY: "auto", maxHeight: "calc(100% - 20px)", /* Adjusting for padding*/ }}>
+              <h2 className="text-xl font-bold mb-4">Report Details</h2>
+              <p className="mb-2">
+                <strong>Description:</strong> {selectedReport.description}
+              </p>
+              <p className="mb-2">
+                <strong>Category:</strong> {selectedReport.category}
+              </p>
+              <p className="mb-2">
+                <strong>Location:</strong> {selectedReport.customLocation}
+              </p>
 
-            {/* Google Map Section */}
-            <div id="map" className="w-full h-60 mt-4 rounded-lg border border-gray-300"></div>
-            
-            <p className="mb-2">
-              <strong>Reported By:</strong> {selectedReport.reportedBy?.username } ({selectedReport.reportedBy?.id})
-            </p>
-            <p className="mb-2">
-              <strong>Reported Date:</strong> { new Date(selectedReport.createdAt).toLocaleString()}
-            </p>
-            <div className="flex justify-end gap-4 mt-4">
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="px-4 py-2 bg-gray-300 text-sm font-medium rounded hover:bg-gray-400"
-              >
-                Close
-              </button>
+              {/* Google Map Section */}
+              {selectedReport.usingCustomLocation === false && (
+                <div id="map" className="w-full h-60 mt-4 rounded-lg border border-gray-300"></div>
+              )}
+              <p className="mb-2">
+                <strong>Reported By:</strong> {selectedReport.reportedBy?.username } 
+              </p>
+              <p className="mb-2">
+                <strong>Reported Date:</strong> { new Date(selectedReport.createdAt).toLocaleString()}
+              </p>
+              {selectedReport.photoUrls && selectedReport.photoUrls.length > 0 ? (
+                <div className="mt-3">
+                    <strong className="mb-2">Report Photo:</strong>
+                      <div className="flex flex-wrap gap-2 mt-1">
+                        {selectedReport.photoUrls.map((photo, i) => (
+                          <img 
+                          key={i} 
+                          src={photo+sastoken}  
+                          alt={`Report Photo ${i + 1}`} 
+                          className="w-60 h-60 rounded-md shadow-md border border-gray-200 object-cover"
+                          onError={(e) => { e.target.src = "/placeholder.jpg"; }} // Handle broken URLs
+                          />
+                        ))}
+                      </div>
+                  </div>
+              )  : (
+                  <p className="text-sm text-gray-500 mt-2"><strong>Report Photo:</strong> No photos</p>
+                    )}
+              
+              <div className="flex justify-end gap-4 mt-4">
+                <button
+                  onClick={() => setIsModalOpen(false)}
+                  className="px-4 py-2 bg-gray-300 text-sm font-medium rounded hover:bg-gray-400"
+                >
+                  Close
+                </button>
+              </div>
             </div>
           </div>
         </div>
       )}
+      <style>
+              {`
+                .flex-1::-webkit-scrollbar {
+                  width: 6px; /* Adjust the width of the scrollbar */
+                }
+
+                .flex-1::-webkit-scrollbar-thumb {
+                  background-color: rgba(0, 0, 0, 0.3); /* Thumb color */
+                  border-radius: 10px;
+                }
+
+                .flex-1::-webkit-scrollbar-track {
+                  background: transparent; /* Track color */
+                }
+              `}
+            </style>
     </div>
+    
   );
 }

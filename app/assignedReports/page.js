@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 
 export default function AssignedReportsPage() {
   const backendUrl = "https://aufonduebackend.kindisland-399ef298.southeastasia.azurecontainerapps.io/api";
+  const sastoken = "?sp=r&st=2025-02-27T14:24:36Z&se=2025-02-27T22:24:36Z&spr=https&sv=2022-11-02&sr=c&sig=NZ1zMoe4smf8HrFS4Kre5yaggX8pFMblhfJorUfReBU%3D";
   const [reports, setReports] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false); // Modal state
   const [modalType, setModalType] = useState(""); // "details" or "update"
@@ -95,7 +96,7 @@ export default function AssignedReportsPage() {
 
   // Map
   useEffect(() => {
-    if (isModalOpen && selectedReport && modalType === "details") {
+    if (isModalOpen && selectedReport && selectedReport.usingCustomLocation === false) {
       const loadGoogleMaps = () => {
         if (!window.google) {
           const script = document.createElement("script");
@@ -110,13 +111,13 @@ export default function AssignedReportsPage() {
       };
   
       const initializeMap = () => {
+        const mapDiv = document.getElementById("map");
+        if (!mapDiv) return; // Prevent error if the div is missing
+  
         const location = {
           lat: selectedReport.latitude || 0, 
           lng: selectedReport.longitude || 0, 
         };
-  
-        const mapDiv = document.getElementById("map");
-        if (!mapDiv) return; // ✅ Prevents crash if "map" div isn't found
   
         const map = new google.maps.Map(mapDiv, {
           zoom: 14,
@@ -132,6 +133,7 @@ export default function AssignedReportsPage() {
       loadGoogleMaps();
     }
   }, [isModalOpen, selectedReport, modalType]);
+  
 
   return (
     <div className="flex-1 p-6">
@@ -211,11 +213,29 @@ export default function AssignedReportsPage() {
                 <p className="mb-2">
                   <strong>Category:</strong> {selectedReport.category}
                 </p>
+                {selectedReport.photoUrls && selectedReport.photoUrls.length > 0 ? (
+              <div className="mt-3">
+                  <strong className="mb-2">Report Photo:</strong>
+                    <div className="flex flex-wrap gap-2 mt-1">
+                      {selectedReport.photoUrls.map((photo, i) => (
+                        <img 
+                        key={i} 
+                        src={photo + sastoken}  
+                        alt={`Report Photo ${i + 1}`} 
+                        className="w-60 h-60 rounded-md shadow-md border border-gray-200 object-cover"
+                        onError={(e) => { e.target.src = "placeholder.jpg"; }} // Handle broken URLs
+                        />
+                      ))}
+                    </div>
+                </div>
+            )  : (
+                <p className="text-sm text-gray-500 mt-2"><strong>Report Photo:</strong> No photos</p>
+                  )}
                 <p className="mb-2">
-                  <strong>Assigned To:</strong> {selectedReport.assignedTo?.name}
+                  <strong>Assigned To: </strong> {selectedReport.assignedTo?.name}
                 </p>
                 <p className="mb-2">
-                  <strong>Reported Date:</strong> {selectedReport.createdAt}
+                  <strong>Reported Date: </strong>{ new Date(selectedReport.createdAt).toLocaleString()}
                 </p>
                 <p className="mb-2">
                   <strong>Status:</strong>{" "}
@@ -233,7 +253,9 @@ export default function AssignedReportsPage() {
                 </p>
 
                 {/* Google Map Section */}
-                <div id="map" className="w-full h-60 mt-4 rounded-lg border border-gray-300"></div>
+                {selectedReport.usingCustomLocation === false && (
+                  <div id="map" className="w-full h-60 mt-4 rounded-lg border border-gray-300"></div>
+                )}
 
 
                 {/* Update Details Section */}
@@ -264,9 +286,9 @@ export default function AssignedReportsPage() {
                               {update.photoUrls.map((photo, i) => (
                                 <img 
                                   key={i} 
-                                  src={photo}  
+                                  src={photo + sastoken}  
                                   alt={`Update Photo ${i + 1}`} 
-                                  className="w-20 h-20 rounded-md shadow-md border border-gray-200 object-cover"
+                                  className="w-60 h-60 rounded-md shadow-md border border-gray-200 object-cover"
                                   onError={(e) => { e.target.src = "/placeholder.jpg"; }} // Handle broken URLs
                                 />
                               ))}
