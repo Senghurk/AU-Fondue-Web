@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 
 export default function ReportsPage() {
   const backendUrl = "https://aufonduebackend.kindisland-399ef298.southeastasia.azurecontainerapps.io/api";
-  const sastoken = "?sp=r&st=2025-02-27T14:24:36Z&se=2025-02-27T22:24:36Z&spr=https&sv=2022-11-02&sr=c&sig=NZ1zMoe4smf8HrFS4Kre5yaggX8pFMblhfJorUfReBU%3D";
+  const sastoken = "?sp=r&st=2025-02-28T02:27:10Z&se=2025-02-28T10:27:10Z&spr=https&sv=2022-11-02&sr=c&sig=j0MtkuVGUM79jMo2AMz5662kRcD%2Fp5AHcdmQQGROUKk%3D";
   // State to store fetched reports
   const [reports, setReports] = useState([]);
   const [staffMembers, setStaffMembers] = useState([]);
@@ -21,8 +21,16 @@ export default function ReportsPage() {
     fetch(`${backendUrl}/issues/unassigned`)
       .then((response) => response.json())
       .then((data) => {
+        console.log("Fetched data:", data); // Debugging step
+  
+        if (!Array.isArray(data)) {
+          console.error("Error: Expected an array but got:", data);
+          return;
+        }
+  
         setReports(data);
-        // Initialize assignments for the fetched reports
+  
+        // Initialize assignments only if data is an array
         setAssignments(
           data.reduce((acc, report) => ({ ...acc, [report.id]: "" }), {})
         );
@@ -214,8 +222,9 @@ export default function ReportsPage() {
                 <strong>Reported By:</strong> {selectedReport.reportedBy?.username } 
               </p>
               <p className="mb-2">
-                <strong>Reported Date:</strong> { new Date(selectedReport.createdAt).toLocaleString()}
+                <strong>Reported Date:</strong> { new Date(selectedReport.createdAt).toLocaleString("en-US", { timeZone: "Asia/Bangkok" })}
               </p>
+
               {selectedReport.photoUrls && selectedReport.photoUrls.length > 0 ? (
                 <div className="mt-3">
                     <strong className="mb-2">Report Photo:</strong>

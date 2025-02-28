@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 
 export default function AssignedReportsPage() {
   const backendUrl = "https://aufonduebackend.kindisland-399ef298.southeastasia.azurecontainerapps.io/api";
-  const sastoken = "?sp=r&st=2025-02-27T14:24:36Z&se=2025-02-27T22:24:36Z&spr=https&sv=2022-11-02&sr=c&sig=NZ1zMoe4smf8HrFS4Kre5yaggX8pFMblhfJorUfReBU%3D";
+  const sastoken = "?sp=r&st=2025-02-28T02:27:10Z&se=2025-02-28T10:27:10Z&spr=https&sv=2022-11-02&sr=c&sig=j0MtkuVGUM79jMo2AMz5662kRcD%2Fp5AHcdmQQGROUKk%3D";
   const [reports, setReports] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false); // Modal state
   const [modalType, setModalType] = useState(""); // "details" or "update"
@@ -70,7 +70,7 @@ export default function AssignedReportsPage() {
   // Fetch updates for a specific issue by issueId
   const fetchUpdates = async (issueId) => {
     try {
-      const response = await fetch(`${backendUrl}/issues/${issueId}/updates`);
+      const response = await fetch('http://localhost:8080/api/issues/${issueId}/updates');
       if (!response.ok) {
         throw new Error("Failed to fetch updates");
       }
@@ -84,7 +84,7 @@ export default function AssignedReportsPage() {
 
   // Function to fetch reports from the backend
   const fetchReports = () => {
-    fetch(`${backendUrl}/issues/assigned`) // Adjust the endpoint as needed
+    fetch('http://localhost:8080/api/issues/assigned') // Adjust the endpoint as needed
       .then((response) => response.json())
       .then(data => setReports(data))
       .catch((error) => console.error("Error fetching reports:", error));
@@ -142,7 +142,10 @@ export default function AssignedReportsPage() {
         <h1 className="text-3xl font-bold">Assigned Reports</h1>
         <div className="flex items-center gap-2">
           {/* Refresh Button */}
-          <button className="px-4 py-2 bg-red-500 text-white text-sm font-medium rounded hover:bg-red-600">
+          <button
+            className="px-4 py-2 bg-red-500 text-white text-sm font-medium rounded hover:bg-red-600"
+            onClick={fetchReports}
+          >
             Refresh
           </button>
         </div>
@@ -213,6 +216,12 @@ export default function AssignedReportsPage() {
                 <p className="mb-2">
                   <strong>Category:</strong> {selectedReport.category}
                 </p>
+                <p className="mb-2">
+                <strong>Location:</strong> {selectedReport.customLocation}
+              </p>
+              <p className="mb-2">
+                <strong>Reported By:</strong> {selectedReport.reportedBy?.username } 
+              </p>
                 {selectedReport.photoUrls && selectedReport.photoUrls.length > 0 ? (
               <div className="mt-3">
                   <strong className="mb-2">Report Photo:</strong>
@@ -235,7 +244,7 @@ export default function AssignedReportsPage() {
                   <strong>Assigned To: </strong> {selectedReport.assignedTo?.name}
                 </p>
                 <p className="mb-2">
-                  <strong>Reported Date: </strong>{ new Date(selectedReport.createdAt).toLocaleString()}
+                  <strong>Reported Date:</strong> { new Date(selectedReport.createdAt).toLocaleString("en-US", { timeZone: "Asia/Bangkok" })}
                 </p>
                 <p className="mb-2">
                   <strong>Status:</strong>{" "}
@@ -272,7 +281,7 @@ export default function AssignedReportsPage() {
                               {update.status}
                             </span>
                           </p>
-                          <p className="text-xs text-gray-500">{new Date(update.updateTime).toLocaleString()}</p>
+                          <p className="text-xs text-gray-500">{new Date(update.update_time).toLocaleString("en-US", { timeZone: "Asia/Bangkok" })}</p>
                         </div>
 
                         <p className="text-sm text-gray-800">
