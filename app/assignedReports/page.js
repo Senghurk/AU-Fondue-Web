@@ -70,7 +70,7 @@ export default function AssignedReportsPage() {
   // Fetch updates for a specific issue by issueId
   const fetchUpdates = async (issueId) => {
     try {
-      const response = await fetch('http://localhost:8080/api/issues/${issueId}/updates');
+      const response = await fetch(`${backendUrl}/issues/${issueId}/updates`);
       if (!response.ok) {
         throw new Error("Failed to fetch updates");
       }
@@ -84,7 +84,7 @@ export default function AssignedReportsPage() {
 
   // Function to fetch reports from the backend
   const fetchReports = () => {
-    fetch('http://localhost:8080/api/issues/assigned') // Adjust the endpoint as needed
+    fetch(`${backendUrl}/issues/assigned`) // Adjust the endpoint as needed
       .then((response) => response.json())
       .then(data => setReports(data))
       .catch((error) => console.error("Error fetching reports:", error));
@@ -152,8 +152,12 @@ export default function AssignedReportsPage() {
       </div>
 
       {/* Cards Grid */}
+      
       <div className="grid grid-cols-3 gap-4">
-        {reports.map((report) => (
+
+        {reports
+        .filter((report) => report.status !== "COMPLETED")
+        .map((report) => (
           <div
             key={report.id}
             className="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition"
@@ -229,7 +233,7 @@ export default function AssignedReportsPage() {
                       {selectedReport.photoUrls.map((photo, i) => (
                         <img 
                         key={i} 
-                        src={photo + sastoken}  
+                        src={`${photo}?${sastoken}`}  
                         alt={`Report Photo ${i + 1}`} 
                         className="w-60 h-60 rounded-md shadow-md border border-gray-200 object-cover"
                         onError={(e) => { e.target.src = "placeholder.jpg"; }} // Handle broken URLs

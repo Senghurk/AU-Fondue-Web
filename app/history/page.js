@@ -21,8 +21,8 @@ export default function HistoryPage() {
     const dataToExport = completedReports.map((report) => ({
       "Description": report.description,
       "Assigned To": report.assignedTo?.name,
-      "Reported Date": report.createdAt,
-      "Completion Date": report.updatedAt,
+      "Reported Date": report.createdAt.toLocaleString("en-US", { timeZone: "Asia/Bangkok" }), 
+      "Completion Date": report.updatedAt.toLocaleString("en-US", { timeZone: "Asia/Bangkok" }),
     }));
 
     // Create a worksheet and workbook
@@ -69,7 +69,7 @@ export default function HistoryPage() {
             </tr>
           </thead>
           <tbody>
-            {completedReports.map((report, index) => (
+            {completedReports.map((report, index) => ( 
               <tr
                 key={report.id}
                 className={`border-t ${
@@ -78,12 +78,12 @@ export default function HistoryPage() {
               >
                 <td className="p-3 text-sm">{index + 1}</td>
                 <td className="p-3 text-sm">{report.description}</td>
-                <td className="p-3 text-sm">{report.assignedTo?.name}</td>
+                <td className="p-3 text-sm">{report.assignedTo?.name}</td> 
                 <td className="p-3 text-sm font-semibold text-green-600">
                   Completed
                 </td>
-                <td className="p-3 text-sm">{ new Date(report.createdAt).toLocaleString()}</td>
-                <td className="p-3 text-sm">{ new Date(report.updatedAt).toLocaleString()}</td>
+                <td className="p-3 text-sm">{ new Date(report.createdAt).toLocaleString("en-US", { timeZone: "Asia/Bangkok" })}</td>
+                <td className="p-3 text-sm">{ new Date(report.updatedAt).toLocaleString("en-US", { timeZone: "Asia/Bangkok" })}</td>
               </tr>
             ))}
           </tbody>
