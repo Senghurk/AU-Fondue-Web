@@ -82,8 +82,8 @@ export default function HistoryPage() {
                 <td className="p-3 text-sm font-semibold text-green-600">
                   Completed
                 </td>
-                <td className="p-3 text-sm">{ new Date(report.createdAt).toLocaleString("en-US", { timeZone: "Asia/Bangkok" })}</td>
-                <td className="p-3 text-sm">{ new Date(report.updatedAt).toLocaleString("en-US", { timeZone: "Asia/Bangkok" })}</td>
+                <td className="p-3 text-sm">{ new Date(report.createdAt).toLocaleString()}</td>
+                <td className="p-3 text-sm">{ new Date(report.updatedAt).toLocaleString()}</td>
               </tr>
             ))}
           </tbody>
