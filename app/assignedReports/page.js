@@ -13,6 +13,8 @@ export default function AssignedReportsPage() {
   const [comments, setComments] = useState(""); // Textbox comments
   const [photos, setPhotos] = useState([]); // Uploaded photos
   const [updates, setUpdates] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
+
 
   // Open the modal with the selected report
   const handleOpenModal = (report, type) => {
@@ -90,6 +92,12 @@ export default function AssignedReportsPage() {
       .catch((error) => console.error("Error fetching reports:", error));
   };
 
+  const filteredReports = reports.filter(
+    (report) =>
+      report.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      report.category.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   useEffect(() => {
     fetchReports();
   }, []);
@@ -151,11 +159,22 @@ export default function AssignedReportsPage() {
         </div>
       </div>
 
+      {/* Search Bar */}
+      <div className="mb-6">
+      <input
+        type="text"
+        placeholder="Search by description or category..."
+        className="w-full px-4 py-2 border rounded shadow-sm focus:outline-none focus:ring focus:border-blue-300"
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+      />
+      </div>
+
       {/* Cards Grid */}
       
       <div className="grid grid-cols-3 gap-4">
 
-        {reports
+        {filteredReports
         .filter((report) => report.status !== "COMPLETED")
         .map((report) => (
           <div

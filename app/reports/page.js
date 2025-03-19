@@ -8,6 +8,8 @@ export default function ReportsPage() {
   // State to store fetched reports
   const [reports, setReports] = useState([]);
   const [staffMembers, setStaffMembers] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
+
 
   // State to manage assigned staff for each report
   const [assignments, setAssignments] = useState({});
@@ -123,6 +125,13 @@ export default function ReportsPage() {
       loadGoogleMaps();
     }
   }, [isModalOpen, selectedReport]);
+
+
+  const filteredReports = reports.filter(
+    (report) =>
+      report.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      report.category.toLowerCase().includes(searchQuery.toLowerCase())
+  );
   
 
   return (
@@ -143,17 +152,21 @@ export default function ReportsPage() {
 
       {/* Search Bar */}
       <div className="mb-6">
-        <input
-          type="text"
-          placeholder="Search..."
-          className="w-full px-4 py-2 border rounded shadow-sm focus:outline-none focus:ring focus:border-blue-300"
-        />
+      <input
+        type="text"
+        placeholder="Search by description or category..."
+        className="w-full px-4 py-2 border rounded shadow-sm focus:outline-none focus:ring focus:border-blue-300"
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+      />
       </div>
+
+      
 
       {/* Cards Grid */}
       
       <div className="grid grid-cols-3 gap-4">
-        {reports.map((report) => (
+        {filteredReports.map((report) => (
           <div
             key={report.id}
             className="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition"
