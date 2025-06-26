@@ -50,7 +50,7 @@ export default function Sidebar({activeTopLink, activeLink,setActiveLink }) {
                 className={`sidebar-link ${
                   activeLink === "/general-settings" ? "!text-red-600 !font-bold" : ""
                 }`}
-                onClick={() => handleLinkClick("/pages/general-settings")}
+                onClick={() => handleLinkClick("/general-settings")}
               >
                 General Settings
               </Link>

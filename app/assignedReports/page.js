@@ -94,53 +94,63 @@ export default function AssignedReportsPage() {
 
   const filteredReports = reports.filter(
     (report) =>
-      report.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      report.category.toLowerCase().includes(searchQuery.toLowerCase())
+      (report.description.toLowerCase().includes(searchQuery.toLowerCase()) ||  // Search by both description and category
+      report.category.toLowerCase().includes(searchQuery.toLowerCase())) &&
+      report.status !== "COMPLETED"   // filtering out the completed reports in the groupedReports
   );
+  
+
+  const groupedReports = filteredReports.reduce((groups, report) => {
+    if (!groups[report.category]) {
+      groups[report.category] = [];
+    }
+    groups[report.category].push(report);
+    return groups;
+  }, {});
 
   useEffect(() => {
     fetchReports();
   }, []);
 
-  // Map
-  useEffect(() => {
-    if (isModalOpen && selectedReport && selectedReport.usingCustomLocation === false) {
-      const loadGoogleMaps = () => {
-        if (!window.google) {
-          const script = document.createElement("script");
-          script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyAsR5qRX8IB3xtGZCxzSoh62usnHTgOpTU`;
-          script.async = true;
-          script.defer = true;
-          script.onload = initializeMap;
-          document.body.appendChild(script);
-        } else {
-          initializeMap();
-        }
-      };
+  // // Map
+  // useEffect(() => {
+  //   if (isModalOpen && selectedReport && selectedReport.usingCustomLocation === false) {
+  //     const loadGoogleMaps = () => {
+  //       if (!window.google) {
+  //         const script = document.createElement("script");
+  //         script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyAsR5qRX8IB3xtGZCxzSoh62usnHTgOpTU`;
+  //         script.async = true;
+  //         script.defer = true;
+  //         script.onload = initializeMap;
+  //         document.body.appendChild(script);
+  //       } else {
+  //         initializeMap();
+  //       }
+  //     };
   
-      const initializeMap = () => {
-        const mapDiv = document.getElementById("map");
-        if (!mapDiv) return; // Prevent error if the div is missing
+  //     const initializeMap = () => {
+  //       const mapDiv = document.getElementById("map");
+  //       if (!mapDiv) return; // Prevent error if the div is missing
   
-        const location = {
-          lat: selectedReport.latitude || 0, 
-          lng: selectedReport.longitude || 0, 
-        };
+  //       const location = {
+  //         lat: selectedReport.latitude || 0, 
+  //         lng: selectedReport.longitude || 0, 
+  //       };
   
-        const map = new google.maps.Map(mapDiv, {
-          zoom: 14,
-          center: location,
-        });
+  //       const map = new google.maps.Map(mapDiv, {
+  //         zoom: 14,
+  //         center: location,
+  //       });
   
-        new google.maps.Marker({
-          position: location,
-          map: map,
-        });
-      };
+  //       new google.maps.Marker({
+  //         position: location,
+  //         map: map,
+  //       });
+  //     };
   
-      loadGoogleMaps();
-    }
-  }, [isModalOpen, selectedReport, modalType]);
+  //     loadGoogleMaps();
+  //   }
+  // }, [isModalOpen, selectedReport, modalType]);                                      // no more map
   
 
   return (
@@ -172,57 +182,62 @@ export default function AssignedReportsPage() {
 
       {/* Cards Grid */}
       
-      <div className="grid grid-cols-3 gap-4">
+      {Object.entries(groupedReports).map(([category, reports]) => (
+        <div key={category} className="mb-8">
+        <h2 className="text-xl font-bold mb-4">{category}</h2>
+        <div className="grid grid-cols-3 gap-4">
 
-        {filteredReports
-        .filter((report) => report.status !== "COMPLETED")
-        .map((report) => (
-          <div
-            key={report.id}
-            className="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition"
-          >
-            {/* Report Title */}
-            <h2 className="text-lg font-semibold mb-2">{report.description}</h2>
-            {/* Category */}
-            <p className="text-sm text-gray-600">Category: {report.category}</p>
-            {/* Status */}
-            <p className="text-sm text-gray-600 mt-1">
-              Status:{" "}
-              <span
-                className={`font-semibold ${
-                  report.status === "COMPLETED"
-                    ? "text-green-600"
-                    : report.status === "IN PROGRESS"
-                    ? "text-blue-600"
-                    : "text-red-600"
-                }`}
-              >
-                {report.status}
-              </span>
-            </p>
-          
-            {/* Assigned To */}
-            <p className="text-sm text-gray-600 mt-1">
-              Assigned To: {report.assignedTo?.name}
-            </p>
-            {/* Action Buttons */}
-            <div className="flex gap-2 mt-4">
-              <button
-                onClick={() => handleOpenModal(report, "details")}
-                className="flex-1 px-4 py-2 bg-gray-200 text-sm font-medium rounded hover:bg-gray-300"
-              >
-                Details
-              </button>
-              <button
-                onClick={() => handleOpenModal(report, "update")}
-                className="flex-1 px-4 py-2 bg-blue-500 text-white text-sm font-medium rounded hover:bg-blue-600"
-              >
-                Update
-              </button>
+          {reports
+          .filter((report) => report.status !== "COMPLETED")
+          .map((report) => (
+            <div
+              key={report.id}
+              className="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition"
+            >
+              {/* Report Title */}
+              <h2 className="text-lg font-semibold mb-2">{report.description}</h2>
+              {/* Category */}
+              <p className="text-sm text-gray-600">Category: {report.category}</p>
+              {/* Status */}
+              <p className="text-sm text-gray-600 mt-1">
+                Status:{" "}
+                <span
+                  className={`font-semibold ${
+                    report.status === "COMPLETED"
+                      ? "text-green-600"
+                      : report.status === "IN PROGRESS"
+                      ? "text-blue-600"
+                      : "text-red-600"
+                  }`}
+                >
+                  {report.status}
+                </span>
+              </p>
+            
+              {/* Assigned To */}
+              <p className="text-sm text-gray-600 mt-1">
+                Assigned To: {report.assignedTo?.name}
+              </p>
+              {/* Action Buttons */}
+              <div className="flex gap-2 mt-4">
+                <button
+                  onClick={() => handleOpenModal(report, "details")}
+                  className="flex-1 px-4 py-2 bg-gray-200 text-sm font-medium rounded hover:bg-gray-300"
+                >
+                  Details
+                </button>
+                <button
+                  onClick={() => handleOpenModal(report, "update")}
+                  className="flex-1 px-4 py-2 bg-blue-500 text-white text-sm font-medium rounded hover:bg-blue-600"
+                >
+                  Update
+                </button>
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
+      ))}
 
       {/* Modal */}
       {isModalOpen && (
@@ -283,11 +298,14 @@ export default function AssignedReportsPage() {
                     {selectedReport.status}
                   </span>
                 </p>
-
-                {/* Google Map Section */}
+                 
+                <p className="mb-2">
+                  <strong>Location: </strong> Some sort of location information here
+                </p>
+                {/* Google Map Section
                 {selectedReport.usingCustomLocation === false && (
                   <div id="map" className="w-full h-60 mt-4 rounded-lg border border-gray-300"></div>
-                )}
+                )} */}
 
 
                 {/* Update Details Section */}

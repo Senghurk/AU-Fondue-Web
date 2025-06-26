@@ -23,6 +23,7 @@ export default function HistoryPage() {
       "Assigned To": report.assignedTo?.name,
       "Reported Date": report.createdAt.toLocaleString("en-US", { timeZone: "Asia/Bangkok" }), 
       "Completion Date": report.updatedAt.toLocaleString("en-US", { timeZone: "Asia/Bangkok" }),
+      "Duration": getDuration(report.createdAt, report.updatedAt)
     }));
 
     // Create a worksheet and workbook
@@ -33,6 +34,21 @@ export default function HistoryPage() {
     // Export the Excel file
     XLSX.writeFile(workbook, "Completed_Reports.xlsx");
   };
+
+  const getDuration = (start, end) => {
+  const startTime = new Date(start);
+  const endTime = new Date(end);
+  const diffMs = endTime - startTime; // gets the difference in milliseconds
+
+  if (isNaN(diffMs) || diffMs < 0) return "Invalid";
+
+  const totalMinutes = Math.floor(diffMs / 1000 / 60); // convert milliseconds to minutes
+  const hours = Math.floor(totalMinutes / 60); // convert minutes to hours
+  const minutes = totalMinutes % 60; // remaining minutes after converting to hours
+
+  return `${hours}h ${minutes}m`;
+};
+
 
 
   useEffect(() => {
@@ -66,6 +82,7 @@ export default function HistoryPage() {
               <th className="p-3 text-sm font-semibold">Status</th>
               <th className="p-3 text-sm font-semibold">Reported Date</th>
               <th className="p-3 text-sm font-semibold">Completion Date</th>
+              <th className="p-3 text-sm font-semibold">Duration</th>
             </tr>
           </thead>
           <tbody>
@@ -84,6 +101,7 @@ export default function HistoryPage() {
                 </td>
                 <td className="p-3 text-sm">{ new Date(report.createdAt).toLocaleString()}</td>
                 <td className="p-3 text-sm">{ new Date(report.updatedAt).toLocaleString()}</td>
+                <td className="p-3 text-sm">{getDuration(report.createdAt, report.updatedAt)}</td>
               </tr>
             ))}
           </tbody>
