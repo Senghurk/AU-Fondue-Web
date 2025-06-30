@@ -55,7 +55,7 @@ export default function Home() {
               Be the change.
             </h1>
             <p className="text-lg text-gray-700 mb-6">
-              AU Fondue makes reporting maintenance problems easy. Whether you're a student or staff, stay updated on what's fixed and what's pending.
+              AU Fondue makes reporting maintenance problems easy. Whether you&apos;re a student or staff, stay updated on what&apos;s fixed and what&apos;s pending.
             </p>
 
             <div className="mt-4">
