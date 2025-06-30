@@ -12,8 +12,11 @@
 
 .sidebar {
   @apply w-1/4 bg-blue-50 p-4 rounded-xl;
-  @apply h-[calc(90vh-3rem)] ;
+  @apply h-[calc(100vh-2rem)]; /* Keeps it visible without cutting off top */
+  @apply overflow-y-auto;
+  @apply sticky top-6; /* Or top-4 if you prefer tighter spacing */
 }
+
 
 /* Navigation list and spacing between items */
 .sidebar-nav {
