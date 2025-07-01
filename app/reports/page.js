@@ -159,7 +159,10 @@ export default function ReportsPage() {
               <h2 className="text-xl font-bold mb-4">Report Details</h2>
               <p><strong>Description:</strong> {selectedReport.description}</p>
               <p><strong>Category:</strong> {selectedReport.category}</p>
-              <p><strong>Location:</strong> {selectedReport.customLocation}</p>
+              {selectedReport.usingCustomLocation === true && (
+                <p><strong>Location:</strong> {selectedReport.customLocation}</p>
+              )}
+              
               {selectedReport.usingCustomLocation === false && (
                 <p><strong>Location:</strong> Some sort of location info</p>
               )}
