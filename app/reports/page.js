@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react";
 
 export default function ReportsPage() {
-  const backendUrl = "https://aufonduebackend.kindisland-399ef298.southeastasia.azurecontainerapps.io/api";
+  const backendUrl = "https://aufondue-webtest.kindisland-399ef298.southeastasia.azurecontainerapps.io/api"; //test link
+  //const backendUrl = "https://aufonduebackend.kindisland-399ef298.southeastasia.azurecontainerapps.io/api";
   const sastoken = "?sp=r&st=2025-03-12T12:14:46Z&se=2026-03-31T20:14:46Z&spr=https&sv=2022-11-02&sr=c&sig=j4Mc241rEaPiBzNQ1qPFwwHEamVp83OERRYmBj1Tums%3D";
 
   const [reports, setReports] = useState([]);
@@ -12,6 +13,7 @@ export default function ReportsPage() {
   const [assignments, setAssignments] = useState({});
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedReport, setSelectedReport] = useState(null);
+  const [priority, setPriority] = useState({}); // State to hold priority for {each report} it will hold all the priorities
 
   useEffect(() => {
     fetchReports();
@@ -25,7 +27,9 @@ export default function ReportsPage() {
         if (!Array.isArray(data)) return;
         setReports(data);
         setAssignments(data.reduce((acc, r) => ({ ...acc, [r.id]: "" }), {}));
+        setPriority(data.reduce((acc, r) => ({ ...acc, [r.id]: "" }), {})); // this set the priority state as empty first
       });
+    
   };
 
   const fetchStaffMembers = () => {
@@ -40,7 +44,8 @@ export default function ReportsPage() {
 
   const handleConfirmAssign = (id) => {
     if (!assignments[id]) return alert("Please select a staff member.");
-    fetch(`${backendUrl}/issues/${id}/assign?staffId=${assignments[id]}`, { method: "POST" })
+    if (!priority[id]) return alert("Please select a priority.");
+    fetch(`${backendUrl}/issues/${id}/assign?staffId=${assignments[id]}&priority=${priority[id]}`, {method: "POST",})
       .then((res) => {
         if (res.ok) {
           alert("Assigned successfully.");
@@ -99,11 +104,20 @@ export default function ReportsPage() {
 
                 <div className="mt-4 flex items-center gap-2">
                   <label className="text-sm font-semibold">Priority</label>
-                  <select className="w-full px-3 py-2 border rounded">
-                    <option value="" disabled hidden>Choose Priority Level</option>
-                    {["Low", "Normal", "High"].map((priority) => (
-                      <option key={priority}>{priority}</option>
-                    ))}
+                  <select
+                    
+                    value={priority[report.id] || ""}
+                    onChange={(e) =>
+                      setPriority((prev) => ({
+                        ...prev,
+                        [report.id]: e.target.value.toUpperCase(),
+                      }))
+                    }
+                    className="w-full px-3 py-2 border rounded"
+                  >
+                    <option value="" disabled hidden>Set Priority</option>
+                    <option value="LOW">Low</option>
+                    <option value="HIGH">High</option>
                   </select>
                 </div>
 
@@ -167,7 +181,7 @@ export default function ReportsPage() {
                 <p><strong>Location:</strong> Some sort of location info</p>
               )}
               <p><strong>Reported By:</strong> {selectedReport.reportedBy?.username}</p>
-              <p><strong>Reported Date:</strong> {new Date(selectedReport.createdAt).toLocaleString("en-US", { timeZone: "Asia/Bangkok" })}</p>
+              <p><strong>Reported Date:</strong> {new Date(selectedReport.createdAt).toLocaleString("en-GB", { timeZone: "Asia/Bangkok" })}</p>
 
               {selectedReport.photoUrls?.length > 0 ? (
                 <div className="mt-3">

@@ -1,93 +1,92 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function AdminListPage() {
-  // Mock data for admin list
-  const initialAdmins = [
-    { id: 1, name: "Alice Johnson", email: "alice@university.edu" },
-    { id: 2, name: "Bob Smith", email: "bob@university.edu" },
-    { id: 3, name: "Charlie Davis", email: "charlie@university.edu" },
-  ];
+  const backendUrl = "https://aufondue-webtest.kindisland-399ef298.southeastasia.azurecontainerapps.io/api"; // Change to your Azure URL if needed
 
-  // State for admins, search query, and modal visibility
-  const [admins, setAdmins] = useState(initialAdmins);
+  const [admins, setAdmins] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isAddingAdmin, setIsAddingAdmin] = useState(false);
   const [newAdminEmail, setNewAdminEmail] = useState("");
+  const [newAdminUsername, setNewAdminUsername] = useState("");
 
-  // Handler to update the search query
-  const handleSearch = (event) => {
-    setSearchQuery(event.target.value);
+  // Fetch admin list from backend
+  const fetchAdmins = async () => {
+    try {
+      const response = await fetch(`${backendUrl}/admin`);
+      const data = await response.json();
+      setAdmins(data);
+    } catch (error) {
+      console.error("Failed to fetch admins:", error);
+    }
   };
 
-  // Show modal for adding a new admin
-  const openAddAdminModal = () => {
-    setIsAddingAdmin(true);
-  };
+  useEffect(() => {
+    fetchAdmins();
+  }, []);
 
-  // Close modal for adding a new admin
-  const closeAddAdminModal = () => {
-    setIsAddingAdmin(false);
-    setNewAdminEmail("");
-  };
-
-  // Handle input for new admin email (demo only)
-  const handleNewAdminEmailChange = (event) => {
-    setNewAdminEmail(event.target.value);
-  };
-
-  // Demo "Add Admin" action (not persistent)
-  const handleAddAdmin = () => {
-    if (newAdminEmail.trim() === "") return;
-    const newAdmin = {
-      id: admins.length + 1,
-      name: "New Admin", // Placeholder name for demo
-      email: newAdminEmail,
-    };
-    setAdmins([...admins, newAdmin]);
-    closeAddAdminModal();
-  };
-
-  // Filter admins by search query
+  // Search filtering
   const filteredAdmins = admins.filter((admin) =>
-    admin.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    admin.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
     admin.email.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const handleAddAdmin = async () => {
+    if (!newAdminEmail.trim() || !newAdminUsername.trim()) return;
+
+    try {
+      const res = await fetch(`${backendUrl}/admin`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: newAdminEmail,
+          username: newAdminUsername,
+        }),
+      });
+
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(`Failed to add admin: ${res.status} - ${text}`);
+      }
+
+      await fetchAdmins(); // Refresh list
+      setNewAdminEmail("");
+      setNewAdminUsername("");
+      setIsAddingAdmin(false);
+    } catch (error) {
+      alert("Error adding admin: " + error.message);
+    }
+  };
+
   return (
     <div className="flex-1 p-6">
-      {/* Page Header */}
       <h1 className="text-3xl font-bold mb-6">Admin List</h1>
       <p className="text-gray-600 mb-4">View and manage all admins in the system.</p>
 
-      {/* Search and Add Controls */}
       <div className="mb-4 flex items-center space-x-4">
-        {/* Search Box */}
         <input
           type="text"
           placeholder="Search admins by name or email..."
           value={searchQuery}
-          onChange={handleSearch}
+          onChange={(e) => setSearchQuery(e.target.value)}
           className="border p-2 rounded w-full max-w-sm"
         />
 
-        {/* Add Admin Button */}
         <button
-          onClick={openAddAdminModal}
+          onClick={() => setIsAddingAdmin(true)}
           className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
         >
           Add Admin
         </button>
       </div>
 
-      {/* Admin Table */}
       <div className="bg-white rounded-lg shadow-md p-4">
         <table className="w-full table-auto border-collapse">
           <thead>
             <tr className="bg-gray-200 text-left">
               <th className="p-3 text-sm font-semibold">#</th>
-              <th className="p-3 text-sm font-semibold">Name</th>
+              <th className="p-3 text-sm font-semibold">Username</th>
               <th className="p-3 text-sm font-semibold">Email</th>
             </tr>
           </thead>
@@ -100,7 +99,7 @@ export default function AdminListPage() {
                 }`}
               >
                 <td className="p-3 text-sm">{index + 1}</td>
-                <td className="p-3 text-sm">{admin.name}</td>
+                <td className="p-3 text-sm">{admin.username}</td>
                 <td className="p-3 text-sm">{admin.email}</td>
               </tr>
             ))}
@@ -111,21 +110,27 @@ export default function AdminListPage() {
         )}
       </div>
 
-      {/* Add Admin Modal */}
       {isAddingAdmin && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
             <h2 className="text-xl font-bold mb-4">Add New Admin</h2>
             <input
+              type="text"
+              placeholder="Admin Username"
+              value={newAdminUsername}
+              onChange={(e) => setNewAdminUsername(e.target.value)}
+              className="border p-2 rounded w-full mb-3"
+            />
+            <input
               type="email"
-              placeholder="University email"
+              placeholder="Admin Email"
               value={newAdminEmail}
-              onChange={handleNewAdminEmailChange}
+              onChange={(e) => setNewAdminEmail(e.target.value)}
               className="border p-2 rounded w-full mb-4"
             />
             <div className="flex justify-end space-x-2">
               <button
-                onClick={closeAddAdminModal}
+                onClick={() => setIsAddingAdmin(false)}
                 className="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400"
               >
                 Cancel

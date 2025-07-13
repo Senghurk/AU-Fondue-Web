@@ -1,42 +1,151 @@
 "use client";
- 
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { FileText, CheckCircle, Clock } from 'lucide-react'; // Import icons
- 
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "../firebaseClient"; // adjust path if needed
+
+import {
+  FileText,
+  CheckCircle,
+  Clock,
+} from "lucide-react";
+import {
+  PieChart,
+  Pie,
+  Cell,
+  Legend,
+  Tooltip,
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+} from "recharts";
+
 export default function HomePage() {
   const router = useRouter();
-  const backendUrl = "https://aufonduebackend.kindisland-399ef298.southeastasia.azurecontainerapps.io/api";
-  // Setting data for statistics
-  const [stats, setStats] = useState([
-    { label: "Total Reports", value: 0, color: "bg-blue-500", icon: <FileText size={32} /> },
-    { label: "Pending Assignments", value: 0, color: "bg-yellow-500", icon: <Clock size={32} /> },
-    { label: "Completed Tasks", value: 0, color: "bg-green-500", icon: <CheckCircle size={32} /> },
-  ]);
+  const backendUrl =  "https://aufondue-webtest.kindisland-399ef298.southeastasia.azurecontainerapps.io/api/issues" //"https://aufonduebackend.kindisland-399ef298.southeastasia.azurecontainerapps.io/api/issues";
 
-  // Fetching data for statistics
+  const [userName, setUserName] = useState(null);
+
+  // State
+  const [stats, setStats] = useState([
+    {
+      label: "Total Reports",
+      value: 0,
+      color: "bg-blue-500",
+      icon: <FileText size={32} />,
+    },
+    {
+      label: "Pending Assignments",
+      value: 0,
+      color: "bg-yellow-500",
+      icon: <Clock size={32} />,
+    },
+    {
+      label: "Completed Tasks",
+      value: 0,
+      color: "bg-green-500",
+      icon: <CheckCircle size={32} />,
+    },
+  ]);
+  const [categoryCounts, setCategoryCounts] = useState({});
+  const [reportsOverTime, setReportsOverTime] = useState([]);
+
+  // Listen to auth changes and get user info
   useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUserName(user.displayName || user.email || "User");
+      } else {
+        setUserName(null);
+        router.push("/"); // redirect to login if no user
+      }
+    });
+
+    return () => unsubscribe();
+  }, [router]);
+
+  // Fetch data
+  useEffect(() => {
+   
+
     const fetchStats = async () => {
       try {
-        const response = await fetch(`${backendUrl}/issues/stats`); 
+        const response = await fetch(`${backendUrl}/stats`);
         const data = await response.json();
 
         setStats([
-          { label: "Total Reports", value: data.totalIssues, color: "bg-blue-500", icon: <FileText size={32} /> },
-          { label: "Pending Assignments", value: data.pendingIssues, color: "bg-yellow-500", icon: <Clock size={32} /> },
-          { label: "Completed Tasks", value: data.completedIssues, color: "bg-green-500", icon: <CheckCircle size={32} /> },
+          {
+            label: "Total Reports",
+            value: data.totalIssues,
+            color: "bg-blue-500",
+            icon: <FileText size={32} />,
+          },
+          {
+            label: "Pending Assignments",
+            value: data.pendingIssues,
+            color: "bg-yellow-500",
+            icon: <Clock size={32} />,
+          },
+          {
+            label: "Completed Tasks",
+            value: data.completedIssues,
+            color: "bg-green-500",
+            icon: <CheckCircle size={32} />,
+          },
         ]);
       } catch (error) {
         console.error("Error fetching stats:", error);
       }
     };
 
+    const fetchCategoryCounts = async () => {
+      try {
+        const response = await fetch(`${backendUrl}/reports?page=0&size=1000`);
+        const allIssues = await response.json();
+        console.log(allIssues)
+        const counts = allIssues.reduce((acc, issue) => {
+          acc[issue.category] = (acc[issue.category] || 0) + 1;
+          return acc;
+        }, {});
+        setCategoryCounts(counts);
+      } catch (error) {
+        
+        console.error("Error fetching issues for categories:", error);
+      }
+    };
+
+    const fetchReportsOverTime = async () => {
+      try {
+        const response = await fetch(`${backendUrl}/reports?page=0&size=1000`);
+        const allIssues = await response.json();
+
+        const dateCounts = {};
+
+        allIssues.forEach((issue) => {
+          const date = new Date(issue.createdAt).toISOString().split("T")[0]; // "YYYY-MM-DD"
+          dateCounts[date] = (dateCounts[date] || 0) + 1;
+        });
+
+        const formattedData = Object.entries(dateCounts)
+          .sort(([a], [b]) => new Date(a) - new Date(b))
+          .map(([date, count]) => ({ date, count }));
+
+        setReportsOverTime(formattedData);
+      } catch (error) {
+        console.error("Error fetching reports over time:", error);
+      }
+    };
+
     fetchStats();
+    fetchCategoryCounts();
+    fetchReportsOverTime();
   }, []);
 
- 
-  // Quick Links Data
+  // Quick links
   const quickLinks = [
     {
       label: "View All Reports",
@@ -60,21 +169,40 @@ export default function HomePage() {
       icon: <CheckCircle size={28} />,
     },
   ];
- 
-  // Navigate Function
+
   const handleNavigate = (path) => {
     router.push(path);
   };
- 
+
+  // Pie Chart Data
+  const pieData = Object.entries(categoryCounts).map(([category, count]) => ({
+    name: category,
+    value: count,
+  }));
+
+  const COLORS = [
+    "#8884d8",
+    "#82ca9d",
+    "#ffc658",
+    "#ff8042",
+    "#a4de6c",
+    "#d0ed57",
+    "#8dd1e1",
+  ];
+
   return (
     <div className="flex-1 p-6">
-      {/* Welcome Section */}
+      {/* Welcome */}
       <div className="mb-8">
-        <h1 className="text-4xl font-bold text-black">Welcome Admin</h1>
-        <p className="text-gray-600 dark:text-grey-800">Manage your reports and tasks efficiently.</p>
+        <h1 className="text-4xl font-bold text-black">
+          Welcome Admin{userName ? `, ${userName}` : ""}
+        </h1>
+        <p className="text-gray-600 dark:text-grey-800">
+          Manage your reports and tasks efficiently.
+        </p>
       </div>
- 
-      {/* Quick Stats */}
+
+      {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         {stats.map((stat, index) => (
           <div
@@ -89,7 +217,7 @@ export default function HomePage() {
           </div>
         ))}
       </div>
- 
+
       {/* Quick Links */}
       <div className="mb-8">
         <h2 className="text-2xl font-bold text-gray-800 mb-4">Quick Links</h2>
@@ -110,20 +238,49 @@ export default function HomePage() {
           ))}
         </div>
       </div>
- 
-      {/* System Overview
-      <div className="bg-white rounded-2xl shadow-lg p-6">
-        <h2 className="text-2xl font-bold text-gray-800 mb-4">System Overview</h2>
-        <p className="text-gray-600  mb-4">
-          The admin dashboard provides a comprehensive overview of tasks, reports, and team
-          activities. Here’s what’s happening:
-        </p>
-        <ul className="list-disc pl-6 text-gray-600">
-          <li>Review <span className="font-semibold">34 pending tasks</span> and assign them to team members.</li>
-          <li>Analyze trends in reports to identify recurring issues.</li>
-          <li>Communicate updates effectively to keep everyone informed.</li>
-        </ul>
-      </div> */}
+
+      {/* Pie Chart */}
+      {pieData.length > 0 && (
+        <div className="mb-8 bg-white p-6 rounded-2xl shadow-lg">
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">Reports by Category</h2>
+          <ResponsiveContainer width="100%" height={300}>
+            <PieChart>
+              <Pie
+                data={pieData}
+                cx="50%"
+                cy="50%"
+                outerRadius={100}
+                fill="#8884d8"
+                dataKey="value"
+                label
+              >
+                {pieData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                ))}
+              </Pie>
+              <Tooltip />
+              <Legend />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+      )}
+
+      {/* Line Chart */}
+      {reportsOverTime.length > 0 && (
+        <div className="mb-8 bg-white p-6 rounded-2xl shadow-lg">
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">Reports Over Time</h2>
+          <ResponsiveContainer width="100%" height={300}>
+            <LineChart data={reportsOverTime}>
+              <CartesianGrid stroke="#ccc" strokeDasharray="5 5" />
+              <XAxis dataKey="date" tick={{ fontSize: 12 }} />
+              <YAxis allowDecimals={false} />
+              <Tooltip />
+              <Legend />
+              <Line type="monotone" dataKey="count" stroke="#8884d8" strokeWidth={2} />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      )}
     </div>
   );
 }

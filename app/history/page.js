@@ -6,7 +6,8 @@ import * as XLSX from "xlsx";
 
 export default function HistoryPage() {
   const [completedReports, setCompletedReports] = useState([]);
-  const backendUrl = "https://aufonduebackend.kindisland-399ef298.southeastasia.azurecontainerapps.io/api";
+  const backendUrl = "https://aufondue-webtest.kindisland-399ef298.southeastasia.azurecontainerapps.io/api"; //test link
+  //const backendUrl = "https://aufonduebackend.kindisland-399ef298.southeastasia.azurecontainerapps.io/api";
   const fetchCompletedReports = () =>{
     fetch(`${backendUrl}/issues/completed`)
       .then((response) => response.json())
@@ -21,8 +22,8 @@ export default function HistoryPage() {
     const dataToExport = completedReports.map((report) => ({
       "Description": report.description,
       "Assigned To": report.assignedTo?.name,
-      "Reported Date": report.createdAt.toLocaleString("en-US", { timeZone: "Asia/Bangkok" }), 
-      "Completion Date": report.updatedAt.toLocaleString("en-US", { timeZone: "Asia/Bangkok" }),
+      "Reported Date": report.createdAt.toLocaleString("en-GB", { timeZone: "Asia/Bangkok" }), 
+      "Completion Date": report.updatedAt.toLocaleString("en-GB", { timeZone: "Asia/Bangkok" }),
       "Duration": getDuration(report.createdAt, report.updatedAt)
     }));
 
@@ -72,12 +73,13 @@ export default function HistoryPage() {
       </p>
 
       {/* Reports Table */}
-      <div className="bg-white rounded-lg shadow-md p-4">
+      <div className="bg-white rounded-lg shadow-md p-3.5 overflow-x-auto max-w-full">
         <table className="w-full table-auto border-collapse">
           <thead>
             <tr className="bg-gray-200 text-left">
               <th className="p-3 text-sm font-semibold">#</th>
               <th className="p-3 text-sm font-semibold">Description</th>
+              <th className="p-3 text-sm font-semibold">Category</th>
               <th className="p-3 text-sm font-semibold">Assigned To</th>
               <th className="p-3 text-sm font-semibold">Status</th>
               <th className="p-3 text-sm font-semibold">Reported Date</th>
@@ -95,12 +97,13 @@ export default function HistoryPage() {
               >
                 <td className="p-3 text-sm">{index + 1}</td>
                 <td className="p-3 text-sm">{report.description}</td>
+                <td className="p-3 text-sm">{report.category}</td>
                 <td className="p-3 text-sm">{report.assignedTo?.name}</td> 
                 <td className="p-3 text-sm font-semibold text-green-600">
                   Completed
                 </td>
-                <td className="p-3 text-sm">{ new Date(report.createdAt).toLocaleString()}</td>
-                <td className="p-3 text-sm">{ new Date(report.updatedAt).toLocaleString()}</td>
+                <td className="p-3 text-sm">{ new Date(report.createdAt).toLocaleString("en-GB", { timeZone: "Asia/Bangkok" })}</td>
+                <td className="p-3 text-sm">{ new Date(report.updatedAt).toLocaleString("en-GB", { timeZone: "Asia/Bangkok" })}</td>
                 <td className="p-3 text-sm">{getDuration(report.createdAt, report.updatedAt)}</td>
               </tr>
             ))}
