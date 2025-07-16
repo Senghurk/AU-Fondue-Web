@@ -10,7 +10,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const backendUrl = "http://localhost:8080/api"; // for local
+  const backendUrl = "https://aufondue-webtest.kindisland-399ef298.southeastasia.azurecontainerapps.io/api"; // for local
 
   const handleLogin = async (e) => {
     e.preventDefault();

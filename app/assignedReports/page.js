@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 
 export default function AssignedReportsPage() {
   // const backendUrl ="https://aufonduebackend.kindisland-399ef298.southeastasia.azurecontainerapps.io/api";
-  const backendUrl = "http://localhost:8080/api"; //test link
+  const backendUrl = "https://aufondue-webtest.kindisland-399ef298.southeastasia.azurecontainerapps.io/api"; //test link
   const sastoken =
     "?sv=2024-11-04&ss=bfqt&srt=co&sp=rwdlacupiytfx&se=2027-07-16T22:11:38Z&st=2025-07-16T13:56:38Z&spr=https,http&sig=5xb1czmfngshEckXBdlhtw%2BVe%2B5htYpCnXyhPw9tnHk%3D";
 

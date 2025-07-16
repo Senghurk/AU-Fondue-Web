@@ -26,7 +26,7 @@ import {
 
 export default function HomePage() {
   const router = useRouter();
-  const backendUrl =  "http://localhost:8080/api" //"https://aufonduebackend.kindisland-399ef298.southeastasia.azurecontainerapps.io/api";
+  const backendUrl =  "https://aufondue-webtest.kindisland-399ef298.southeastasia.azurecontainerapps.io/api" //"https://aufonduebackend.kindisland-399ef298.southeastasia.azurecontainerapps.io/api";
 
   const [userName, setUserName] = useState(null);
 
