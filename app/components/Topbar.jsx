@@ -43,13 +43,13 @@ export default function Topbar({ activeTopLink, setActiveTopLink, setActiveLink 
           </li>
           <li>
             <Link
-              href="/user-list"
+              href="/admins"
               className={`topbar-link ${
-                activeTopLink === "/user-list" ? "!text-lg !text-red-600 !font-bold" : ""
+                activeTopLink === "/admins" ? "!text-lg !text-red-600 !font-bold" : ""
               }`}
               onClick={() => {
-                handleLinkClick("/user-list");
-                handleDefaultLink("/user-list");
+                handleLinkClick("/admins");
+                handleDefaultLink("/admins");
               }}
             >
               Users

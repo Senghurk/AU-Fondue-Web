@@ -2,51 +2,51 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import {
-  OAuthProvider,
-  signInWithPopup,
-  setPersistence,
-  browserLocalPersistence,
-  signOut,
-} from "firebase/auth";
+import { signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
 import { auth } from "../firebaseClient";
 
 export default function LoginPage() {
   const router = useRouter();
-  
-  const handleMicrosoftLoginPopup = async () => {
-    const provider = new OAuthProvider("microsoft.com");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const backendUrl = "http://localhost:8080/api"; // for local
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
 
     try {
-      await setPersistence(auth, browserLocalPersistence);
-      const result = await signInWithPopup(auth, provider);
-      const user = result.user;
+      // Step 1: Check backend status
+      const res = await fetch(`${backendUrl}/admin/check?email=${email}`);
+      const status = await res.text();
 
-      // Step 1: Restrict to AU domain
-      if (!user.email.endsWith("@au.edu")) {
-        alert("Access restricted to AU users only.");
-        await signOut(auth);
+      if (status !== "can_login") {
+        alert("Access denied: You are not allowed to log in.");
         return;
       }
 
-      // Step 2: Check with backend if this email is in admin table
-      const backendUrl = "https://aufondue-webtest.kindisland-399ef298.southeastasia.azurecontainerapps.io/api"; //test link
-      // const backendUrl ="https://aufonduebackend.kindisland-399ef298.southeastasia.azurecontainerapps.io/api";
-      const response = await fetch(`${backendUrl}/admin/check?email=${user.email}`);
-      const isAdmin = await response.json();
-
-      if (!isAdmin) {
-        alert("Access denied: Your email is not registered as an admin.");
-        await signOut(auth);
-        return;
-      }
-
-      // ✅ Success — allow access
+      // Step 2: Firebase login
+      await signInWithEmailAndPassword(auth, email, password);
+      alert("Login successful!");
       router.push("/dashboard");
-
     } catch (error) {
       console.error("Login failed:", error);
       alert("Login failed: " + error.message);
+    }
+  };
+
+  const handleResetPassword = async () => {
+    if (!email) {
+      alert("Please enter your email to reset your password.");
+      return;
+    }
+
+    try {
+      await sendPasswordResetEmail(auth, email);
+      alert("Password reset email sent! Please check your inbox.");
+    } catch (error) {
+      console.error("Reset error:", error);
+      alert("Error sending reset email: " + error.message);
     }
   };
 
@@ -59,29 +59,50 @@ export default function LoginPage() {
         </div>
 
         <div className="flex justify-center mb-6">
-          <img
-            src="https://cdn-icons-png.flaticon.com/512/3408/3408515.png"
-            alt="Admin Illustration"
-            className="h-24 w-24"
-          />
+          <img src="app_icon.svg" alt="Admin Illustration" className="h-40 w-45" />
         </div>
 
-        <button
-          onClick={handleMicrosoftLoginPopup}
-          className="w-full flex items-center justify-center bg-blue-600 text-white py-3 px-4 rounded-lg text-lg font-semibold hover:bg-blue-700 transition"
-        >
-          <img
-            src="https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg"
-            alt="Microsoft"
-            className="h-6 w-6 mr-3"
+        <form onSubmit={handleLogin}>
+          <input
+            type="email"
+            placeholder="Email"
+            className="w-full mb-4 px-4 py-2 border rounded"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
           />
-          Log in with Microsoft 
-        </button>
+
+          <input
+            type="password"
+            placeholder="Password"
+            className="w-full mb-2 px-4 py-2 border rounded"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+
+          <div className="text-right mb-4">
+            <button
+              type="button"
+              className="text-blue-600 text-sm hover:underline"
+              onClick={handleResetPassword}
+            >
+              Forgot Password?
+            </button>
+          </div>
+
+          <button
+            type="submit"
+            className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg text-lg font-semibold hover:bg-blue-700 transition"
+          >
+            Log In
+          </button>
+        </form>
+
         <div className="text-center mt-6">
           <p className="text-gray-500 text-sm">
-            By logging in, you agree to our{" "}
-            <a href="#" className="text-blue-600 hover:underline">Terms</a> and{" "}
-            <a href="#" className="text-blue-600 hover:underline">Privacy Policy</a>.
+            Just got invited by Admin?{" "}
+            <a href="/Sign-up" className="text-blue-600 hover:underline">Sign up</a>
           </p>
         </div>
       </div>

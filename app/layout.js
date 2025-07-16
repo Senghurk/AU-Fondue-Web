@@ -12,7 +12,7 @@ export default function RootLayout({ children }) {
   const pathname = usePathname();
 
   // ✅ Pages that should NOT have admin layout
-  const isPublicPage = pathname === "/" || pathname === "/Log-in";
+  const isPublicPage = pathname === "/" || pathname === "/Log-in" || pathname === "/Sign-up";
 
   return (
     <html lang="en">

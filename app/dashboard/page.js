@@ -26,7 +26,7 @@ import {
 
 export default function HomePage() {
   const router = useRouter();
-  const backendUrl =  "https://aufondue-webtest.kindisland-399ef298.southeastasia.azurecontainerapps.io/api/issues" //"https://aufonduebackend.kindisland-399ef298.southeastasia.azurecontainerapps.io/api/issues";
+  const backendUrl =  "http://localhost:8080/api" //"https://aufonduebackend.kindisland-399ef298.southeastasia.azurecontainerapps.io/api";
 
   const [userName, setUserName] = useState(null);
 
@@ -56,14 +56,22 @@ export default function HomePage() {
 
   // Listen to auth changes and get user info
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async(user) => {
       if (user) {
-        setUserName(user.displayName || user.email || "User");
-      } else {
-        setUserName(null);
-        router.push("/"); // redirect to login if no user
+      try {
+        const email = user.email;
+        const res = await fetch(`${backendUrl}/admin/details?email=${email}`);
+        const adminData = await res.json();
+
+        setUserName(adminData.username || email);
+      } catch (err) {
+        console.error("Failed to fetch admin details", err);
+        setUserName(user.email);
       }
-    });
+    } else {
+      router.push("/");
+    }
+  });
 
     return () => unsubscribe();
   }, [router]);
@@ -74,7 +82,7 @@ export default function HomePage() {
 
     const fetchStats = async () => {
       try {
-        const response = await fetch(`${backendUrl}/stats`);
+        const response = await fetch(`${backendUrl}/issues/stats`);
         const data = await response.json();
 
         setStats([
@@ -85,8 +93,8 @@ export default function HomePage() {
             icon: <FileText size={32} />,
           },
           {
-            label: "Pending Assignments",
-            value: data.pendingIssues,
+            label: "Incomplete Tasks",
+            value: data.incompleteIssues,
             color: "bg-yellow-500",
             icon: <Clock size={32} />,
           },
@@ -104,7 +112,7 @@ export default function HomePage() {
 
     const fetchCategoryCounts = async () => {
       try {
-        const response = await fetch(`${backendUrl}/reports?page=0&size=1000`);
+        const response = await fetch(`${backendUrl}/issues/reports?page=0&size=1000`);
         const allIssues = await response.json();
         console.log(allIssues)
         const counts = allIssues.reduce((acc, issue) => {
@@ -120,7 +128,7 @@ export default function HomePage() {
 
     const fetchReportsOverTime = async () => {
       try {
-        const response = await fetch(`${backendUrl}/reports?page=0&size=1000`);
+        const response = await fetch(`${backendUrl}/issues/reports?page=0&size=1000`);
         const allIssues = await response.json();
 
         const dateCounts = {};

@@ -12,10 +12,10 @@ export default function Sidebar({ activeTopLink, activeLink, setActiveLink }) {
 
   const renderLinks = () => {
     switch (activeTopLink) {
-      case "/user-list":
+      case "/admins":
         return (
           <ul className="sidebar-nav">
-            <li>
+            {/* <li>
               <Link
                 href="/user-list"
                 className={`sidebar-link ${
@@ -25,7 +25,7 @@ export default function Sidebar({ activeTopLink, activeLink, setActiveLink }) {
               >
                 User List
               </Link>
-            </li>
+            </li> */}
             <li>
               <Link
                 href="/admins"
