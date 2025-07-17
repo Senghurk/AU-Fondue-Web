@@ -1,52 +1,50 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
+import { useState } from "react";
+import {
+  OAuthProvider,
+  signInWithPopup,
+  setPersistence,
+  browserLocalPersistence,
+  signOut,
+} from "firebase/auth";
 import { auth } from "../firebaseClient";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
 
-  const backendUrl = "https://aufondue-webtest.kindisland-399ef298.southeastasia.azurecontainerapps.io/api"; // for local
-
-  const handleLogin = async (e) => {
-    e.preventDefault();
+  const handleMicrosoftLoginPopup = async () => {
+    const provider = new OAuthProvider("microsoft.com");
 
     try {
-      // Step 1: Check backend status
-      const res = await fetch(`${backendUrl}/admin/check?email=${email}`);
-      const status = await res.text();
+      await setPersistence(auth, browserLocalPersistence);
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
 
-      if (status !== "can_login") {
-        alert("Access denied: You are not allowed to log in.");
+      // Only allow @au.edu domain
+      if (!user.email.endsWith("@au.edu")) {
+        alert("Access restricted to AU users only.");
+        await signOut(auth);
         return;
       }
 
-      // Step 2: Firebase login
-      await signInWithEmailAndPassword(auth, email, password);
-      alert("Login successful!");
+      // Backend check for admin permission
+      const backendUrl = "https://aufondue-webtest.kindisland-399ef298.southeastasia.azurecontainerapps.io/api";
+      const response = await fetch(`${backendUrl}/admin/check?email=${user.email}`);
+      const isAdmin = await response.json();
+
+      if (!isAdmin) {
+        alert("Access denied: Your email is not registered as an admin.");
+        await signOut(auth);
+        return;
+      }
+
+      // ✅ Success — redirect
       router.push("/dashboard");
     } catch (error) {
       console.error("Login failed:", error);
       alert("Login failed: " + error.message);
-    }
-  };
-
-  const handleResetPassword = async () => {
-    if (!email) {
-      alert("Please enter your email to reset your password.");
-      return;
-    }
-
-    try {
-      await sendPasswordResetEmail(auth, email);
-      alert("Password reset email sent! Please check your inbox.");
-    } catch (error) {
-      console.error("Reset error:", error);
-      alert("Error sending reset email: " + error.message);
     }
   };
 
@@ -59,50 +57,30 @@ export default function LoginPage() {
         </div>
 
         <div className="flex justify-center mb-6">
-          <img src="app_icon.svg" alt="Admin Illustration" className="h-40 w-45" />
+          <img
+            src="https://cdn-icons-png.flaticon.com/512/3408/3408515.png"
+            alt="Admin"
+            className="h-40 w-45"
+          />
         </div>
 
-        <form onSubmit={handleLogin}>
-          <input
-            type="email"
-            placeholder="Email"
-            className="w-full mb-4 px-4 py-2 border rounded"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
+        <button
+          onClick={handleMicrosoftLoginPopup}
+          className="w-full flex items-center justify-center bg-blue-600 text-white py-3 px-4 rounded-lg text-lg font-semibold hover:bg-blue-700 transition"
+        >
+          <img
+            src="https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg"
+            alt="Microsoft"
+            className="h-6 w-6 mr-3"
           />
-
-          <input
-            type="password"
-            placeholder="Password"
-            className="w-full mb-2 px-4 py-2 border rounded"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-
-          <div className="text-right mb-4">
-            <button
-              type="button"
-              className="text-blue-600 text-sm hover:underline"
-              onClick={handleResetPassword}
-            >
-              Forgot Password?
-            </button>
-          </div>
-
-          <button
-            type="submit"
-            className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg text-lg font-semibold hover:bg-blue-700 transition"
-          >
-            Log In
-          </button>
-        </form>
+          Log in with Microsoft
+        </button>
 
         <div className="text-center mt-6">
           <p className="text-gray-500 text-sm">
-            Just got invited by Admin?{" "}
-            <a href="/Sign-up" className="text-blue-600 hover:underline">Sign up</a>
+            By logging in, you agree to our{" "}
+            <a href="#" className="text-blue-600 hover:underline">Terms</a> and{" "}
+            <a href="#" className="text-blue-600 hover:underline">Privacy Policy</a>.
           </p>
         </div>
       </div>

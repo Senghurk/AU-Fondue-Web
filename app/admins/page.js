@@ -40,15 +40,13 @@ export default function AdminListPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email: newAdminEmail,
-          username: newAdminUsername,
-          invited: true,
-          registered: false
+          username: newAdminUsername
         }),
       });
 
       if (!res.ok) {
         const text = await res.text();
-        throw new Error(`Failed to invite admin: ${res.status} - ${text}`);
+        throw new Error(`Failed to add admin: ${res.status} - ${text}`);
       }
 
       await fetchAdmins(); // Refresh list
@@ -56,14 +54,14 @@ export default function AdminListPage() {
       setNewAdminUsername("");
       setIsInviting(false);
     } catch (error) {
-      alert("Error inviting admin: " + error.message);
+      alert("Error adding admin: " + error.message);
     }
   };
 
   return (
     <div className="flex-1 p-6">
       <h1 className="text-3xl font-bold mb-6">Admin Management</h1>
-      <p className="text-gray-600 mb-4">Invite new admins and manage access control.</p>
+      <p className="text-gray-600 mb-4">Add or manage admins with AU Microsoft accounts.</p>
 
       <div className="mb-4 flex items-center space-x-4">
         <input
@@ -78,7 +76,7 @@ export default function AdminListPage() {
           onClick={() => setIsInviting(true)}
           className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
         >
-          Invite Admin
+          Add Admin
         </button>
       </div>
 
@@ -89,27 +87,17 @@ export default function AdminListPage() {
               <th className="p-3 text-sm font-semibold">#</th>
               <th className="p-3 text-sm font-semibold">Username</th>
               <th className="p-3 text-sm font-semibold">Email</th>
-              <th className="p-3 text-sm font-semibold">Invited</th>
-              <th className="p-3 text-sm font-semibold">Registered</th>
             </tr>
           </thead>
           <tbody>
             {filteredAdmins.map((admin, index) => (
               <tr
                 key={admin.id}
-                className={`border-t ${
-                  index % 2 === 0 ? "bg-gray-50" : "bg-white"
-                }`}
+                className={`border-t ${index % 2 === 0 ? "bg-gray-50" : "bg-white"}`}
               >
                 <td className="p-3 text-sm">{index + 1}</td>
                 <td className="p-3 text-sm">{admin.username}</td>
                 <td className="p-3 text-sm">{admin.email}</td>
-                <td className="p-3 text-sm">
-                  {admin.invited ? "✅" : "❌"}
-                </td>
-                <td className="p-3 text-sm">
-                  {admin.registered ? "✅" : "❌"}
-                </td>
               </tr>
             ))}
           </tbody>
@@ -122,7 +110,7 @@ export default function AdminListPage() {
       {isInviting && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
           <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
-            <h2 className="text-xl font-bold mb-4">Invite New Admin</h2>
+            <h2 className="text-xl font-bold mb-4">Add New Admin</h2>
             <input
               type="text"
               placeholder="Admin Username"
@@ -150,7 +138,7 @@ export default function AdminListPage() {
                 onClick={handleInviteAdmin}
                 className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
               >
-                Send Invite
+                Save Admin
               </button>
             </div>
           </div>
