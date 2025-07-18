@@ -285,8 +285,7 @@ export default function ReportsPage() {
                   >
                     <option value="">Select Priority</option>
                     <option value="LOW">Low</option>
-                    <option value="MEDIUM">Medium</option>
-                    <option value="HIGH">High</option>
+                    <option value="NORMAL">Normal</option>
                     <option value="URGENT">Urgent</option>
                   </select>
                 </div>

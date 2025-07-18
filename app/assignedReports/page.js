@@ -332,7 +332,7 @@ export default function AssignedReportsPage() {
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                       >
                         <option value="PENDING">Pending</option>
-                        <option value="IN_PROGRESS">In Progress</option>
+                        <option value="IN PROGRESS">In Progress</option>
                         <option value="COMPLETED">Completed</option>
                       </select>
                     </div>
@@ -362,10 +362,29 @@ export default function AssignedReportsPage() {
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                       />
                       {photos.length > 0 && (
-                        <div className="mt-2">
-                          <p className="text-sm text-gray-600">
-                            Selected: {photos.length} photo(s)
-                          </p>
+                        <div className="flex flex-wrap gap-2 mt-2">
+                          {photos.map((photo, i) => (
+                            <div
+                              key={i}
+                              className="relative w-20 h-20 rounded overflow-hidden border shadow cursor-pointer"
+                            >
+                              <img
+                                src={URL.createObjectURL(photo)}
+                                alt={photo.name}
+                                className="object-cover w-full h-full"
+                                onClick={() => window.open(URL.createObjectURL(photo), "_blank")}
+                              />
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setPhotos((prev) => prev.filter((_, index) => index !== i))
+                                }
+                                className="absolute top-0 right-0 bg-black bg-opacity-50 text-white px-1 text-xs rounded-bl hover:bg-red-600"
+                              >
+                                ✕
+                              </button>
+                            </div>
+                          ))}
                         </div>
                       )}
                     </div>
