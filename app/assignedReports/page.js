@@ -166,15 +166,19 @@ export default function AssignedReportsPage() {
     fetchReports();
   }, []);
 
-  const filteredReports = reports.filter(
-    (report) =>
-      report.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      report.category?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      report.reportedBy?.username
-        ?.toLowerCase()
-        .includes(searchQuery.toLowerCase())
-  );
+  // Filter out COMPLETED reports and apply search
+  const filteredReports = reports
+    .filter(
+      (report) =>
+        report.status !== "COMPLETED" &&
+        (
+          report.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          report.category?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          report.reportedBy?.username?.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+    );
 
+  // Group remaining reports by category
   const groupedReports = filteredReports.reduce((groups, report) => {
     if (!groups[report.category]) groups[report.category] = [];
     groups[report.category].push(report);
@@ -221,17 +225,17 @@ export default function AssignedReportsPage() {
                       {report.description?.substring(0, 50)}...
                     </h3>
                     <div className="flex flex-col items-start gap-1">
+                      {/* Status */}
                       <span
                         className={`px-2 py-1 text-xs font-medium rounded-full ${
-                          report.status === "COMPLETED"
-                            ? "bg-green-100 text-green-800"
-                            : report.status === "IN PROGRESS"
+                          report.status === "IN PROGRESS"
                             ? "bg-blue-100 text-blue-800"
                             : "bg-red-100 text-red-800"
                         }`}
                       >
                         {report.status}
                       </span>
+                      {/* Priority */}
                       <span
                         className={`px-2 py-1 text-xs font-bold rounded-full ${
                           report.priority === "URGENT"
@@ -306,7 +310,7 @@ export default function AssignedReportsPage() {
         ))
       )}
 
-      {/* Restored Modal Content */}
+      {/* Modal with Update & Details */}
       {isModalOpen && selectedReport && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
