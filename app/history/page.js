@@ -6,7 +6,7 @@ import * as XLSX from "xlsx";
 
 export default function HistoryPage() {
   const [completedReports, setCompletedReports] = useState([]);
-  const backendUrl = "https://aufondue-webtest.kindisland-399ef298.southeastasia.azurecontainerapps.io/api"; //test link
+  const backendUrl = "https://aufondue-backend.kindisland-399ef298.southeastasia.azurecontainerapps.io/api"; //test link
   //const backendUrl = "https://aufonduebackend.kindisland-399ef298.southeastasia.azurecontainerapps.io/api";
   const fetchCompletedReports = () =>{
     fetch(`${backendUrl}/issues/completed`)

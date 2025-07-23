@@ -13,7 +13,7 @@ export default function SignupPage() {
   const [showPassword, setShowPassword] = useState(false);
 
   // Use local backend URL here; change to your deployed backend when ready
-  const backendUrl = "https://aufondue-webtest.kindisland-399ef298.southeastasia.azurecontainerapps.io/api";
+  const backendUrl = "https://aufondue-backend.kindisland-399ef298.southeastasia.azurecontainerapps.io/api";
 
   const handleSignup = async (e) => {
     e.preventDefault();

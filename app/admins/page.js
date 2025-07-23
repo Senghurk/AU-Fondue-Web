@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 
 export default function AdminListPage() {
-  const backendUrl = "https://aufondue-webtest.kindisland-399ef298.southeastasia.azurecontainerapps.io/api";
+  const backendUrl = "https://aufondue-backend.kindisland-399ef298.southeastasia.azurecontainerapps.io/api";
 
   const [admins, setAdmins] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");

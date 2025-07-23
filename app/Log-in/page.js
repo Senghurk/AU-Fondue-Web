@@ -30,7 +30,7 @@ export default function LoginPage() {
       }
 
       // Backend check for admin permission
-      const backendUrl = "https://aufondue-webtest.kindisland-399ef298.southeastasia.azurecontainerapps.io/api";
+      const backendUrl = "https://aufondue-backend.kindisland-399ef298.southeastasia.azurecontainerapps.io/api";
       const response = await fetch(`${backendUrl}/admin/check?email=${user.email}`);
       const isAdmin = await response.json();
 
