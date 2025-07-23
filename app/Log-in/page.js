@@ -58,7 +58,7 @@ export default function LoginPage() {
 
         <div className="flex justify-center mb-6">
           <img
-            src="https://cdn-icons-png.flaticon.com/512/3408/3408515.png"
+            src="app_icon.svg"
             alt="Admin"
             className="h-40 w-45"
           />

@@ -4,8 +4,7 @@ import { useState, useEffect } from "react";
 
 export default function ReportsPage() {
   const backendUrl =
-    "https://aufondue-webtest.kindisland-399ef298.southeastasia.azurecontainerapps.io/api"; //test link
-  //const backendUrl = "https://aufonduebackend.kindisland-399ef298.southeastasia.azurecontainerapps.io/api";
+    "https://aufondue-webtest.kindisland-399ef298.southeastasia.azurecontainerapps.io/api"; 
   const sastoken =
     "?sv=2024-11-04&ss=bfqt&srt=co&sp=rwdlacupiytfx&se=2027-07-16T22:11:38Z&st=2025-07-16T13:56:38Z&spr=https,http&sig=5xb1czmfngshEckXBdlhtw%2BVe%2B5htYpCnXyhPw9tnHk%3D";
 
@@ -17,11 +16,9 @@ export default function ReportsPage() {
   const [selectedReport, setSelectedReport] = useState(null);
   const [priority, setPriority] = useState({});
 
-  // NEW: Add feedback state
   const [assignmentMessage, setAssignmentMessage] = useState(null);
   const [isAssigning, setIsAssigning] = useState({});
 
-  // NEW: Feedback component
   const AssignmentFeedback = ({ message, onClose }) => {
     if (!message) return null;
 
@@ -94,7 +91,6 @@ export default function ReportsPage() {
     setPriority((prev) => ({ ...prev, [id]: priorityValue }));
   };
 
-  // UPDATED: Enhanced assignment function with feedback
   const handleConfirmAssign = async (id) => {
     if (!assignments[id]) {
       setAssignmentMessage({
@@ -127,7 +123,6 @@ export default function ReportsPage() {
         });
         fetchReports();
 
-        // Clear message after 3 seconds
         setTimeout(() => setAssignmentMessage(null), 3000);
       } else {
         throw new Error(`Failed to assign: ${response.status}`);
@@ -162,9 +157,15 @@ export default function ReportsPage() {
         .includes(searchQuery.toLowerCase())
   );
 
+  // Group by category
+  const groupedReports = filteredReports.reduce((groups, report) => {
+    if (!groups[report.category]) groups[report.category] = [];
+    groups[report.category].push(report);
+    return groups;
+  }, {});
+
   return (
     <div className="flex-1 p-6">
-      {/* NEW: Add feedback message display */}
       {assignmentMessage && (
         <AssignmentFeedback
           message={assignmentMessage}
@@ -174,7 +175,6 @@ export default function ReportsPage() {
 
       <h1 className="text-3xl font-bold mb-6">Unassigned Reports</h1>
 
-      {/* Search Bar */}
       <div className="mb-6">
         <input
           type="text"
@@ -185,168 +185,163 @@ export default function ReportsPage() {
         />
       </div>
 
-      {/* Reports Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredReports.length === 0 ? (
-          <div className="col-span-full text-center py-12">
-            <p className="text-gray-500 text-lg">
-              No unassigned reports found.
-            </p>
-          </div>
-        ) : (
-          filteredReports.map((report) => (
-            <div
-              key={report.id}
-              className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow"
-            >
-              <div className="flex justify-between items-start mb-4">
-                <h3 className="text-lg font-semibold text-gray-800 truncate">
-                  {report.description?.substring(0, 50)}...
-                </h3>
-                <span className="px-2 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800">
-                  {report.status}
-                </span>
-              </div>
+      {Object.keys(groupedReports).length === 0 ? (
+        <div className="col-span-full text-center py-12">
+          <p className="text-gray-500 text-lg">No unassigned reports found.</p>
+        </div>
+      ) : (
+        Object.entries(groupedReports).map(([category, reports]) => (
+          <div key={category} className="mb-10">
+            <h2 className="text-xl font-bold mb-4 text-gray-800">{category}</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {reports.map((report) => (
+                <div
+                  key={report.id}
+                  className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow"
+                >
+                  <div className="flex justify-between items-start mb-4">
+                    <h3 className="text-lg font-semibold text-gray-800 truncate">
+                      {report.description?.substring(0, 50)}...
+                    </h3>
+                    <span className="px-2 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800">
+                      {report.status}
+                    </span>
+                  </div>
 
-              <div className="space-y-2 text-sm text-gray-600 mb-4">
-                <p>
-                  <strong>Category:</strong> {report.category}
-                </p>
-                <p>
-                  <strong>Location:</strong> {report.customLocation}
-                </p>
-                <p>
-                  <strong>Reported By:</strong> {report.reportedBy?.username}
-                </p>
-                <p>
-                  <strong>Date:</strong>{" "}
-                  {new Date(report.createdAt).toLocaleDateString()}
-                </p>
-              </div>
+                  <div className="space-y-2 text-sm text-gray-600 mb-4">
+                    <p>
+                      <strong>Location:</strong> {report.customLocation}
+                    </p>
+                    <p>
+                      <strong>Reported By:</strong> {report.reportedBy?.username}
+                    </p>
+                    <p>
+                      <strong>Date:</strong>{" "}
+                      {new Date(report.createdAt).toLocaleDateString()}
+                    </p>
+                  </div>
 
-              {/* Report Photos */}
-              {report.photoUrls?.length > 0 && (
-                <div className="mb-4">
-                  <div className="flex gap-2 overflow-x-auto">
-                    {report.photoUrls.slice(0, 3).map((photo, i) => (
-                      <img
-                        key={i}
-                        src={`${photo}${sastoken}`}
-                        alt={`Photo ${i + 1}`}
-                        className="w-16 h-16 object-cover rounded border flex-shrink-0 cursor-pointer hover:opacity-75"
-                        onClick={() =>
-                          window.open(`${photo}${sastoken}`, "_blank")
-                        }
-                      />
-                    ))}
-                    {report.photoUrls.length > 3 && (
-                      <div className="w-16 h-16 bg-gray-100 rounded border flex items-center justify-center text-xs text-gray-500">
-                        +{report.photoUrls.length - 3}
+                  {report.photoUrls?.length > 0 && (
+                    <div className="mb-4">
+                      <div className="flex gap-2 overflow-x-auto">
+                        {report.photoUrls.slice(0, 3).map((photo, i) => (
+                          <img
+                            key={i}
+                            src={`${photo}${sastoken}`}
+                            alt={`Photo ${i + 1}`}
+                            className="w-16 h-16 object-cover rounded border flex-shrink-0 cursor-pointer hover:opacity-75"
+                            onClick={() =>
+                              window.open(`${photo}${sastoken}`, "_blank")
+                            }
+                          />
+                        ))}
+                        {report.photoUrls.length > 3 && (
+                          <div className="w-16 h-16 bg-gray-100 rounded border flex items-center justify-center text-xs text-gray-500">
+                            +{report.photoUrls.length - 3}
+                          </div>
+                        )}
                       </div>
-                    )}
+                    </div>
+                  )}
+
+                  {/* Assign controls */}
+                  <div className="space-y-3">
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">
+                        Assign Staff
+                      </label>
+                      <select
+                        value={assignments[report.id] || ""}
+                        onChange={(e) =>
+                          handleAssignStaff(report.id, e.target.value)
+                        }
+                        className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      >
+                        <option value="">Select Staff</option>
+                        {staffMembers.map((staff) => (
+                          <option key={staff.id} value={staff.id}>
+                            {staff.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">
+                        Priority
+                      </label>
+                      <select
+                        value={priority[report.id] || ""}
+                        onChange={(e) =>
+                          handlePriorityChange(report.id, e.target.value)
+                        }
+                        className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      >
+                        <option value="">Select Priority</option>
+                        <option value="LOW">Low</option>
+                        <option value="NORMAL">Normal</option>
+                        <option value="URGENT">Urgent</option>
+                      </select>
+                    </div>
+
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => handleConfirmAssign(report.id)}
+                        disabled={
+                          isAssigning[report.id] ||
+                          !assignments[report.id] ||
+                          !priority[report.id]
+                        }
+                        className={`flex-1 px-3 py-2 rounded text-sm transition-colors ${
+                          isAssigning[report.id]
+                            ? "bg-gray-400 text-white cursor-not-allowed"
+                            : !assignments[report.id] || !priority[report.id]
+                            ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                            : "bg-green-500 text-white hover:bg-green-600"
+                        }`}
+                      >
+                        {isAssigning[report.id] ? (
+                          <div className="flex items-center justify-center">
+                            <svg
+                              className="animate-spin -ml-1 mr-2 h-4 w-4"
+                              xmlns="http://www.w3.org/2000/svg"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                            >
+                              <circle
+                                className="opacity-25"
+                                cx="12"
+                                cy="12"
+                                r="10"
+                                stroke="currentColor"
+                                strokeWidth="4"
+                              ></circle>
+                              <path
+                                className="opacity-75"
+                                fill="currentColor"
+                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                              ></path>
+                            </svg>
+                            Assigning...
+                          </div>
+                        ) : (
+                          "Assign"
+                        )}
+                      </button>
+                      <button
+                        onClick={() => openModal(report)}
+                        className="flex-1 bg-blue-500 text-white px-3 py-2 rounded text-sm hover:bg-blue-600 transition-colors"
+                      >
+                        Details
+                      </button>
+                    </div>
                   </div>
                 </div>
-              )}
-
-              {/* Assignment Controls */}
-              <div className="space-y-3">
-                {/* Staff Assignment */}
-                <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">
-                    Assign Staff
-                  </label>
-                  <select
-                    value={assignments[report.id] || ""}
-                    onChange={(e) =>
-                      handleAssignStaff(report.id, e.target.value)
-                    }
-                    className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
-                  >
-                    <option value="">Select Staff</option>
-                    {staffMembers.map((staff) => (
-                      <option key={staff.id} value={staff.id}>
-                        {staff.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Priority Selection */}
-                <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">
-                    Priority
-                  </label>
-                  <select
-                    value={priority[report.id] || ""}
-                    onChange={(e) =>
-                      handlePriorityChange(report.id, e.target.value)
-                    }
-                    className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
-                  >
-                    <option value="">Select Priority</option>
-                    <option value="LOW">Low</option>
-                    <option value="NORMAL">Normal</option>
-                    <option value="URGENT">Urgent</option>
-                  </select>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => handleConfirmAssign(report.id)}
-                    disabled={
-                      isAssigning[report.id] ||
-                      !assignments[report.id] ||
-                      !priority[report.id]
-                    }
-                    className={`flex-1 px-3 py-2 rounded text-sm transition-colors ${
-                      isAssigning[report.id]
-                        ? "bg-gray-400 text-white cursor-not-allowed"
-                        : !assignments[report.id] || !priority[report.id]
-                        ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                        : "bg-green-500 text-white hover:bg-green-600"
-                    }`}
-                  >
-                    {isAssigning[report.id] ? (
-                      <div className="flex items-center justify-center">
-                        <svg
-                          className="animate-spin -ml-1 mr-2 h-4 w-4"
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                        >
-                          <circle
-                            className="opacity-25"
-                            cx="12"
-                            cy="12"
-                            r="10"
-                            stroke="currentColor"
-                            strokeWidth="4"
-                          ></circle>
-                          <path
-                            className="opacity-75"
-                            fill="currentColor"
-                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                          ></path>
-                        </svg>
-                        Assigning...
-                      </div>
-                    ) : (
-                      "Assign"
-                    )}
-                  </button>
-                  <button
-                    onClick={() => openModal(report)}
-                    className="flex-1 bg-blue-500 text-white px-3 py-2 rounded text-sm hover:bg-blue-600 transition-colors"
-                  >
-                    Details
-                  </button>
-                </div>
-              </div>
+              ))}
             </div>
-          ))
-        )}
-      </div>
+          </div>
+        ))
+      )}
 
       {/* Details Modal */}
       {isModalOpen && selectedReport && (
@@ -374,8 +369,7 @@ export default function ReportsPage() {
                   <strong>Location:</strong> {selectedReport.customLocation}
                 </p>
                 <p>
-                  <strong>Reported By:</strong>{" "}
-                  {selectedReport.reportedBy?.username}
+                  <strong>Reported By:</strong> {selectedReport.reportedBy?.username}
                 </p>
                 <p>
                   <strong>Status:</strong> {selectedReport.status}
