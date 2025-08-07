@@ -1,56 +1,108 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import * as XLSX from "xlsx";
-
+import ExcelJS from "exceljs";
+import { saveAs } from "file-saver";
 
 export default function HistoryPage() {
   const [completedReports, setCompletedReports] = useState([]);
-  const backendUrl = "https://aufondue-backend.kindisland-399ef298.southeastasia.azurecontainerapps.io/api"; //test link
-  //const backendUrl = "https://aufonduebackend.kindisland-399ef298.southeastasia.azurecontainerapps.io/api";
-  const fetchCompletedReports = () =>{
+  const backendUrl =
+    "https://aufondue-backend.kindisland-399ef298.southeastasia.azurecontainerapps.io/api";
+
+  const fetchCompletedReports = () => {
     fetch(`${backendUrl}/issues/completed`)
       .then((response) => response.json())
       .then((data) => setCompletedReports(data))
-      .catch((error) => console.error("Error fetching Completed Reports", error));
-  }
-  
-
-  // Function to export data to Excel
-  const exportToExcel = () => {
-    // Prepare the data for export
-    const dataToExport = completedReports.map((report) => ({
-      "Description": report.description,
-      "Assigned To": report.assignedTo?.name,
-      "Reported Date": report.createdAt.toLocaleString("en-GB", { timeZone: "Asia/Bangkok" }), 
-      "Completion Date": report.updatedAt.toLocaleString("en-GB", { timeZone: "Asia/Bangkok" }),
-      "Duration": getDuration(report.createdAt, report.updatedAt)
-    }));
-
-    // Create a worksheet and workbook
-    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Completed Reports");
-
-    // Export the Excel file
-    XLSX.writeFile(workbook, "Completed_Reports.xlsx");
+      .catch((error) =>
+        console.error("Error fetching Completed Reports", error)
+      );
   };
 
   const getDuration = (start, end) => {
-  const startTime = new Date(start);
-  const endTime = new Date(end);
-  const diffMs = endTime - startTime; // gets the difference in milliseconds
+    const startTime = new Date(start);
+    const endTime = new Date(end);
+    const diffMs = endTime - startTime;
 
-  if (isNaN(diffMs) || diffMs < 0) return "Invalid";
+    if (isNaN(diffMs) || diffMs < 0) return "Invalid";
 
-  const totalMinutes = Math.floor(diffMs / 1000 / 60); // convert milliseconds to minutes
-  const hours = Math.floor(totalMinutes / 60); // convert minutes to hours
-  const minutes = totalMinutes % 60; // remaining minutes after converting to hours
+    const totalMinutes = Math.floor(diffMs / 1000 / 60);
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
 
-  return `${hours}h ${minutes}m`;
-};
+    return `${hours}h ${minutes}m`;
+  };
 
+  // ✅ NEW: Export to Excel using exceljs
+  const exportToExcel = async () => {
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet("Completed Reports");
 
+    // Define header
+    const header = [
+      "Description",
+      "Category",
+      "Assigned To",
+      "Status",
+      "Reported Date",
+      "Completion Date",
+      "Duration",
+    ];
+    worksheet.addRow(header);
+
+    // Style header row
+    const headerRow = worksheet.getRow(1);
+    headerRow.eachCell((cell) => {
+      cell.font = { bold: true };
+      cell.alignment = { horizontal: "center", vertical: "middle" };
+      cell.fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "FFD3D3D3" },
+      };
+      cell.border = {
+        top: { style: "thin" },
+        left: { style: "thin" },
+        bottom: { style: "thin" },
+        right: { style: "thin" },
+      };
+    });
+
+    // Add data rows
+    completedReports.forEach((report) => {
+      worksheet.addRow([
+        report.description,
+        report.category,
+        report.assignedTo?.name || "Unassigned",
+        "Completed",
+        new Date(report.createdAt).toLocaleString("en-GB", {
+          timeZone: "Asia/Bangkok",
+        }),
+        new Date(report.updatedAt).toLocaleString("en-GB", {
+          timeZone: "Asia/Bangkok",
+        }),
+        getDuration(report.createdAt, report.updatedAt),
+      ]);
+    });
+
+    // Set column widths
+    worksheet.columns = [
+      { width: 40 },
+      { width: 20 },
+      { width: 20 },
+      { width: 15 },
+      { width: 25 },
+      { width: 25 },
+      { width: 15 },
+    ];
+
+    // Generate file and download
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], {
+      type:
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+    saveAs(blob, "Completed_Reports.xlsx");
+  };
 
   useEffect(() => {
     fetchCompletedReports();
@@ -58,7 +110,7 @@ export default function HistoryPage() {
 
   return (
     <div className="flex-1 p-6">
-      {/* Page Header */}
+      {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Report History</h1>
         <button
@@ -72,7 +124,7 @@ export default function HistoryPage() {
         View the history of all completed reports.
       </p>
 
-      {/* Reports Table */}
+      {/* Table */}
       <div className="bg-white rounded-lg shadow-md p-3.5 overflow-x-auto max-w-full">
         <table className="w-full table-auto border-collapse">
           <thead>
@@ -88,7 +140,7 @@ export default function HistoryPage() {
             </tr>
           </thead>
           <tbody>
-            {completedReports.map((report, index) => ( 
+            {completedReports.map((report, index) => (
               <tr
                 key={report.id}
                 className={`border-t ${
@@ -98,13 +150,23 @@ export default function HistoryPage() {
                 <td className="p-3 text-sm">{index + 1}</td>
                 <td className="p-3 text-sm">{report.description}</td>
                 <td className="p-3 text-sm">{report.category}</td>
-                <td className="p-3 text-sm">{report.assignedTo?.name}</td> 
+                <td className="p-3 text-sm">{report.assignedTo?.name}</td>
                 <td className="p-3 text-sm font-semibold text-green-600">
                   Completed
                 </td>
-                <td className="p-3 text-sm">{ new Date(report.createdAt).toLocaleString("en-GB", { timeZone: "Asia/Bangkok" })}</td>
-                <td className="p-3 text-sm">{ new Date(report.updatedAt).toLocaleString("en-GB", { timeZone: "Asia/Bangkok" })}</td>
-                <td className="p-3 text-sm">{getDuration(report.createdAt, report.updatedAt)}</td>
+                <td className="p-3 text-sm">
+                  {new Date(report.createdAt).toLocaleString("en-GB", {
+                    timeZone: "Asia/Bangkok",
+                  })}
+                </td>
+                <td className="p-3 text-sm">
+                  {new Date(report.updatedAt).toLocaleString("en-GB", {
+                    timeZone: "Asia/Bangkok",
+                  })}
+                </td>
+                <td className="p-3 text-sm">
+                  {getDuration(report.createdAt, report.updatedAt)}
+                </td>
               </tr>
             ))}
           </tbody>
