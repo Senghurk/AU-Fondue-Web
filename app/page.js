@@ -86,8 +86,8 @@ export default function Home() {
                 desc: "Monitor trends and report data visually through interactive charts."
               },
               {
-                title: "Mobile Support",
-                desc: "Use the Android app to manage tasks on-the-go."
+                title: "Performance Analytics",
+                desc: "Track staff performance and repair times with detailed metrics."
               },
               {
                 title: "Notification System",

@@ -12,36 +12,35 @@ export default function AssignedReportsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalType, setModalType] = useState("");
   const [selectedReport, setSelectedReport] = useState(null);
+
   const [status, setStatus] = useState("");
   const [comments, setComments] = useState("");
   const [photos, setPhotos] = useState([]);
+  const [resolutionType, setResolutionType] = useState("FIX_SELF");
+
   const [updates, setUpdates] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
 
   const [isUpdating, setIsUpdating] = useState(false);
   const [updateMessage, setUpdateMessage] = useState(null);
 
+  // Lightbox viewer (prevents downloads; shows images inline)
+  const [viewerOpen, setViewerOpen] = useState(false);
+  const [viewerUrl, setViewerUrl] = useState("");
+
+  // ------- Helpers: notifications ----------
   const UpdateFeedback = ({ message, onClose }) => {
     if (!message) return null;
-
-    const getStyles = () => {
-      switch (message.type) {
-        case "success":
-          return "bg-green-100 border-green-400 text-green-700";
-        case "warning":
-          return "bg-yellow-100 border-yellow-400 text-yellow-700";
-        case "error":
-          return "bg-red-100 border-red-400 text-red-700";
-        default:
-          return "bg-blue-100 border-blue-400 text-blue-700";
-      }
-    };
-
+    const style =
+      message.type === "success"
+        ? "bg-green-100 border-green-400 text-green-700"
+        : message.type === "warning"
+        ? "bg-yellow-100 border-yellow-400 text-yellow-700"
+        : message.type === "error"
+        ? "bg-red-100 border-red-400 text-red-700"
+        : "bg-blue-100 border-blue-400 text-blue-700";
     return (
-      <div
-        className={`border px-4 py-3 rounded mb-4 relative ${getStyles()}`}
-        role="alert"
-      >
+      <div className={`border px-4 py-3 rounded mb-4 relative ${style}`} role="alert">
         <div className="flex justify-between items-center">
           <span className="block sm:inline">{message.text}</span>
           <button
@@ -55,12 +54,59 @@ export default function AssignedReportsPage() {
     );
   };
 
+  // ------- Image helpers ----------
+  const toInlineUrl = (raw) => {
+    // Ensure Azure Blob serves inline, not attachment
+    const base = `${raw}${sastoken}`;
+    const joiner = base.includes("?") ? "&" : "?";
+    return `${base}${joiner}rscd=inline&rsct=image/jpeg`;
+  };
+  const openViewer = (raw) => {
+    setViewerUrl(toInlineUrl(raw));
+    setViewerOpen(true);
+  };
+  const closeViewer = () => {
+    setViewerUrl("");
+    setViewerOpen(false);
+  };
+
+  // ------- Data fetch ----------
+  useEffect(() => {
+    fetchReports();
+  }, []);
+
+  const fetchReports = () => {
+    fetch(`${backendUrl}/issues/assigned`)
+      .then((response) => response.json())
+      .then((data) => {
+        if (Array.isArray(data)) setReports(data);
+        else setReports([]);
+      })
+      .catch((error) => {
+        console.error("Error fetching reports:", error);
+        setReports([]);
+      });
+  };
+
+  const fetchUpdates = async (issueId) => {
+    try {
+      const response = await fetch(`${backendUrl}/issues/${issueId}/updates`);
+      if (!response.ok) throw new Error("Failed to fetch updates");
+      const data = await response.json();
+      setUpdates(data);
+    } catch (error) {
+      console.error("Error fetching updates:", error);
+    }
+  };
+
+  // ------- UI handlers ----------
   const handleOpenModal = (report, type) => {
     setSelectedReport(report);
     setModalType(type);
-    setStatus(report.status);
+    setStatus(report.status || "PENDING");
     setComments("");
     setPhotos([]);
+    setResolutionType("FIX_SELF");
     setUpdateMessage(null);
     setIsModalOpen(true);
     if (type === "details") fetchUpdates(report.id);
@@ -72,11 +118,13 @@ export default function AssignedReportsPage() {
   };
 
   useEffect(() => {
+    // cleanup object URLs if created anywhere else
     return () => {
-      photos.forEach((photo) => URL.revokeObjectURL(photo));
+      photos.forEach((p) => URL.revokeObjectURL?.(p));
     };
   }, [photos]);
 
+  // ------- Update submit ----------
   const handleUpdate = async () => {
     if (!selectedReport) return;
 
@@ -85,6 +133,8 @@ export default function AssignedReportsPage() {
     formData.append("status", status);
     formData.append("comment", comments);
     formData.append("updatedBy", "admin@au.edu");
+    // NEW: resolution type
+    formData.append("resolutionType", resolutionType);
 
     photos.forEach((photo) => formData.append("photos", photo));
 
@@ -134,51 +184,16 @@ export default function AssignedReportsPage() {
     }
   };
 
-  const fetchUpdates = async (issueId) => {
-    try {
-      const response = await fetch(`${backendUrl}/issues/${issueId}/updates`);
-      if (!response.ok) throw new Error("Failed to fetch updates");
-      const data = await response.json();
-      setUpdates(data);
-    } catch (error) {
-      console.error("Error fetching updates:", error);
-    }
-  };
+  // ------- Filter + Group ----------
+  // Hide COMPLETED from the page
+  const filteredReports = reports.filter(
+    (report) =>
+      report.status !== "COMPLETED" &&
+      (report.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        report.category?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        report.reportedBy?.username?.toLowerCase().includes(searchQuery.toLowerCase()))
+  );
 
-  const fetchReports = () => {
-    fetch(`${backendUrl}/issues/assigned`)
-      .then((response) => response.json())
-      .then((data) => {
-        if (Array.isArray(data)) {
-          setReports(data);
-        } else {
-          console.error("Expected array but got:", data);
-          setReports([]);
-        }
-      })
-      .catch((error) => {
-        console.error("Error fetching reports:", error);
-        setReports([]);
-      });
-  };
-
-  useEffect(() => {
-    fetchReports();
-  }, []);
-
-  // Filter out COMPLETED reports and apply search
-  const filteredReports = reports
-    .filter(
-      (report) =>
-        report.status !== "COMPLETED" &&
-        (
-          report.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          report.category?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          report.reportedBy?.username?.toLowerCase().includes(searchQuery.toLowerCase())
-        )
-    );
-
-  // Group remaining reports by category
   const groupedReports = filteredReports.reduce((groups, report) => {
     if (!groups[report.category]) groups[report.category] = [];
     groups[report.category].push(report);
@@ -196,6 +211,7 @@ export default function AssignedReportsPage() {
 
       <h1 className="text-3xl font-bold mb-6">Assigned Reports</h1>
 
+      {/* Search */}
       <div className="mb-6">
         <input
           type="text"
@@ -206,6 +222,7 @@ export default function AssignedReportsPage() {
         />
       </div>
 
+      {/* Groups */}
       {Object.keys(groupedReports).length === 0 ? (
         <div className="col-span-full text-center py-12">
           <p className="text-gray-500 text-lg">No assigned reports found.</p>
@@ -214,6 +231,7 @@ export default function AssignedReportsPage() {
         Object.entries(groupedReports).map(([category, reports]) => (
           <div key={category} className="mb-10">
             <h2 className="text-xl font-bold mb-4 text-gray-800">{category}</h2>
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {reports.map((report) => (
                 <div
@@ -224,30 +242,15 @@ export default function AssignedReportsPage() {
                     <h3 className="text-lg font-semibold text-gray-800 truncate">
                       {report.description?.substring(0, 50)}...
                     </h3>
-                    <div className="flex flex-col items-start gap-1">
-                      {/* Status */}
-                      <span
-                        className={`px-2 py-1 text-xs font-medium rounded-full ${
-                          report.status === "IN PROGRESS"
-                            ? "bg-blue-100 text-blue-800"
-                            : "bg-red-100 text-red-800"
-                        }`}
-                      >
-                        {report.status}
-                      </span>
-                      {/* Priority */}
-                      <span
-                        className={`px-2 py-1 text-xs font-bold rounded-full ${
-                          report.priority === "URGENT"
-                            ? "bg-red-600 text-white"
-                            : report.priority === "NORMAL"
-                            ? "bg-yellow-500 text-white"
-                            : "bg-green-600 text-white"
-                        }`}
-                      >
-                        {report.priority || "NORMAL"}
-                      </span>
-                    </div>
+                    <span
+                      className={`px-2 py-1 text-xs font-medium rounded-full ${
+                        report.status === "IN PROGRESS"
+                          ? "bg-blue-100 text-blue-800"
+                          : "bg-red-100 text-red-800"
+                      }`}
+                    >
+                      {report.status}
+                    </span>
                   </div>
 
                   <div className="space-y-2 text-sm text-gray-600 mb-4">
@@ -255,7 +258,8 @@ export default function AssignedReportsPage() {
                       <strong>Location:</strong> {report.customLocation}
                     </p>
                     <p>
-                      <strong>Reported By:</strong> {report.reportedBy?.username}
+                      <strong>Reported By:</strong>{" "}
+                      {report.reportedBy?.username}
                     </p>
                     <p>
                       <strong>Assigned To:</strong> {report.assignedTo?.name}
@@ -266,18 +270,17 @@ export default function AssignedReportsPage() {
                     </p>
                   </div>
 
+                  {/* Photos (inline view on click) */}
                   {report.photoUrls?.length > 0 && (
                     <div className="mb-4">
                       <div className="flex gap-2 overflow-x-auto">
                         {report.photoUrls.slice(0, 3).map((photo, i) => (
                           <img
                             key={i}
-                            src={`${photo}${sastoken}`}
+                            src={toInlineUrl(photo)}
                             alt={`Photo ${i + 1}`}
                             className="w-16 h-16 object-cover rounded border flex-shrink-0 cursor-pointer hover:opacity-75"
-                            onClick={() =>
-                              window.open(`${photo}${sastoken}`, "_blank")
-                            }
+                            onClick={() => openViewer(photo)}
                           />
                         ))}
                         {report.photoUrls.length > 3 && (
@@ -310,7 +313,7 @@ export default function AssignedReportsPage() {
         ))
       )}
 
-      {/* Modal with Update & Details */}
+      {/* Modal */}
       {isModalOpen && selectedReport && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -329,8 +332,9 @@ export default function AssignedReportsPage() {
 
               {modalType === "update" ? (
                 <>
-                  {/* Update Modal */}
+                  {/* UPDATE FORM */}
                   <div className="space-y-4">
+                    {/* Status */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         Status
@@ -346,6 +350,46 @@ export default function AssignedReportsPage() {
                       </select>
                     </div>
 
+                    {/* NEW: Resolution Type */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Resolution Type
+                      </label>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                        <label className="flex items-center gap-2 border rounded px-3 py-2 cursor-pointer">
+                          <input
+                            type="radio"
+                            name="resolutionType"
+                            value="FIX_SELF"
+                            checked={resolutionType === "FIX_SELF"}
+                            onChange={(e) => setResolutionType(e.target.value)}
+                          />
+                          <span>Fix myself</span>
+                        </label>
+                        <label className="flex items-center gap-2 border rounded px-3 py-2 cursor-pointer">
+                          <input
+                            type="radio"
+                            name="resolutionType"
+                            value="NEEDS_PRODUCT"
+                            checked={resolutionType === "NEEDS_PRODUCT"}
+                            onChange={(e) => setResolutionType(e.target.value)}
+                          />
+                          <span>Needs product to order</span>
+                        </label>
+                        <label className="flex items-center gap-2 border rounded px-3 py-2 cursor-pointer">
+                          <input
+                            type="radio"
+                            name="resolutionType"
+                            value="EXTERNAL_SERVICE"
+                            checked={resolutionType === "EXTERNAL_SERVICE"}
+                            onChange={(e) => setResolutionType(e.target.value)}
+                          />
+                          <span>Call external service</span>
+                        </label>
+                      </div>
+                    </div>
+
+                    {/* Comments */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         Comments
@@ -359,6 +403,7 @@ export default function AssignedReportsPage() {
                       />
                     </div>
 
+                    {/* Upload Photos */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         Upload Photos (Optional)
@@ -381,9 +426,7 @@ export default function AssignedReportsPage() {
                                 src={URL.createObjectURL(photo)}
                                 alt={photo.name}
                                 className="object-cover w-full h-full"
-                                onClick={() =>
-                                  window.open(URL.createObjectURL(photo), "_blank")
-                                }
+                                onClick={() => openViewer(URL.createObjectURL(photo))}
                               />
                               <button
                                 type="button"
@@ -423,7 +466,7 @@ export default function AssignedReportsPage() {
                 </>
               ) : (
                 <>
-                  {/* Details Modal */}
+                  {/* DETAILS VIEW */}
                   <div className="space-y-3">
                     <p>
                       <strong>Description:</strong> {selectedReport.description}
@@ -435,22 +478,22 @@ export default function AssignedReportsPage() {
                       <strong>Location:</strong> {selectedReport.customLocation}
                     </p>
                     <p>
-                      <strong>Reported By:</strong> {selectedReport.reportedBy?.username}
+                      <strong>Reported By:</strong>{" "}
+                      {selectedReport.reportedBy?.username}
                     </p>
                     <p>
                       <strong>Status:</strong> {selectedReport.status}
                     </p>
                     <p>
-                      <strong>Priority:</strong> {selectedReport.priority || "NORMAL"}
-                    </p>
-                    <p>
-                      <strong>Assigned To:</strong> {selectedReport.assignedTo?.name}
+                      <strong>Assigned To:</strong>{" "}
+                      {selectedReport.assignedTo?.name}
                     </p>
                     <p>
                       <strong>Reported At:</strong>{" "}
-                      {new Date(selectedReport.createdAt).toLocaleString("en-GB", {
-                        timeZone: "Asia/Bangkok",
-                      })}
+                      {new Date(selectedReport.createdAt).toLocaleString(
+                        "en-GB",
+                        { timeZone: "Asia/Bangkok" }
+                      )}
                     </p>
                   </div>
 
@@ -461,19 +504,17 @@ export default function AssignedReportsPage() {
                         {selectedReport.photoUrls.map((photo, i) => (
                           <img
                             key={i}
-                            src={`${photo}${sastoken}`}
+                            src={toInlineUrl(photo)}
                             alt={`Photo ${i + 1}`}
                             className="w-40 h-40 object-cover rounded border shadow cursor-pointer hover:opacity-75"
-                            onClick={() =>
-                              window.open(`${photo}${sastoken}`, "_blank")
-                            }
+                            onClick={() => openViewer(photo)}
                           />
                         ))}
                       </div>
                     </div>
                   )}
 
-                  {/* Show update history */}
+                  {/* Update history */}
                   <hr className="my-4" />
                   <h3 className="font-semibold mb-2">Update History</h3>
                   {updates.length === 0 ? (
@@ -488,23 +529,28 @@ export default function AssignedReportsPage() {
                           <p>
                             <strong>Status:</strong> {update.status}
                           </p>
+                          {/* If backend returns resolutionType in update, show it */}
+                          {update.resolutionType && (
+                            <p>
+                              <strong>Resolution:</strong> {update.resolutionType}
+                            </p>
+                          )}
                           <p>
                             <strong>Updated At:</strong>{" "}
-                            {new Date(update.updateTime).toLocaleString("en-GB", {
-                              timeZone: "Asia/Bangkok",
-                            })}
+                            {new Date(update.updateTime).toLocaleString(
+                              "en-GB",
+                              { timeZone: "Asia/Bangkok" }
+                            )}
                           </p>
                           {update.photoUrls?.length > 0 && (
                             <div className="mt-2 flex gap-2">
                               {update.photoUrls.map((photo, i) => (
                                 <img
                                   key={i}
-                                  src={`${photo}${sastoken}`}
+                                  src={toInlineUrl(photo)}
                                   alt={`Update Photo ${i + 1}`}
                                   className="w-20 h-20 object-cover rounded border cursor-pointer hover:opacity-75"
-                                  onClick={() =>
-                                    window.open(`${photo}${sastoken}`, "_blank")
-                                  }
+                                  onClick={() => openViewer(photo)}
                                 />
                               ))}
                             </div>
@@ -516,6 +562,28 @@ export default function AssignedReportsPage() {
                 </>
               )}
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Image Lightbox Viewer */}
+      {viewerOpen && (
+        <div
+          className="fixed inset-0 bg-black/75 flex items-center justify-center z-[100]"
+          onClick={closeViewer}
+        >
+          <div className="relative max-w-[90vw] max-h-[90vh]">
+            <button
+              className="absolute -top-10 right-0 bg-white/90 text-black px-3 py-1 rounded shadow"
+              onClick={closeViewer}
+            >
+              Close
+            </button>
+            <img
+              src={viewerUrl}
+              alt="Preview"
+              className="max-w-[90vw] max-h-[90vh] object-contain rounded"
+            />
           </div>
         </div>
       )}
