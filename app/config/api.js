@@ -9,7 +9,7 @@ const config = {
     // Local backend (if you want to test with local backend later)
     LOCAL: "http://localhost:8080/api",
     
-    // Alternative container URL (commented out in your code)
+    // Alternative container URL (if needed for backup)
     CONTAINER_ALT: "https://aufonduebackend.kindisland-399ef298.southeastasia.azurecontainerapps.io/api"
   },
   
@@ -17,7 +17,7 @@ const config = {
   ENVIRONMENT: {
     // Set this to switch between different backend URLs
     // Options: 'CONTAINER', 'LOCAL', 'CONTAINER_ALT'
-    CURRENT: 'LOCAL'  // Using local backend for development
+    CURRENT: 'CONTAINER'  // Using Azure container backend for production testing
   }
 };
 
