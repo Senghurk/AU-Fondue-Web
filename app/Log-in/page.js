@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
+import { useTheme } from "../context/ThemeContext";
 import { getBackendUrl } from "../config/api";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card";
@@ -14,6 +15,7 @@ import { useToast } from "../context/ToastContext";
 export default function LoginPage() {
   const router = useRouter();
   const { login } = useAuth();
+  const { setLightTheme } = useTheme();
   const { toast, clearAllToasts } = useToast();
   const [loginType, setLoginType] = useState(null); // null, 'admin', 'staff'
   const [staffCredentials, setStaffCredentials] = useState({
@@ -86,6 +88,9 @@ export default function LoginPage() {
         token: token
       };
       login(userData);
+
+      // Set theme to light for admin users
+      setLightTheme();
 
       // Success — redirect to dashboard (with slight delay for toast visibility)
       setTimeout(() => {
@@ -194,6 +199,9 @@ export default function LoginPage() {
       });
       
       login(userData);
+
+      // Set theme to light for staff users
+      setLightTheme();
       
       // If it's first login, might want to redirect to password change page
       if (firstLogin) {

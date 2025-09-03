@@ -10,13 +10,23 @@ export function ThemeProvider({ children }) {
 
   // Hydrate theme from localStorage after mount
   useEffect(() => {
-    const savedTheme = localStorage.getItem("theme");
-    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    // Check if user is logged in
+    const userData = localStorage.getItem("user");
+    const isLoggedIn = userData && userData !== "null";
     
-    if (savedTheme) {
-      setTheme(savedTheme);
-    } else if (prefersDark) {
-      setTheme("dark");
+    if (isLoggedIn) {
+      // Force light theme for logged-in users (admin or staff)
+      setTheme("light");
+    } else {
+      // For non-logged-in users, use their preference
+      const savedTheme = localStorage.getItem("theme");
+      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      
+      if (savedTheme) {
+        setTheme(savedTheme);
+      } else if (prefersDark) {
+        setTheme("dark");
+      }
     }
     
     setMounted(true);
@@ -41,6 +51,11 @@ export function ThemeProvider({ children }) {
     setTheme(prev => prev === "light" ? "dark" : "light");
   };
 
+  // Force light theme (called when user logs in)
+  const setLightTheme = () => {
+    setTheme("light");
+  };
+
   // Prevent hydration mismatch by not rendering until mounted
   if (!mounted) {
     return <div className="opacity-0">{children}</div>;
@@ -50,6 +65,7 @@ export function ThemeProvider({ children }) {
     theme,
     setTheme,
     toggleTheme,
+    setLightTheme,
     isDark: theme === "dark"
   };
 
@@ -68,6 +84,7 @@ export function useTheme() {
       theme: "light",
       setTheme: () => {},
       toggleTheme: () => {},
+      setLightTheme: () => {},
       isDark: false
     };
   }
