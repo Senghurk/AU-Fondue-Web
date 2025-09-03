@@ -19,6 +19,7 @@ export default function ReportsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [assignments, setAssignments] = useState({});
   const [isAssigning, setIsAssigning] = useState({});
+  const [collapsedCategories, setCollapsedCategories] = useState({});
 
   const [assignmentMessage, setAssignmentMessage] = useState(null);
 
@@ -132,7 +133,7 @@ export default function ReportsPage() {
       if (response.ok) {
         setAssignmentMessage({
           type: "success",
-          text: "✅ Report assigned successfully!",
+          text: "Report assigned successfully!",
         });
         fetchReports();
         setTimeout(() => setAssignmentMessage(null), 3000);
@@ -185,11 +186,32 @@ export default function ReportsPage() {
       report.reportedBy?.username?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  // Recent reports (last 10 reports, sorted by newest first)
+  const recentReports = [...filteredReports]
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+    .slice(0, 10);
+
+  // Check if report is new (within last 24 hours)
+  const isNewReport = (createdAt) => {
+    const reportDate = new Date(createdAt);
+    const now = new Date();
+    const diffHours = (now - reportDate) / (1000 * 60 * 60);
+    return diffHours <= 24;
+  };
+
   const groupedReports = filteredReports.reduce((groups, report) => {
     if (!groups[report.category]) groups[report.category] = [];
     groups[report.category].push(report);
     return groups;
   }, {});
+
+  // Toggle category collapse/expand
+  const toggleCategory = (category) => {
+    setCollapsedCategories(prev => ({
+      ...prev,
+      [category]: !prev[category]
+    }));
+  };
 
   return (
     <div className="flex-1 p-4 lg:p-6">
@@ -236,36 +258,321 @@ export default function ReportsPage() {
             />
           </div>
 
-          {/* Groups */}
-      {Object.keys(groupedReports).length === 0 ? (
+          {/* Recent Reports Section */}
+          {recentReports.length > 0 && (
+            <div className="mb-10">
+              <div 
+                className="flex items-center justify-between bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg px-4 py-3 mb-4 cursor-pointer hover:from-purple-100 hover:to-pink-100 transition-all duration-200 border border-purple-200 hover:border-purple-300 shadow-sm hover:shadow-md"
+                onClick={() => toggleCategory('Recent')}
+              >
+                <div className="flex items-center gap-3">
+                  <h2 className="text-xl font-bold text-gray-800">Recent Reports</h2>
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-purple-100 text-purple-700 border border-purple-200">
+                    {recentReports.length} {recentReports.length === 1 ? 'report' : 'reports'}
+                  </span>
+                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700 border border-green-200">
+                    <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.707-10.293a1 1 0 00-1.414-1.414l-3 3a1 1 0 000 1.414l3 3a1 1 0 001.414-1.414L9.414 11H13a1 1 0 100-2H9.414l1.293-1.293z" clipRule="evenodd" />
+                    </svg>
+                    Latest
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-gray-600 font-medium">
+                    {collapsedCategories['Recent'] ? 'Show' : 'Hide'}
+                  </span>
+                  <svg 
+                    className={`w-5 h-5 text-gray-600 transition-transform duration-200 ${
+                      collapsedCategories['Recent'] ? 'rotate-180' : ''
+                    }`} 
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+              </div>
+
+              {!collapsedCategories['Recent'] && (
+                <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                  {recentReports.map((report) => (
+                    <div
+                      key={report.id}
+                      className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl hover:border-purple-200 transition-all duration-300 transform hover:-translate-y-1"
+                    >
+                      {/* Header with gradient background */}
+                      <div className="bg-gradient-to-r from-purple-50 to-pink-50 px-4 py-3 border-b border-gray-100">
+                        <div className="flex justify-between items-start">
+                          <div className="flex-1 min-w-0">
+                            <h3 className="text-base font-bold text-gray-900 truncate mb-1">
+                              {report.description?.substring(0, 40)}...
+                            </h3>
+                            <p className="text-xs text-gray-500 font-medium">
+                              Report #{report.id}
+                            </p>
+                          </div>
+                          <div className="ml-4 flex-shrink-0 flex flex-col gap-1">
+                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-800 border border-yellow-200">
+                              <div className="w-1.5 h-1.5 bg-yellow-500 rounded-full mr-1.5"></div>
+                              {report.status}
+                            </span>
+                            {isNewReport(report.createdAt) && (
+                              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800 border border-green-200">
+                                <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                                </svg>
+                                NEW
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Content section - Same as regular cards */}
+                      <div className="p-4">
+                        <div className="grid grid-cols-1 gap-2 mb-3">
+                          <div className="flex items-center text-sm">
+                            <div className="w-6 h-6 bg-red-100 rounded-lg flex items-center justify-center mr-2">
+                              <svg className="w-3 h-3 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
+                              </svg>
+                            </div>
+                            <div>
+                              <p className="font-medium text-gray-900 text-sm">{report.customLocation}</p>
+                              <p className="text-gray-500 text-xs">Location</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center text-sm">
+                            <div className="w-6 h-6 bg-blue-100 rounded-lg flex items-center justify-center mr-2">
+                              <svg className="w-3 h-3 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                              </svg>
+                            </div>
+                            <div>
+                              <p className="font-medium text-gray-900 text-sm">{report.reportedBy?.username}</p>
+                              <p className="text-gray-500 text-xs">Reported by</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center text-sm">
+                            <div className="w-6 h-6 bg-green-100 rounded-lg flex items-center justify-center mr-2">
+                              <svg className="w-3 h-3 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
+                              </svg>
+                            </div>
+                            <div>
+                              <p className="font-medium text-gray-900 text-sm">{new Date(report.createdAt).toLocaleDateString()}</p>
+                              <p className="text-gray-500 text-xs">Date reported</p>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Media Gallery */}
+                        {(report.photoUrls?.length > 0 || report.videoUrls?.length > 0) && (
+                          <div className="mb-4">
+                            <div className="flex items-center mb-2">
+                              <svg className="w-4 h-4 text-gray-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                              </svg>
+                              <span className="text-sm font-semibold text-gray-700">Media Attachments</span>
+                            </div>
+                            <div className="flex gap-3 overflow-x-auto pb-2">
+                              {/* Photos */}
+                              {report.photoUrls?.slice(0, 3).map((photo, i) => {
+                                const base = `${photo}${sastoken}`;
+                                const joiner = base.includes("?") ? "&" : "?";
+                                const inlineUrl = `${base}${joiner}rscd=inline&rsct=image/jpeg`;
+                                return (
+                                  <div key={`photo-${i}`} className="relative group">
+                                    <img
+                                      src={inlineUrl}
+                                      alt={`Photo ${i + 1}`}
+                                      className="w-16 h-16 object-cover rounded-lg border-2 border-gray-200 flex-shrink-0 cursor-pointer transition-all duration-200 group-hover:border-purple-300 group-hover:shadow-md"
+                                      onClick={() => openMediaViewer(base, "image")}
+                                    />
+                                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 rounded-lg transition-all duration-200 flex items-center justify-center pointer-events-none">
+                                      <svg className="w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                      </svg>
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                              {/* Videos */}
+                              {report.videoUrls?.slice(0, 3).map((video, i) => {
+                                const base = `${video}${sastoken}`;
+                                const joiner = base.includes("?") ? "&" : "?";
+                                const inlineUrl = `${base}${joiner}rscd=inline&rsct=video/mp4`;
+                                return (
+                                  <div key={`video-${i}`} className="relative group">
+                                    <video
+                                      src={inlineUrl}
+                                      className="w-16 h-16 object-cover rounded-lg border-2 border-gray-200 flex-shrink-0 cursor-pointer transition-all duration-200 group-hover:border-purple-300 group-hover:shadow-md"
+                                      onClick={() => openMediaViewer(base, "video")}
+                                      onMouseEnter={(e) => e.target.play()}
+                                      onMouseLeave={(e) => {e.target.pause(); e.target.currentTime = 0;}}
+                                      muted
+                                      preload="metadata"
+                                    />
+                                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                      <div className="bg-black/60 backdrop-blur-sm rounded-full p-2 group-hover:bg-black/70 transition-all duration-200">
+                                        <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
+                                        </svg>
+                                      </div>
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                              {/* More items indicator */}
+                              {(report.photoUrls?.length > 3 || report.videoUrls?.length > 3) && (
+                                <div className="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center flex-shrink-0">
+                                  <div className="text-center">
+                                    <p className="text-xs font-bold text-gray-600">+{(report.photoUrls?.length || 0) + (report.videoUrls?.length || 0) - 3}</p>
+                                    <p className="text-xs text-gray-500">more</p>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Action Controls */}
+                        <div className="border-t border-gray-100 pt-3">
+                          <div className="space-y-3">
+                            <div>
+                              <label className="block text-sm font-semibold text-gray-800 mb-2">
+                                Assign Staff Member
+                              </label>
+                              <div className="relative">
+                                <select
+                                  value={assignments[report.id] || ""}
+                                  onChange={(e) =>
+                                    handleAssignStaff(report.id, e.target.value)
+                                  }
+                                  className="w-full px-3 py-2 text-sm bg-gradient-to-br from-white to-gray-50 border-2 border-gray-200 rounded-xl shadow-sm appearance-none cursor-pointer transition-all duration-200 hover:border-purple-300 hover:shadow-md focus:outline-none focus:ring-4 focus:ring-purple-100 focus:border-purple-500 focus:bg-white"
+                                >
+                                  <option value="" className="text-gray-500">Choose a staff member...</option>
+                                  {staffMembers.map((staff) => (
+                                    <option key={staff.id} value={staff.id} className="py-2">
+                                      {staff.name}
+                                    </option>
+                                  ))}
+                                </select>
+                                <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
+                                  <svg className="w-5 h-5 text-purple-500 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                  </svg>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="flex gap-3">
+                              <button
+                                onClick={() => handleConfirmAssign(report.id)}
+                                disabled={isAssigning[report.id] || !assignments[report.id]}
+                                className={`flex-1 px-3 py-2 rounded-xl font-semibold transition-all duration-200 min-h-[40px] text-sm ${
+                                  isAssigning[report.id]
+                                    ? "bg-gray-400 text-white cursor-not-allowed"
+                                    : !assignments[report.id]
+                                    ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                                    : "bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700 shadow-md hover:shadow-lg transform hover:scale-105"
+                                }`}
+                              >
+                                {isAssigning[report.id] ? (
+                                  <div className="flex items-center justify-center gap-2">
+                                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                    Assigning...
+                                  </div>
+                                ) : (
+                                  <div className="flex items-center justify-center gap-2">
+                                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                    </svg>
+                                    Assign
+                                  </div>
+                                )}
+                              </button>
+                              <button
+                                onClick={() => openModal(report)}
+                                className="flex-1 bg-gradient-to-r from-purple-500 to-purple-600 text-white px-3 py-2 rounded-xl font-semibold hover:from-purple-600 hover:to-purple-700 transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 min-h-[40px] text-sm"
+                              >
+                                <div className="flex items-center justify-center gap-2">
+                                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                                  </svg>
+                                  Details
+                                </div>
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Categorized Groups */}
+      {Object.keys(groupedReports).length === 0 && recentReports.length === 0 ? (
         <div className="col-span-full text-center py-12">
           <p className="text-gray-500 text-lg">No unassigned reports found.</p>
         </div>
       ) : (
-        Object.entries(groupedReports).map(([category, reports]) => (
+        Object.entries(groupedReports)
+          .sort(([a], [b]) => a.localeCompare(b)) // Sort categories alphabetically
+          .map(([category, reports]) => (
           <div key={category} className="mb-10">
-            <h2 className="text-xl font-bold mb-4 text-gray-800">{category}</h2>
+            <div 
+              className="flex items-center justify-between bg-gradient-to-r from-gray-50 to-blue-50 rounded-lg px-4 py-3 mb-4 cursor-pointer hover:from-gray-100 hover:to-blue-100 transition-all duration-200 border border-gray-200 hover:border-blue-300 shadow-sm hover:shadow-md"
+              onClick={() => toggleCategory(category)}
+            >
+              <div className="flex items-center gap-3">
+                <h2 className="text-xl font-bold text-gray-800">{category}</h2>
+                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-700 border border-blue-200">
+                  {reports.length} {reports.length === 1 ? 'report' : 'reports'}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-600 font-medium">
+                  {collapsedCategories[category] ? 'Show' : 'Hide'}
+                </span>
+                <svg 
+                  className={`w-5 h-5 text-gray-600 transition-transform duration-200 ${
+                    collapsedCategories[category] ? 'rotate-180' : ''
+                  }`} 
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {reports.map((report) => (
+            {!collapsedCategories[category] && (
+              <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                {reports.map((report) => (
                 <div
                   key={report.id}
                   className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl hover:border-blue-200 transition-all duration-300 transform hover:-translate-y-1"
                 >
                   {/* Header with gradient background */}
-                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b border-gray-100">
+                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-4 py-3 border-b border-gray-100">
                     <div className="flex justify-between items-start">
                       <div className="flex-1 min-w-0">
-                        <h3 className="text-lg font-bold text-gray-900 truncate mb-1">
+                        <h3 className="text-base font-bold text-gray-900 truncate mb-1">
                           {report.description?.substring(0, 45)}...
                         </h3>
-                        <p className="text-sm text-gray-500 font-medium">
+                        <p className="text-xs text-gray-500 font-medium">
                           Report #{report.id}
                         </p>
                       </div>
                       <div className="ml-4 flex-shrink-0">
-                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-800 border border-yellow-200">
-                          <div className="w-2 h-2 bg-yellow-500 rounded-full mr-2"></div>
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-800 border border-yellow-200">
+                          <div className="w-1.5 h-1.5 bg-yellow-500 rounded-full mr-1.5"></div>
                           {report.status}
                         </span>
                       </div>
@@ -273,38 +580,38 @@ export default function ReportsPage() {
                   </div>
 
                   {/* Content section */}
-                  <div className="p-6">
-                    <div className="grid grid-cols-1 gap-3 mb-4">
+                  <div className="p-4">
+                    <div className="grid grid-cols-1 gap-2 mb-3">
                       <div className="flex items-center text-sm">
-                        <div className="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center mr-3">
-                          <svg className="w-4 h-4 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                        <div className="w-6 h-6 bg-red-100 rounded-lg flex items-center justify-center mr-2">
+                          <svg className="w-3 h-3 text-red-600" fill="currentColor" viewBox="0 0 20 20">
                             <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
                           </svg>
                         </div>
                         <div>
-                          <p className="font-medium text-gray-900">{report.customLocation}</p>
+                          <p className="font-medium text-gray-900 text-sm">{report.customLocation}</p>
                           <p className="text-gray-500 text-xs">Location</p>
                         </div>
                       </div>
                       <div className="flex items-center text-sm">
-                        <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
-                          <svg className="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                        <div className="w-6 h-6 bg-blue-100 rounded-lg flex items-center justify-center mr-2">
+                          <svg className="w-3 h-3 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
                             <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
                           </svg>
                         </div>
                         <div>
-                          <p className="font-medium text-gray-900">{report.reportedBy?.username}</p>
+                          <p className="font-medium text-gray-900 text-sm">{report.reportedBy?.username}</p>
                           <p className="text-gray-500 text-xs">Reported by</p>
                         </div>
                       </div>
                       <div className="flex items-center text-sm">
-                        <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center mr-3">
-                          <svg className="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                        <div className="w-6 h-6 bg-green-100 rounded-lg flex items-center justify-center mr-2">
+                          <svg className="w-3 h-3 text-green-600" fill="currentColor" viewBox="0 0 20 20">
                             <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
                           </svg>
                         </div>
                         <div>
-                          <p className="font-medium text-gray-900">{new Date(report.createdAt).toLocaleDateString()}</p>
+                          <p className="font-medium text-gray-900 text-sm">{new Date(report.createdAt).toLocaleDateString()}</p>
                           <p className="text-gray-500 text-xs">Date reported</p>
                         </div>
                       </div>
@@ -312,8 +619,8 @@ export default function ReportsPage() {
 
                     {/* Media Gallery */}
                     {(report.photoUrls?.length > 0 || report.videoUrls?.length > 0) && (
-                      <div className="mb-6">
-                        <div className="flex items-center mb-3">
+                      <div className="mb-4">
+                        <div className="flex items-center mb-2">
                           <svg className="w-4 h-4 text-gray-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                           </svg>
@@ -330,7 +637,7 @@ export default function ReportsPage() {
                                 <img
                                   src={inlineUrl}
                                   alt={`Photo ${i + 1}`}
-                                  className="w-20 h-20 object-cover rounded-lg border-2 border-gray-200 flex-shrink-0 cursor-pointer transition-all duration-200 group-hover:border-blue-300 group-hover:shadow-md"
+                                  className="w-16 h-16 object-cover rounded-lg border-2 border-gray-200 flex-shrink-0 cursor-pointer transition-all duration-200 group-hover:border-blue-300 group-hover:shadow-md"
                                   onClick={() => openMediaViewer(base, "image")}
                                 />
                                 <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 rounded-lg transition-all duration-200 flex items-center justify-center pointer-events-none">
@@ -350,7 +657,7 @@ export default function ReportsPage() {
                               <div key={`video-${i}`} className="relative group">
                                 <video
                                   src={inlineUrl}
-                                  className="w-20 h-20 object-cover rounded-lg border-2 border-gray-200 flex-shrink-0 cursor-pointer transition-all duration-200 group-hover:border-blue-300 group-hover:shadow-md"
+                                  className="w-16 h-16 object-cover rounded-lg border-2 border-gray-200 flex-shrink-0 cursor-pointer transition-all duration-200 group-hover:border-blue-300 group-hover:shadow-md"
                                   onClick={() => openMediaViewer(base, "video")}
                                   onMouseEnter={(e) => e.target.play()}
                                   onMouseLeave={(e) => {e.target.pause(); e.target.currentTime = 0;}}
@@ -369,7 +676,7 @@ export default function ReportsPage() {
                           })}
                           {/* More items indicator */}
                           {(report.photoUrls?.length > 3 || report.videoUrls?.length > 3) && (
-                            <div className="w-20 h-20 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center flex-shrink-0">
+                            <div className="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center flex-shrink-0">
                               <div className="text-center">
                                 <p className="text-xs font-bold text-gray-600">+{(report.photoUrls?.length || 0) + (report.videoUrls?.length || 0) - 3}</p>
                                 <p className="text-xs text-gray-500">more</p>
@@ -381,10 +688,10 @@ export default function ReportsPage() {
                     )}
 
                     {/* Action Controls */}
-                    <div className="border-t border-gray-100 pt-4">
-                      <div className="space-y-4">
+                    <div className="border-t border-gray-100 pt-3">
+                      <div className="space-y-3">
                     <div>
-                      <label className="block text-sm font-semibold text-gray-800 mb-3">
+                      <label className="block text-sm font-semibold text-gray-800 mb-2">
                         Assign Staff Member
                       </label>
                       <div className="relative">
@@ -393,7 +700,7 @@ export default function ReportsPage() {
                           onChange={(e) =>
                             handleAssignStaff(report.id, e.target.value)
                           }
-                          className="w-full px-4 py-3 text-base bg-gradient-to-br from-white to-gray-50 border-2 border-gray-200 rounded-xl shadow-sm appearance-none cursor-pointer transition-all duration-200 hover:border-blue-300 hover:shadow-md focus:outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-500 focus:bg-white"
+                          className="w-full px-3 py-2 text-sm bg-gradient-to-br from-white to-gray-50 border-2 border-gray-200 rounded-xl shadow-sm appearance-none cursor-pointer transition-all duration-200 hover:border-blue-300 hover:shadow-md focus:outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-500 focus:bg-white"
                         >
                           <option value="" className="text-gray-500">Choose a staff member...</option>
                           {staffMembers.map((staff) => (
@@ -414,7 +721,7 @@ export default function ReportsPage() {
                           <button
                             onClick={() => handleConfirmAssign(report.id)}
                             disabled={isAssigning[report.id] || !assignments[report.id]}
-                            className={`flex-1 px-4 py-3 rounded-xl font-semibold transition-all duration-200 min-h-[48px] ${
+                            className={`flex-1 px-3 py-2 rounded-xl font-semibold transition-all duration-200 min-h-[40px] text-sm ${
                               isAssigning[report.id]
                                 ? "bg-gray-400 text-white cursor-not-allowed"
                                 : !assignments[report.id]
@@ -438,7 +745,7 @@ export default function ReportsPage() {
                           </button>
                           <button
                             onClick={() => openModal(report)}
-                            className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-3 rounded-xl font-semibold hover:from-blue-600 hover:to-blue-700 transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 min-h-[48px]"
+                            className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 text-white px-3 py-2 rounded-xl font-semibold hover:from-blue-600 hover:to-blue-700 transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 min-h-[40px] text-sm"
                           >
                             <div className="flex items-center justify-center gap-2">
                               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
@@ -452,8 +759,9 @@ export default function ReportsPage() {
                     </div>
                   </div>
                 </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         ))
       )}
