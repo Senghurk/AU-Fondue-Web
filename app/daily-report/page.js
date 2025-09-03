@@ -1,12 +1,10 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { getBackendUrl } from "../config/api";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { format, startOfDay, endOfDay } from "date-fns";
-
-const BACKEND_URL =
-  "https://aufondue-webtest.kindisland-399ef298.southeastasia.azurecontainerapps.io/api";
 
 function diffHM(startISO, endISO) {
   const s = new Date(startISO);
@@ -58,6 +56,7 @@ function sampleRowsFor(dateStr) {
 }
 
 export default function DailyReportsPage() {
+  const backendUrl = getBackendUrl();
   const [date, setDate] = useState(() => format(new Date(), "yyyy-MM-dd"));
   const [loading, setLoading] = useState(false);
   const [rows, setRows] = useState([]);
@@ -73,7 +72,7 @@ export default function DailyReportsPage() {
         const to = endOfDay(new Date(date)).toISOString();
 
         const res = await fetch(
-          `${BACKEND_URL}/issues/reports?from=${encodeURIComponent(
+          `${backendUrl}/issues/reports?from=${encodeURIComponent(
             from
           )}&to=${encodeURIComponent(to)}&page=0&size=1000`
         );
@@ -220,13 +219,38 @@ export default function DailyReportsPage() {
         </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow-md p-4 overflow-x-auto">
-        {error && <div className="mb-4 text-red-600">{error}</div>}
-        {loading ? (
-          <div className="py-16 text-center text-gray-500">Loading…</div>
-        ) : rows.length === 0 ? (
-          <div className="py-16 text-center text-gray-500">No reports for this day.</div>
-        ) : (
+      {/* Loading State */}
+      {loading && (
+        <div className="flex justify-center items-center py-12">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+          <span className="ml-3 text-gray-600">Loading daily reports...</span>
+        </div>
+      )}
+
+      {/* Error State */}
+      {error && !loading && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
+          <div className="flex items-center">
+            <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+            </svg>
+            <span>{error}</span>
+          </div>
+        </div>
+      )}
+
+      {/* Main Content */}
+      {!loading && (
+        <div className="bg-white rounded-lg shadow-md p-4 overflow-x-auto">
+          {rows.length === 0 ? (
+            <div className="text-center py-12">
+              <svg className="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              <p className="text-gray-500 text-lg">No reports found for {format(new Date(date), "dd/MM/yyyy")}.</p>
+              <p className="text-gray-400 text-sm mt-1">Try selecting a different date.</p>
+            </div>
+          ) : (
           <table className="w-full table-auto border-collapse text-[13px]">
             <thead>
               <tr className="bg-gray-100">
@@ -249,8 +273,9 @@ export default function DailyReportsPage() {
               ))}
             </tbody>
           </table>
-        )}
-      </div>
+          )}
+        </div>
+      )}
 
       {/* Print tweaks so the table fills the page cleanly */}
       <style jsx global>{`

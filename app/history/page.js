@@ -1,21 +1,44 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { getBackendUrl } from "../config/api";
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 
 export default function HistoryPage() {
   const [completedReports, setCompletedReports] = useState([]);
-  const backendUrl =
-    "https://aufondue-backend.kindisland-399ef298.southeastasia.azurecontainerapps.io/api";
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const backendUrl = getBackendUrl();
 
-  const fetchCompletedReports = () => {
-    fetch(`${backendUrl}/issues/completed`)
-      .then((response) => response.json())
-      .then((data) => setCompletedReports(data))
-      .catch((error) =>
-        console.error("Error fetching Completed Reports", error)
-      );
+  const fetchCompletedReports = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      console.log("Fetching from:", `${backendUrl}/issues/completed`);
+      
+      const response = await fetch(`${backendUrl}/issues/completed`);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      console.log("Fetched completed reports:", data);
+      
+      if (Array.isArray(data)) {
+        setCompletedReports(data);
+      } else {
+        setCompletedReports([]);
+        console.warn("Expected array but got:", typeof data, data);
+      }
+    } catch (error) {
+      console.error("Error fetching completed reports:", error);
+      setError(`Failed to fetch completed reports: ${error.message}`);
+      setCompletedReports([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const getDuration = (start, end) => {
@@ -124,54 +147,92 @@ export default function HistoryPage() {
         View the history of all completed reports.
       </p>
 
+      {/* Loading State */}
+      {loading && (
+        <div className="flex justify-center items-center py-12">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+          <span className="ml-3 text-gray-600">Loading completed reports...</span>
+        </div>
+      )}
+
+      {/* Error State */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
+          <div className="flex items-center">
+            <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+            </svg>
+            <span>{error}</span>
+          </div>
+          <button 
+            onClick={fetchCompletedReports}
+            className="mt-2 px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700"
+          >
+            Retry
+          </button>
+        </div>
+      )}
+
       {/* Table */}
-      <div className="bg-white rounded-lg shadow-md p-3.5 overflow-x-auto max-w-full">
-        <table className="w-full table-auto border-collapse">
-          <thead>
-            <tr className="bg-gray-200 text-left">
-              <th className="p-3 text-sm font-semibold">#</th>
-              <th className="p-3 text-sm font-semibold">Description</th>
-              <th className="p-3 text-sm font-semibold">Category</th>
-              <th className="p-3 text-sm font-semibold">Assigned To</th>
-              <th className="p-3 text-sm font-semibold">Status</th>
-              <th className="p-3 text-sm font-semibold">Reported Date</th>
-              <th className="p-3 text-sm font-semibold">Completion Date</th>
-              <th className="p-3 text-sm font-semibold">Duration</th>
-            </tr>
-          </thead>
-          <tbody>
-            {completedReports.map((report, index) => (
-              <tr
-                key={report.id}
-                className={`border-t ${
-                  index % 2 === 0 ? "bg-gray-50" : "bg-white"
-                }`}
-              >
-                <td className="p-3 text-sm">{index + 1}</td>
-                <td className="p-3 text-sm">{report.description}</td>
-                <td className="p-3 text-sm">{report.category}</td>
-                <td className="p-3 text-sm">{report.assignedTo?.name}</td>
-                <td className="p-3 text-sm font-semibold text-green-600">
-                  Completed
-                </td>
-                <td className="p-3 text-sm">
-                  {new Date(report.createdAt).toLocaleString("en-GB", {
-                    timeZone: "Asia/Bangkok",
-                  })}
-                </td>
-                <td className="p-3 text-sm">
-                  {new Date(report.updatedAt).toLocaleString("en-GB", {
-                    timeZone: "Asia/Bangkok",
-                  })}
-                </td>
-                <td className="p-3 text-sm">
-                  {getDuration(report.createdAt, report.updatedAt)}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      {!loading && !error && (
+        <div className="bg-white rounded-lg shadow-md p-3.5 overflow-x-auto max-w-full">
+          {completedReports.length === 0 ? (
+            <div className="text-center py-12">
+              <svg className="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              <p className="text-gray-500 text-lg">No completed reports found.</p>
+              <p className="text-gray-400 text-sm mt-1">Completed reports will appear here once tasks are finished.</p>
+            </div>
+          ) : (
+            <table className="w-full table-auto border-collapse">
+              <thead>
+                <tr className="bg-gray-200 text-left">
+                  <th className="p-3 text-sm font-semibold">#</th>
+                  <th className="p-3 text-sm font-semibold">Description</th>
+                  <th className="p-3 text-sm font-semibold">Category</th>
+                  <th className="p-3 text-sm font-semibold">Assigned To</th>
+                  <th className="p-3 text-sm font-semibold">Status</th>
+                  <th className="p-3 text-sm font-semibold">Reported Date</th>
+                  <th className="p-3 text-sm font-semibold">Completion Date</th>
+                  <th className="p-3 text-sm font-semibold">Duration</th>
+                </tr>
+              </thead>
+              <tbody>
+                {completedReports.map((report, index) => (
+                  <tr
+                    key={report.id}
+                    className={`border-t ${
+                      index % 2 === 0 ? "bg-gray-50" : "bg-white"
+                    }`}
+                  >
+                    <td className="p-3 text-sm">{index + 1}</td>
+                    <td className="p-3 text-sm">{report.description}</td>
+                    <td className="p-3 text-sm">{report.category}</td>
+                    <td className="p-3 text-sm">{report.assignedTo?.name}</td>
+                    <td className="p-3 text-sm font-semibold text-green-600">
+                      Completed
+                    </td>
+                    <td className="p-3 text-sm">
+                      {new Date(report.createdAt).toLocaleString("en-GB", {
+                        timeZone: "Asia/Bangkok",
+                      })}
+                    </td>
+                    <td className="p-3 text-sm">
+                      {new Date(report.updatedAt).toLocaleString("en-GB", {
+                        timeZone: "Asia/Bangkok",
+                      })}
+                    </td>
+                    <td className="p-3 text-sm">
+                      {getDuration(report.createdAt, report.updatedAt)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      )}
     </div>
   );
 }
