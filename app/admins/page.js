@@ -1,15 +1,26 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { getBackendUrl } from "../config/api";
+import { 
+  Pagination, 
+  PaginationContent, 
+  PaginationItem, 
+  PaginationLink, 
+  PaginationNext, 
+  PaginationPrevious 
+} from "../../components/ui/pagination";
 
 export default function AdminListPage() {
-  const backendUrl = "https://aufondue-backend.kindisland-399ef298.southeastasia.azurecontainerapps.io/api";
+  const backendUrl = getBackendUrl();
 
   const [admins, setAdmins] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isInviting, setIsInviting] = useState(false);
   const [newAdminEmail, setNewAdminEmail] = useState("");
   const [newAdminUsername, setNewAdminUsername] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   // Fetch admin list from backend
   const fetchAdmins = async () => {
@@ -30,6 +41,23 @@ export default function AdminListPage() {
     admin.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
     admin.email.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  // Pagination logic
+  const totalPages = Math.ceil(filteredAdmins.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedAdmins = filteredAdmins.slice(startIndex, endIndex);
+
+  // Handle search with pagination reset
+  const handleSearch = (e) => {
+    setSearchQuery(e.target.value);
+    setCurrentPage(1);
+  };
+
+  // Handle page change
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
 
   const handleInviteAdmin = async () => {
     if (!newAdminEmail.trim() || !newAdminUsername.trim()) return;
@@ -68,7 +96,7 @@ export default function AdminListPage() {
           type="text"
           placeholder="Search admins by name or email..."
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          onChange={handleSearch}
           className="border p-2 rounded w-full max-w-sm"
         />
 
@@ -90,22 +118,82 @@ export default function AdminListPage() {
             </tr>
           </thead>
           <tbody>
-            {filteredAdmins.map((admin, index) => (
+            {paginatedAdmins.map((admin, index) => (
               <tr
                 key={admin.id}
                 className={`border-t ${index % 2 === 0 ? "bg-gray-50" : "bg-white"}`}
               >
-                <td className="p-3 text-sm">{index + 1}</td>
+                <td className="p-3 text-sm">{startIndex + index + 1}</td>
                 <td className="p-3 text-sm">{admin.username}</td>
                 <td className="p-3 text-sm">{admin.email}</td>
               </tr>
             ))}
           </tbody>
         </table>
-        {filteredAdmins.length === 0 && (
+        {paginatedAdmins.length === 0 && (
           <p className="text-center text-gray-500 mt-4">No admins found.</p>
         )}
       </div>
+
+      {/* Pagination */}
+      {filteredAdmins.length > 0 && totalPages > 1 && (
+        <div className="mt-6 flex flex-col items-center space-y-2">
+          <div className="text-sm text-gray-600">
+            Showing {startIndex + 1} to {Math.min(endIndex, filteredAdmins.length)} of {filteredAdmins.length} admins
+          </div>
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious 
+                  onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
+                  className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                />
+              </PaginationItem>
+              
+              {[...Array(totalPages)].map((_, i) => {
+                const pageNum = i + 1;
+                const isCurrentPage = pageNum === currentPage;
+                
+                // Show first page, last page, current page, and pages around current
+                const showPage = pageNum === 1 || 
+                                pageNum === totalPages || 
+                                Math.abs(pageNum - currentPage) <= 1;
+                
+                if (!showPage) {
+                  // Show ellipsis for gaps
+                  if (pageNum === currentPage - 2 || pageNum === currentPage + 2) {
+                    return (
+                      <PaginationItem key={`ellipsis-${pageNum}`}>
+                        <span className="px-3 py-2 text-gray-500">...</span>
+                      </PaginationItem>
+                    );
+                  }
+                  return null;
+                }
+                
+                return (
+                  <PaginationItem key={pageNum}>
+                    <PaginationLink
+                      onClick={() => handlePageChange(pageNum)}
+                      isActive={isCurrentPage}
+                      className="cursor-pointer"
+                    >
+                      {pageNum}
+                    </PaginationLink>
+                  </PaginationItem>
+                );
+              })}
+              
+              <PaginationItem>
+                <PaginationNext 
+                  onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
+                  className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        </div>
+      )}
 
       {isInviting && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">

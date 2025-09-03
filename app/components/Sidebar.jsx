@@ -2,156 +2,222 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { Button } from "../../components/ui/button";
+import { Card } from "../../components/ui/card";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "../../components/ui/collapsible";
+import {
+  Home,
+  FileText,
+  Calendar,
+  History,
+  Users,
+  Settings,
+  Shield,
+  Package,
+  ChevronDown,
+  ChevronRight
+} from "lucide-react";
+import { useAuth } from "../context/AuthContext";
 
-export default function Sidebar({ activeTopLink, activeLink, setActiveLink }) {
-  const [isIncidentMenuOpen, setIsIncidentMenuOpen] = useState(false);
+export default function Sidebar({ activeTopLink, activeLink, setActiveLink, isMobile, onNavigate }) {
+  const [isReportsMenuOpen, setIsReportsMenuOpen] = useState(false);
+  const { user, isAdmin, isOMStaff } = useAuth();
 
   const handleLinkClick = (link) => {
     setActiveLink(link);
+    // Close mobile sidebar when navigating
+    if (isMobile && onNavigate) {
+      onNavigate();
+    }
   };
 
   const renderLinks = () => {
-    switch (activeTopLink) {
-      case "/admins":
-        return (
-          <ul className="sidebar-nav">
-            {/* <li>
-              <Link
-                href="/user-list"
-                className={`sidebar-link ${
-                  activeLink === "/user-list" ? "!text-red-600 !font-bold" : ""
-                }`}
-                onClick={() => handleLinkClick("/user-list")}
-              >
-                User List
-              </Link>
-            </li> */}
-            <li>
-              <Link
-                href="/admins"
-                className={`sidebar-link ${
-                  activeLink === "/admins" ? "!text-red-600 !font-bold" : ""
-                }`}
-                onClick={() => handleLinkClick("/admins")}
-              >
-                Admin List
-              </Link>
-            </li>
-          </ul>
-        );
+    // OM Staff - Only show Unassigned Reports
+    if (isOMStaff()) {
+      return (
+        <div className="space-y-1">
+          <Button
+            variant={activeLink === "/reports" ? "default" : "ghost"}
+            className="w-full justify-start"
+            asChild
+          >
+            <Link
+              href="/reports"
+              onClick={() => handleLinkClick("/reports")}
+            >
+              <FileText className="mr-2 h-4 w-4" />
+              Unassigned Reports
+            </Link>
+          </Button>
+        </div>
+      );
+    }
 
-      // case "/general-settings":
-      //   return (
-      //     <ul className="sidebar-nav">
-      //       <li>
-      //         <Link
-      //           href="/general-settings"
-      //           className={`sidebar-link ${
-      //             activeLink === "/general-settings" ? "!text-red-600 !font-bold" : ""
-      //           }`}
-      //           onClick={() => handleLinkClick("/general-settings")}
-      //         >
-      //           General Settings
-      //         </Link>
-      //       </li>
-      //       <li>
-      //         <Link
-      //           href="/notification-settings"
-      //           className={`sidebar-link ${
-      //             activeLink === "/notification-settings" ? "!text-red-600 !font-bold" : ""
-      //           }`}
-      //           onClick={() => handleLinkClick("/notification-settings")}
-      //         >
-      //           Notification Settings
-      //         </Link>
-      //       </li>
-      //     </ul>
-      //   );
-
-      default:
-        return (
-          <ul className="sidebar-nav">
-            {/* Home */}
-            <li>
-              <Link
-                href="/dashboard"
-                className={`sidebar-link ${
-                  activeLink === "/dashboard" || activeLink === "/" ? "!text-red-600 !font-bold" : ""
-                }`}
-                onClick={() => handleLinkClick("/dashboard")}
+    // Admin Navigation
+    if (isAdmin()) {
+      switch (activeTopLink) {
+        case "/admins":
+          return (
+            <div className="space-y-1">
+              <Button
+                variant={activeLink === "/admins" ? "default" : "ghost"}
+                className="w-full justify-start"
+                asChild
               >
-                Home
-              </Link>
-            </li>
-
-            {/* Incidents */}
-            <li>
-              <div
-                className="sidebar-home-menu"
-                onClick={() => setIsIncidentMenuOpen(!isIncidentMenuOpen)}
+                <Link
+                  href="/admins"
+                  onClick={() => handleLinkClick("/admins")}
+                >
+                  <Shield className="mr-2 h-4 w-4" />
+                  Admin List
+                </Link>
+              </Button>
+              <Button
+                variant={activeLink === "/user-list" ? "default" : "ghost"}
+                className="w-full justify-start"
+                asChild
               >
-                <span>Incidents</span>
-                <span>{isIncidentMenuOpen ? "▲" : "▼"}</span>
-              </div>
-              {isIncidentMenuOpen && (
-                <ul className="sidebar-submenu">
-                  <li>
+                <Link
+                  href="/user-list"
+                  onClick={() => handleLinkClick("/user-list")}
+                >
+                  <Users className="mr-2 h-4 w-4" />
+                  OM Staff List
+                </Link>
+              </Button>
+            </div>
+          );
+
+        default:
+          return (
+            <div className="space-y-1">
+              {/* Home */}
+              <Button
+                variant={activeLink === "/dashboard" || activeLink === "/" ? "default" : "ghost"}
+                className="w-full justify-start"
+                asChild
+              >
+                <Link
+                  href="/dashboard"
+                  onClick={() => handleLinkClick("/dashboard")}
+                >
+                  <Home className="mr-2 h-4 w-4" />
+                  Home
+                </Link>
+              </Button>
+
+              {/* Reports */}
+              <Collapsible
+                open={isReportsMenuOpen}
+                onOpenChange={setIsReportsMenuOpen}
+              >
+                <CollapsibleTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start"
+                  >
+                    <FileText className="mr-2 h-4 w-4" />
+                    <span className="ml-0.4">Reports</span>
+                    {isReportsMenuOpen ? (
+                      <ChevronDown className="ml-auto h-4 w-4" />
+                    ) : (
+                      <ChevronRight className="ml-auto h-4 w-4" />
+                    )}
+                  </Button>
+                </CollapsibleTrigger>
+                <CollapsibleContent className="space-y-1 ml-9 mt-1">
+                  <Button
+                    variant={activeLink === "/reports" ? "default" : "ghost"}
+                    className="w-full justify-start pl-6"
+                    asChild
+                  >
                     <Link
                       href="/reports"
-                      className={`sidebar-submenu-link ${
-                        activeLink === "/reports" ? "!text-red-500 !font-bold" : ""
-                      }`}
                       onClick={() => handleLinkClick("/reports")}
                     >
-                      Reports
+                      All Reports
                     </Link>
-                  </li>
-                  <li>
+                  </Button>
+                  <Button
+                    variant={activeLink === "/assignedReports" ? "default" : "ghost"}
+                    className="w-full justify-start pl-6"
+                    asChild
+                  >
                     <Link
                       href="/assignedReports"
-                      className={`sidebar-submenu-link ${
-                        activeLink === "/assignedReports" ? "!text-red-500 !font-bold" : ""
-                      }`}
                       onClick={() => handleLinkClick("/assignedReports")}
                     >
                       Assigned Reports
                     </Link>
-                  </li>
-                </ul>
-              )}
-            </li>
-            <li>
-              <Link
-                href="/daily-report"
-                className={`sidebar-link ${
-                  activeLink === "/daily-report" ? "!text-red-500 !font-bold" : ""
-                }`}
-                onClick={() => handleLinkClick("/daily-report")}
-              >
-                Daily Reports
-              </Link>
-            </li>
+                  </Button>
+                </CollapsibleContent>
+              </Collapsible>
 
-            {/* History */}
-            <li>
-              <Link
-                href="/history"
-                className={`sidebar-link ${
-                  activeLink === "/history" ? "!text-red-500 !font-bold" : ""
-                }`}
-                onClick={() => handleLinkClick("/history")}
+              <Button
+                variant={activeLink === "/daily-report" ? "default" : "ghost"}
+                className="w-full justify-start"
+                asChild
               >
-                History
-              </Link>
-            </li>
-          </ul>
-        );
+                <Link
+                  href="/daily-report"
+                  onClick={() => handleLinkClick("/daily-report")}
+                >
+                  <Calendar className="mr-2 h-4 w-4" />
+                  Daily Reports
+                </Link>
+              </Button>
+
+              {/* Order Material */}
+              <Button
+                variant={activeLink === "/order-material" ? "default" : "ghost"}
+                className="w-full justify-start"
+                asChild
+              >
+                <Link
+                  href="/order-material"
+                  onClick={() => handleLinkClick("/order-material")}
+                >
+                  <Package className="mr-2 h-4 w-4" />
+                  Order Material
+                </Link>
+              </Button>
+
+              {/* History */}
+              <Button
+                variant={activeLink === "/history" ? "default" : "ghost"}
+                className="w-full justify-start"
+                asChild
+              >
+                <Link
+                  href="/history"
+                  onClick={() => handleLinkClick("/history")}
+                >
+                  <History className="mr-2 h-4 w-4" />
+                  History
+                </Link>
+              </Button>
+            </div>
+          );
+      }
     }
+
+    // Fallback - no navigation
+    return <div className="space-y-1"></div>;
   };
 
   return (
-    <div className="sidebar pt-6">
-      {renderLinks()}
-    </div>
+    <Card className={`p-4 overflow-y-auto ${
+      isMobile 
+        ? 'h-[calc(100vh-6rem)] w-full' 
+        : 'w-full h-[calc(100vh-2rem)] sticky top-6'
+    }`}>
+      <nav className="space-y-2">
+        {renderLinks()}
+      </nav>
+    </Card>
   );
 }
