@@ -256,7 +256,37 @@ export default function Home() {
                         className="bg-white border border-gray-200 rounded-xl p-8 shadow-md hover:shadow-lg transition-all duration-300"
                       >
                         <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mb-6">
-                          <div className="w-6 h-6 bg-red-600 rounded"></div>
+                          {/* Dynamic icon based on feature title */}
+                          {feature.title === "Report Overview" && (
+                            <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                          )}
+                          {feature.title === "Smart Task Assignment" && (
+                            <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                            </svg>
+                          )}
+                          {feature.title === "Excel Report Export" && (
+                            <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                          )}
+                          {feature.title === "Visual Stats & Charts" && (
+                            <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                            </svg>
+                          )}
+                          {feature.title === "Performance Analytics" && (
+                            <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                            </svg>
+                          )}
+                          {feature.title === "Smart Notifications" && (
+                            <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-5 5v-5zM10.07 2.82l3.46 3.46M12 10c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9 9 4.03 9 9zM10 8.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" />
+                            </svg>
+                          )}
                         </div>
                         <h3 className="text-xl font-bold mb-4 text-gray-900">
                           {feature.title}
@@ -344,7 +374,27 @@ export default function Home() {
                         className="bg-white border border-gray-200 rounded-xl p-8 shadow-md hover:shadow-lg transition-all duration-300"
                       >
                         <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-6">
-                          <div className="w-6 h-6 bg-blue-600 rounded"></div>
+                          {/* Dynamic icon based on feature title */}
+                          {feature.title === "Lightning-Fast Reporting" && (
+                            <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                            </svg>
+                          )}
+                          {feature.title === "Live Progress Tracking" && (
+                            <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                            </svg>
+                          )}
+                          {feature.title === "Comprehensive History" && (
+                            <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                          )}
+                          {feature.title === "Intuitive Design" && (
+                            <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                            </svg>
+                          )}
                         </div>
                         <h3 className="text-xl font-bold mb-4 text-gray-900">
                           {feature.title}
@@ -427,7 +477,7 @@ export default function Home() {
               <div className="grid grid-cols-2 gap-6">
                 <div className="text-center">
                   <div className="text-3xl font-bold text-red-600 mb-2">2024</div>
-                  <div className="text-gray-600 text-sm">Year Founded</div>
+                  <div className="text-gray-600 text-sm">Year Developed</div>
                 </div>
                 <div className="text-center">
                   <div className="text-3xl font-bold text-blue-600 mb-2">100%</div>
@@ -457,28 +507,49 @@ export default function Home() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
               <div className="text-center">
                 <div className="w-16 h-16 bg-white rounded-lg shadow-md flex items-center justify-center mx-auto mb-4">
-                  <span className="text-2xl font-bold text-blue-600">React</span>
+                  <svg className="w-12 h-12" viewBox="0 0 256 256" fill="none">
+                    <circle cx="128" cy="128" r="3" fill="#61DAFB"/>
+                    <ellipse cx="128" cy="128" rx="95" ry="35" stroke="#61DAFB" strokeWidth="8" fill="none"/>
+                    <ellipse cx="128" cy="128" rx="95" ry="35" stroke="#61DAFB" strokeWidth="8" fill="none" transform="rotate(60 128 128)"/>
+                    <ellipse cx="128" cy="128" rx="95" ry="35" stroke="#61DAFB" strokeWidth="8" fill="none" transform="rotate(120 128 128)"/>
+                  </svg>
                 </div>
                 <h4 className="font-medium text-gray-900">Frontend</h4>
                 <p className="text-sm text-gray-600">Next.js & React</p>
               </div>
               <div className="text-center">
                 <div className="w-16 h-16 bg-white rounded-lg shadow-md flex items-center justify-center mx-auto mb-4">
-                  <span className="text-2xl font-bold text-green-600">Spring</span>
+                  <svg className="w-12 h-12" viewBox="0 0 256 256" fill="none">
+                    <circle cx="128" cy="128" r="128" fill="#68bd45"/>
+                    <path d="M128 64c-35.35 0-64 28.65-64 64 0 35.35 28.65 64 64 64 35.35 0 64-28.65 64-64 0-35.35-28.65-64-64-64z" fill="white"/>
+                    <path d="M200 128c0-39.76-32.24-72-72-72s-72 32.24-72 72 32.24 72 72 72 72-32.24 72-72z" fill="none" stroke="white" strokeWidth="4"/>
+                    <path d="M128 96c-17.67 0-32 14.33-32 32s14.33 32 32 32 32-14.33 32-32-14.33-32-32-32z" fill="#68bd45"/>
+                  </svg>
                 </div>
                 <h4 className="font-medium text-gray-900">Backend</h4>
                 <p className="text-sm text-gray-600">Spring Boot</p>
               </div>
               <div className="text-center">
                 <div className="w-16 h-16 bg-white rounded-lg shadow-md flex items-center justify-center mx-auto mb-4">
-                  <span className="text-2xl font-bold text-purple-600">DB</span>
+                  <svg className="w-12 h-12" viewBox="0 0 256 256" fill="none">
+                    <path d="M230 128c0 17-8 33-22 43l-12-8c10-7 16-19 16-31 0-22-18-40-40-40-11 0-21 4-28 12l-8-6c10-11 24-18 40-18 29 0 54 23 54 52z" fill="#336791"/>
+                    <ellipse cx="100" cy="100" rx="8" ry="12" fill="#336791" transform="rotate(-15 100 100)"/>
+                    <ellipse cx="156" cy="100" rx="8" ry="12" fill="#336791" transform="rotate(15 156 100)"/>
+                    <path d="M128 200c-39 0-72-31-72-72 0-20 8-38 22-51l8 6c-11 10-18 25-18 41 0 33 27 60 60 60s60-27 60-60c0-16-7-31-18-41l8-6c14 13 22 31 22 51 0 41-33 72-72 72z" fill="#336791"/>
+                    <circle cx="128" cy="180" r="6" fill="#336791"/>
+                  </svg>
                 </div>
                 <h4 className="font-medium text-gray-900">Database</h4>
                 <p className="text-sm text-gray-600">PostgreSQL</p>
               </div>
               <div className="text-center">
                 <div className="w-16 h-16 bg-white rounded-lg shadow-md flex items-center justify-center mx-auto mb-4">
-                  <span className="text-2xl font-bold text-blue-500">Azure</span>
+                  <svg className="w-12 h-12" viewBox="0 0 256 256" fill="none">
+                    <path d="M80 80h96l16 32-16 32H80L64 112z" fill="#0078d4"/>
+                    <path d="M176 80h32l16 32-16 32h-32l-16-32z" fill="#40e0d0"/>
+                    <path d="M48 144h96l16 32-16 32H48l-16-32z" fill="#0078d4"/>
+                    <path d="M144 144h64l16 32-16 32h-64l-16-32z" fill="#40e0d0"/>
+                  </svg>
                 </div>
                 <h4 className="font-medium text-gray-900">Cloud</h4>
                 <p className="text-sm text-gray-600">Microsoft Azure</p>
