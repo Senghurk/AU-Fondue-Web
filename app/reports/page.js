@@ -186,11 +186,6 @@ export default function ReportsPage() {
       report.reportedBy?.username?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Recent reports (last 10 reports, sorted by newest first)
-  const recentReports = [...filteredReports]
-    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-    .slice(0, 10);
-
   // Check if report is new (within last 24 hours)
   const isNewReport = (createdAt) => {
     const reportDate = new Date(createdAt);
@@ -199,11 +194,22 @@ export default function ReportsPage() {
     return diffHours <= 24;
   };
 
-  const groupedReports = filteredReports.reduce((groups, report) => {
-    if (!groups[report.category]) groups[report.category] = [];
-    groups[report.category].push(report);
-    return groups;
-  }, {});
+  // Recent reports (only NEW reports within last 24 hours)
+  const recentReports = [...filteredReports]
+    .filter(report => isNewReport(report.createdAt)) // Only include reports that are actually "new"
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+    .slice(0, 10);
+
+  // Get IDs of reports in Recent Reports to avoid duplicates
+  const recentReportIds = new Set(recentReports.map(report => report.id));
+
+  const groupedReports = filteredReports
+    .filter(report => !recentReportIds.has(report.id)) // Exclude reports already in Recent Reports
+    .reduce((groups, report) => {
+      if (!groups[report.category]) groups[report.category] = [];
+      groups[report.category].push(report);
+      return groups;
+    }, {});
 
   // Toggle category collapse/expand
   const toggleCategory = (category) => {

@@ -333,67 +333,6 @@ export default function AssignedReportsPage() {
     }
   };
 
-  // ------- Filter + Group ----------
-  // Hide COMPLETED from the page
-  const filteredReports = reports.filter((report) => {
-    // Exclude completed reports
-    if (report.status === "COMPLETED") return false;
-    
-    // Apply search filter
-    const matchesSearch = !searchQuery || 
-      report.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      report.category?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      report.reportedBy?.username?.toLowerCase().includes(searchQuery.toLowerCase());
-    
-    if (!matchesSearch) return false;
-    
-    // Apply status filter
-    if (!statusFilter) return true; // Show all if no status filter
-    
-    switch (statusFilter) {
-      case "PENDING":
-        return report.status === "PENDING";
-      case "IN_PROGRESS":
-        return report.status === "IN PROGRESS"; // Fixed: using space instead of underscore
-      case "OK":
-        const okRemark = getLatestRemark(report);
-        return okRemark === "OK";
-      case "RF":
-        const rfRemark = getLatestRemark(report);
-        return rfRemark === "RF";
-      case "PR":
-        const prRemark = getLatestRemark(report);
-        return prRemark === "PR";
-      default:
-        return true;
-    }
-  });
-
-  // Recent reports (last 10 reports, sorted by newest first)
-  const recentReports = [...filteredReports]
-    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-    .slice(0, 10);
-
-  // Check if report is new (within last 24 hours)
-  const isNewReport = (report) => {
-    const reportDate = new Date(report.createdAt);
-    const now = new Date();
-    const diffHours = (now - reportDate) / (1000 * 60 * 60);
-    const isWithin24Hours = diffHours <= 24;
-    const hasBeenViewed = viewedReports.has(report.id);
-    return isWithin24Hours && !hasBeenViewed;
-  };
-
-  // Save remark to localStorage
-  const saveRemarkToStorage = (reportId, remark) => {
-    const updatedRemarks = { ...reportRemarks, [reportId]: remark };
-    setReportRemarks(updatedRemarks);
-    
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('reportRemarks', JSON.stringify(updatedRemarks));
-    }
-  };
-
   // Get the latest remark from stored data or report updates
   const getLatestRemark = (report) => {
     // First check if we have a stored remark for this report
@@ -417,6 +356,65 @@ export default function AssignedReportsPage() {
     
     // If no stored remark and no updates, return null
     return null;
+  };
+
+  // ------- Filter + Group ----------
+  // Hide COMPLETED from the page
+  const filteredReports = reports.filter((report) => {
+    // Exclude completed reports
+    if (report.status === "COMPLETED") return false;
+    
+    // Apply search filter
+    const matchesSearch = !searchQuery || 
+      report.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      report.category?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      report.reportedBy?.username?.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    if (!matchesSearch) return false;
+    
+    // Apply status filter
+    if (!statusFilter) return true; // Show all if no status filter
+    
+    switch (statusFilter) {
+      case "PENDING":
+        return report.status === "PENDING";
+      case "IN_PROGRESS":
+        return report.status === "IN PROGRESS"; // Fixed: using space instead of underscore
+      case "RF":
+        const rfRemark = getLatestRemark(report);
+        return rfRemark === "RF";
+      case "PR":
+        const prRemark = getLatestRemark(report);
+        return prRemark === "PR";
+      default:
+        return true;
+    }
+  });
+
+  // Check if report is new (within last 24 hours and not viewed)
+  const isNewReport = (report) => {
+    const reportDate = new Date(report.createdAt);
+    const now = new Date();
+    const diffHours = (now - reportDate) / (1000 * 60 * 60);
+    const isWithin24Hours = diffHours <= 24;
+    const hasBeenViewed = viewedReports.has(report.id);
+    return isWithin24Hours && !hasBeenViewed;
+  };
+
+  // Recent reports (only NEW reports that haven't been viewed yet)
+  const recentReports = [...filteredReports]
+    .filter(report => isNewReport(report)) // Only include reports that are actually "new"
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+    .slice(0, 10);
+
+  // Save remark to localStorage
+  const saveRemarkToStorage = (reportId, remark) => {
+    const updatedRemarks = { ...reportRemarks, [reportId]: remark };
+    setReportRemarks(updatedRemarks);
+    
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('reportRemarks', JSON.stringify(updatedRemarks));
+    }
   };
 
   // Render remark tag with appropriate styling
@@ -467,11 +465,16 @@ export default function AssignedReportsPage() {
     );
   };
 
-  const groupedReports = filteredReports.reduce((groups, report) => {
-    if (!groups[report.category]) groups[report.category] = [];
-    groups[report.category].push(report);
-    return groups;
-  }, {});
+  // Get IDs of reports in Recent Reports to avoid duplicates
+  const recentReportIds = new Set(recentReports.map(report => report.id));
+
+  const groupedReports = filteredReports
+    .filter(report => !recentReportIds.has(report.id)) // Exclude reports already in Recent Reports
+    .reduce((groups, report) => {
+      if (!groups[report.category]) groups[report.category] = [];
+      groups[report.category].push(report);
+      return groups;
+    }, {});
 
   // Toggle category collapse/expand
   const toggleCategory = (category) => {
@@ -544,9 +547,8 @@ export default function AssignedReportsPage() {
                   <option value="">All Status</option>
                   <option value="PENDING">Pending</option>
                   <option value="IN_PROGRESS">In Progress</option>
-                  <option value="OK">OK (Approved)</option>
-                  <option value="RF">RF (Requisition Form)</option>
-                  <option value="PR">PR (Purchase Request)</option>
+                  <option value="RF">RF</option>
+                  <option value="PR">PR</option>
                 </select>
               </div>
 
@@ -584,11 +586,7 @@ export default function AssignedReportsPage() {
                 {statusFilter && (
                   <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-green-100 text-green-800">
                     Status: {
-                      statusFilter === "RF" ? "RF (Requisition Form)" : 
-                      statusFilter === "PR" ? "PR (Purchase Request)" : 
-                      statusFilter === "OK" ? "OK (Approved)" :
-                      statusFilter === "IN_PROGRESS" ? "In Progress" :
-                      statusFilter
+                      statusFilter === "IN_PROGRESS" ? "In Progress" : statusFilter
                     }
                     <button
                       onClick={() => setStatusFilter("")}
