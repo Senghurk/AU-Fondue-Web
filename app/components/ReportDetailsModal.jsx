@@ -132,13 +132,25 @@ export default function ReportDetailsModal({
                       {updateHistory.map((update, index) => (
                         <div key={index} className="border-l-4 border-blue-200 pl-4 py-2">
                           <div className="flex justify-between items-start mb-1">
-                            <span className="text-sm font-medium text-gray-900">
-                              Status: {update.status}
-                            </span>
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm font-medium text-gray-900">
+                                Status: {update.status}
+                              </span>
+                              {(update.resolutionType || update.remark) && (
+                                <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
+                                  (update.resolutionType === 'OK' || update.remark === 'OK') ? 'bg-green-100 text-green-800' :
+                                  (update.resolutionType === 'RF' || update.remark === 'RF') ? 'bg-orange-100 text-orange-800' :
+                                  (update.resolutionType === 'PR' || update.remark === 'PR') ? 'bg-purple-100 text-purple-800' :
+                                  'bg-gray-100 text-gray-800'
+                                }`}>
+                                  {update.resolutionType || update.remark}
+                                </span>
+                              )}
+                            </div>
                             <span className="text-xs text-gray-500">
-                              {new Date(update.updatedAt).toLocaleString("en-GB", {
+                              {update.updateTime ? new Date(update.updateTime).toLocaleString("en-GB", {
                                 timeZone: "Asia/Bangkok",
-                              })}
+                              }) : "Invalid Date"}
                             </span>
                           </div>
                           <p className="text-sm text-gray-600">{update.comment}</p>

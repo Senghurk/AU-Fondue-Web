@@ -157,11 +157,19 @@ export default function AssignedReportsPage() {
 
   // ------- Media helpers ----------
   const toInlineUrl = (raw, type = "image") => {
-    // Ensure Azure Blob serves inline, not attachment
-    const base = `${raw}${sastoken}`;
-    const joiner = base.includes("?") ? "&" : "?";
-    const contentType = type === "video" ? "video/mp4" : "image/jpeg";
-    return `${base}${joiner}rscd=inline&rsct=${contentType}`;
+    // Check if the raw URL already has the SAS token
+    if (raw.includes("?sv=")) {
+      // URL already has SAS token, just add inline params
+      const joiner = raw.includes("?") ? "&" : "?";
+      const contentType = type === "video" ? "video/mp4" : "image/jpeg";
+      return `${raw}${joiner}rscd=inline&rsct=${contentType}`;
+    } else {
+      // Add SAS token and inline params
+      const base = `${raw}${sastoken}`;
+      const joiner = "&"; // SAS token always starts with ?, so we use &
+      const contentType = type === "video" ? "video/mp4" : "image/jpeg";
+      return `${base}${joiner}rscd=inline&rsct=${contentType}`;
+    }
   };
   
   const openMediaViewer = (raw, type = "image") => {
