@@ -11,11 +11,22 @@ import { ToastProvider } from "./context/ToastContext";
 import { GeistSans } from 'geist/font/sans';
 
 export default function RootLayout({ children }) {
+  const pathname = usePathname();
   const [activeTopLink, setActiveTopLink] = useState("/");
-  const [activeLink, setActiveLink] = useState("/");
+  const [activeLink, setActiveLink] = useState(pathname);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  const pathname = usePathname();
+
+  // Update activeLink when pathname changes
+  useEffect(() => {
+    setActiveLink(pathname);
+    // Set activeTopLink based on the pathname
+    if (pathname === "/admins" || pathname === "/user-list") {
+      setActiveTopLink("/admins");
+    } else {
+      setActiveTopLink("/");
+    }
+  }, [pathname]);
 
   // Check if mobile screen
   useEffect(() => {

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { getBackendUrl } from "../config/api";
 import ReportDetailsModal from "../components/ReportDetailsModal";
+import { Badge } from "@/components/ui/badge";
 
 export default function ReportsPage() {
   const backendUrl = getBackendUrl();
@@ -26,32 +27,90 @@ export default function ReportsPage() {
   // Details modal
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedReport, setSelectedReport] = useState(null);
+  
+  // Delete functionality
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [reportToDelete, setReportToDelete] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Media viewer (images and videos)
   const [mediaViewerOpen, setMediaViewerOpen] = useState(false);
   const [mediaViewerUrl, setMediaViewerUrl] = useState("");
   const [mediaViewerType, setMediaViewerType] = useState(""); // "image" or "video"
+  
+  // Track viewed reports locally
+  const [viewedReports, setViewedReports] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('unassignedViewedReports');
+      if (stored) {
+        try {
+          return new Set(JSON.parse(stored));
+        } catch (error) {
+          console.error('Error parsing viewed reports:', error);
+        }
+      }
+    }
+    return new Set();
+  });
 
   const AssignmentFeedback = ({ message, onClose }) => {
     if (!message) return null;
-
-    const style =
-      message.type === "success"
-        ? "bg-green-100 border-green-400 text-green-700"
-        : message.type === "error"
-        ? "bg-red-100 border-red-400 text-red-700"
-        : "bg-blue-100 border-blue-400 text-blue-700";
-
+    
+    const getStyles = () => {
+      switch(message.type) {
+        case "success":
+          return {
+            bg: "bg-gradient-to-r from-green-500 to-emerald-600",
+            icon: (
+              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            )
+          };
+        case "error":
+          return {
+            bg: "bg-gradient-to-r from-red-500 to-rose-600",
+            icon: (
+              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            )
+          };
+        default:
+          return {
+            bg: "bg-gradient-to-r from-blue-500 to-indigo-600",
+            icon: (
+              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            )
+          };
+      }
+    };
+    
+    const { bg, icon } = getStyles();
+    
     return (
-      <div className={`border px-4 py-3 rounded mb-4 relative ${style}`} role="alert">
-        <div className="flex justify-between items-center">
-          <span className="block sm:inline">{message.text}</span>
-          <button
-            className="text-current hover:text-gray-600 ml-4 text-xl font-bold"
-            onClick={onClose}
-          >
-            ×
-          </button>
+      <div className="fixed inset-0 flex items-center justify-center z-[100] pointer-events-none">
+        <div className="pointer-events-auto animate-[slideDown_0.3s_ease-out] transform">
+          <div className={`${bg} rounded-2xl shadow-2xl px-6 py-4 max-w-md mx-auto`}>
+            <div className="flex items-center gap-4">
+              <div className="flex-shrink-0 bg-white/20 backdrop-blur-sm rounded-full p-2">
+                {icon}
+              </div>
+              <div className="flex-1">
+                <p className="text-white font-semibold text-lg">{message.text}</p>
+              </div>
+              <button
+                onClick={onClose}
+                className="flex-shrink-0 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full p-1.5 transition-all duration-200 group"
+              >
+                <svg className="w-5 h-5 text-white group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -78,10 +137,11 @@ export default function ReportsPage() {
 
   const fetchReports = async () => {
     try {
-      const res = await fetch(`${backendUrl}/issues/unassigned`);
+      const res = await fetch(`${backendUrl}/issues/unassigned?page=0&size=100`);
       if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
       
       const data = await res.json();
+      console.log('Unassigned reports from backend:', data); // Debug to see if remarkType is coming
       if (!Array.isArray(data)) return;
       
       setReports(data);
@@ -117,6 +177,7 @@ export default function ReportsPage() {
         type: "error",
         text: "Please select a staff member.",
       });
+      setTimeout(() => setAssignmentMessage(null), 3000);
       return;
     }
 
@@ -131,12 +192,17 @@ export default function ReportsPage() {
       );
 
       if (response.ok) {
+        // Refresh reports first
+        await fetchReports();
+        
+        // Show success message after assignment is complete
         setAssignmentMessage({
           type: "success",
-          text: "Report assigned successfully!",
+          text: "Report Assigned Successfully",
         });
-        fetchReports();
-        setTimeout(() => setAssignmentMessage(null), 3000);
+        
+        // Clear message after delay
+        setTimeout(() => setAssignmentMessage(null), 2000);
       } else {
         throw new Error(`Failed to assign: ${response.status}`);
       }
@@ -144,17 +210,123 @@ export default function ReportsPage() {
       console.error("Assignment error:", error);
       setAssignmentMessage({
         type: "error",
-        text: `Failed to assign report: ${error.message}`,
+        text: error instanceof Error ? `Failed to assign report: ${error.message}` : "Failed to assign report",
       });
+      setTimeout(() => setAssignmentMessage(null), 3000);
     } finally {
       setIsAssigning((prev) => ({ ...prev, [id]: false }));
     }
   };
 
+  // Delete report handlers
+  const handleDeleteClick = (report, e) => {
+    e.stopPropagation(); // Prevent card click event
+    setReportToDelete(report);
+    setDeleteConfirmOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!reportToDelete) return;
+
+    setIsDeleting(true);
+    try {
+      const response = await fetch(`${backendUrl}/issues/reports/${reportToDelete.id}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        // Show success message
+        setAssignmentMessage({
+          type: "success",
+          text: "Report deleted successfully",
+        });
+
+        // Refresh the reports list
+        await fetchReports();
+
+        // Close dialog and clear state
+        setDeleteConfirmOpen(false);
+        setReportToDelete(null);
+
+        // Clear message after delay
+        setTimeout(() => setAssignmentMessage(null), 2000);
+      } else {
+        throw new Error(`Failed to delete: ${response.status}`);
+      }
+    } catch (error) {
+      console.error("Delete error:", error);
+      setAssignmentMessage({
+        type: "error",
+        text: error instanceof Error ? `Failed to delete report: ${error.message}` : "Failed to delete report",
+      });
+      setTimeout(() => setAssignmentMessage(null), 3000);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteConfirmOpen(false);
+    setReportToDelete(null);
+  };
+
   // Details modal
-  const openModal = (report) => {
+  const openModal = async (report) => {
     setSelectedReport(report);
     setIsModalOpen(true);
+    
+    // Mark 'new' remark as viewed when opening details
+    if (report.remarkType === 'new' && !report.remarkViewed) {
+      try {
+        const response = await fetch(`${backendUrl}/issues/${report.id}/remark/view`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            adminEmail: 'admin@au.edu' // You may want to get this from user session
+          })
+        });
+        
+        if (response.ok) {
+          // Update the report in the local state to reflect the viewed status
+          // Set remarkViewed to true and clear the remarkType for 'new'
+          setReports(prevReports => 
+            prevReports.map(r => 
+              r.id === report.id 
+                ? { ...r, remarkType: r.remarkType === 'new' ? null : r.remarkType, remarkViewed: true }
+                : r
+            )
+          );
+          
+          // Force a re-render by updating the selected report as well
+          setSelectedReport(prev => ({ ...report, remarkType: null, remarkViewed: true }));
+          
+          // Save to localStorage
+          const newViewedSet = new Set(viewedReports);
+          newViewedSet.add(report.id);
+          setViewedReports(newViewedSet);
+          localStorage.setItem('unassignedViewedReports', JSON.stringify(Array.from(newViewedSet)));
+        }
+      } catch (error) {
+        console.error('Error marking remark as viewed:', error);
+      }
+    } else if (isNewReport(report)) {
+      // Even if no backend remark, mark time-based new reports as viewed locally
+      setReports(prevReports => 
+        prevReports.map(r => 
+          r.id === report.id 
+            ? { ...r, remarkViewed: true }
+            : r
+        )
+      );
+      
+      // Save to localStorage
+      const newViewedSet = new Set(viewedReports);
+      newViewedSet.add(report.id);
+      setViewedReports(newViewedSet);
+      localStorage.setItem('unassignedViewedReports', JSON.stringify(Array.from(newViewedSet)));
+    }
   };
   const closeModal = () => {
     setSelectedReport(null);
@@ -186,17 +358,64 @@ export default function ReportsPage() {
       report.reportedBy?.username?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Check if report is new (within last 24 hours)
-  const isNewReport = (createdAt) => {
-    const reportDate = new Date(createdAt);
+  // Helper functions for rendering badges
+  const renderStatusBadge = (status) => {
+    const statusConfig = {
+      'PENDING': {
+        className: 'bg-yellow-100 text-yellow-800 border-yellow-300 hover:bg-yellow-100',
+      },
+      'IN PROGRESS': {
+        className: 'bg-blue-100 text-blue-800 border-blue-300 hover:bg-blue-100',
+      },
+      'COMPLETED': {
+        className: 'bg-green-100 text-green-800 border-green-300 hover:bg-green-100',
+      }
+    };
+
+    const config = statusConfig[status] || statusConfig['PENDING'];
+    
+    return (
+      <Badge className={config.className} variant="outline">
+        {status}
+      </Badge>
+    );
+  };
+
+  const renderNewBadge = () => {
+    return (
+      <Badge className="bg-green-100 text-green-800 border-green-300 hover:bg-green-100" variant="outline">
+        NEW
+      </Badge>
+    );
+  };
+
+  // Check if report is new (within last 24 hours or has 'new' remark)
+  const isNewReport = (report) => {
+    // Check localStorage first
+    if (viewedReports.has(report.id)) {
+      return false;
+    }
+    
+    // If report has been marked as viewed, it's not new anymore
+    if (report.remarkViewed === true) {
+      return false;
+    }
+    
+    // Check if report has 'new' remark from backend
+    if (report.remarkType === 'new') {
+      return true;
+    }
+    
+    // Fallback to time-based check
+    const reportDate = new Date(report.createdAt);
     const now = new Date();
     const diffHours = (now - reportDate) / (1000 * 60 * 60);
     return diffHours <= 24;
   };
 
-  // Recent reports (only NEW reports within last 24 hours)
+  // Recent reports (only NEW reports within last 24 hours or with 'new' remark)
   const recentReports = [...filteredReports]
-    .filter(report => isNewReport(report.createdAt)) // Only include reports that are actually "new"
+    .filter(report => isNewReport(report)) // Only include reports that are actually "new"
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
     .slice(0, 10);
 
@@ -310,7 +529,7 @@ export default function ReportsPage() {
                       {/* Header with gradient background */}
                       <div className="bg-gradient-to-r from-purple-50 to-pink-50 px-4 py-3 border-b border-gray-100">
                         <div className="flex justify-between items-start">
-                          <div className="flex-1 min-w-0">
+                          <div className="flex-1 min-w-0 pr-10">
                             <h3 className="text-base font-bold text-gray-900 truncate mb-1">
                               {report.description?.substring(0, 40)}...
                             </h3>
@@ -319,18 +538,8 @@ export default function ReportsPage() {
                             </p>
                           </div>
                           <div className="ml-4 flex-shrink-0 flex flex-col gap-1">
-                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-800 border border-yellow-200">
-                              <div className="w-1.5 h-1.5 bg-yellow-500 rounded-full mr-1.5"></div>
-                              {report.status}
-                            </span>
-                            {isNewReport(report.createdAt) && (
-                              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800 border border-green-200">
-                                <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                                </svg>
-                                NEW
-                              </span>
-                            )}
+                            {renderStatusBadge(report.status)}
+                            {isNewReport(report) && renderNewBadge()}
                           </div>
                         </div>
                       </div>
@@ -563,12 +772,12 @@ export default function ReportsPage() {
                 {reports.map((report) => (
                 <div
                   key={report.id}
-                  className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl hover:border-blue-200 transition-all duration-300 transform hover:-translate-y-1"
+                  className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl hover:border-blue-200 transition-all duration-300 transform hover:-translate-y-1 relative"
                 >
                   {/* Header with gradient background */}
                   <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-4 py-3 border-b border-gray-100">
                     <div className="flex justify-between items-start">
-                      <div className="flex-1 min-w-0">
+                      <div className="flex-1 min-w-0 pr-10">
                         <h3 className="text-base font-bold text-gray-900 truncate mb-1">
                           {report.description?.substring(0, 45)}...
                         </h3>
@@ -577,10 +786,7 @@ export default function ReportsPage() {
                         </p>
                       </div>
                       <div className="ml-4 flex-shrink-0">
-                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-800 border border-yellow-200">
-                          <div className="w-1.5 h-1.5 bg-yellow-500 rounded-full mr-1.5"></div>
-                          {report.status}
-                        </span>
+                        {renderStatusBadge(report.status)}
                       </div>
                     </div>
                   </div>
@@ -706,7 +912,7 @@ export default function ReportsPage() {
                           onChange={(e) =>
                             handleAssignStaff(report.id, e.target.value)
                           }
-                          className="w-full px-3 py-2 text-sm bg-gradient-to-br from-white to-gray-50 border-2 border-gray-200 rounded-xl shadow-sm appearance-none cursor-pointer transition-all duration-200 hover:border-blue-300 hover:shadow-md focus:outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-500 focus:bg-white"
+                          className="w-full pl-3 pr-10 py-2 text-sm bg-gradient-to-br from-white to-gray-50 border-2 border-gray-200 rounded-xl shadow-sm appearance-none cursor-pointer transition-all duration-200 hover:border-blue-300 hover:shadow-md focus:outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-500 focus:bg-white"
                         >
                           <option value="" className="text-gray-500">Choose a staff member...</option>
                           {staffMembers.map((staff) => (
@@ -723,41 +929,55 @@ export default function ReportsPage() {
                       </div>
                     </div>
 
-                        <div className="flex gap-3">
-                          <button
-                            onClick={() => handleConfirmAssign(report.id)}
-                            disabled={isAssigning[report.id] || !assignments[report.id]}
-                            className={`flex-1 px-3 py-2 rounded-xl font-semibold transition-all duration-200 min-h-[40px] text-sm ${
-                              isAssigning[report.id]
-                                ? "bg-gray-400 text-white cursor-not-allowed"
-                                : !assignments[report.id]
-                                ? "bg-gray-200 text-gray-500 cursor-not-allowed"
-                                : "bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700 shadow-md hover:shadow-lg transform hover:scale-105"
-                            }`}
-                          >
-                            {isAssigning[report.id] ? (
-                              <div className="flex items-center justify-center gap-2">
-                                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                                Assigning...
-                              </div>
-                            ) : (
+                        <div className="space-y-2">
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => handleConfirmAssign(report.id)}
+                              disabled={isAssigning[report.id] || !assignments[report.id]}
+                              className={`flex-1 px-3 py-2 rounded-xl font-semibold transition-all duration-200 min-h-[40px] text-sm ${
+                                isAssigning[report.id]
+                                  ? "bg-gray-400 text-white cursor-not-allowed"
+                                  : !assignments[report.id]
+                                  ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                                  : "bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700 shadow-md hover:shadow-lg transform hover:scale-105"
+                              }`}
+                            >
+                              {isAssigning[report.id] ? (
+                                <div className="flex items-center justify-center gap-2">
+                                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                  Assigning...
+                                </div>
+                              ) : (
+                                <div className="flex items-center justify-center gap-2">
+                                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                  </svg>
+                                  Assign
+                                </div>
+                              )}
+                            </button>
+                            <button
+                              onClick={() => openModal(report)}
+                              className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 text-white px-3 py-2 rounded-xl font-semibold hover:from-blue-600 hover:to-blue-700 transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 min-h-[40px] text-sm"
+                            >
                               <div className="flex items-center justify-center gap-2">
                                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                                 </svg>
-                                Assign
+                                Details
                               </div>
-                            )}
-                          </button>
+                            </button>
+                          </div>
                           <button
-                            onClick={() => openModal(report)}
-                            className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 text-white px-3 py-2 rounded-xl font-semibold hover:from-blue-600 hover:to-blue-700 transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 min-h-[40px] text-sm"
+                            onClick={(e) => handleDeleteClick(report, e)}
+                            className="w-full bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-xl font-semibold transition-all duration-200 shadow-sm hover:shadow-md text-sm"
+                            title="Delete Report"
                           >
                             <div className="flex items-center justify-center gap-2">
-                              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                               </svg>
-                              Details
+                              Delete Report
                             </div>
                           </button>
                         </div>
@@ -815,6 +1035,64 @@ export default function ReportsPage() {
                 Your browser does not support video playback.
               </video>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Dialog */}
+      {deleteConfirmOpen && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden">
+            <div className="bg-gradient-to-r from-red-500 to-red-600 px-6 py-4">
+              <h3 className="text-xl font-bold text-white">Confirm Delete</h3>
+            </div>
+            <div className="p-6">
+              <div className="flex items-start gap-4 mb-6">
+                <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
+                  <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                </div>
+                <div className="flex-1">
+                  <p className="text-gray-900 font-medium mb-2">
+                    Are you sure you want to delete this report?
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    Report #{reportToDelete?.id}: {reportToDelete?.description?.substring(0, 50)}...
+                  </p>
+                  <p className="text-sm text-red-600 mt-2 font-medium">
+                    This action cannot be undone.
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-3">
+                <button
+                  onClick={handleDeleteCancel}
+                  disabled={isDeleting}
+                  className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-800 font-semibold py-2.5 px-4 rounded-xl transition-all duration-200"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleDeleteConfirm}
+                  disabled={isDeleting}
+                  className={`flex-1 font-semibold py-2.5 px-4 rounded-xl transition-all duration-200 ${
+                    isDeleting 
+                      ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
+                      : 'bg-red-600 hover:bg-red-700 text-white'
+                  }`}
+                >
+                  {isDeleting ? (
+                    <div className="flex items-center justify-center gap-2">
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      Deleting...
+                    </div>
+                  ) : (
+                    'Delete Report'
+                  )}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
