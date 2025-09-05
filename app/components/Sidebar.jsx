@@ -43,23 +43,56 @@ export default function Sidebar({ activeTopLink, activeLink, setActiveLink, isMo
   };
 
   const renderLinks = () => {
-    // OM Staff - Only show Unassigned Reports
+    // OM Staff - Show both Unassigned and Assigned Reports
     if (isOMStaff()) {
       return (
         <div className="space-y-1">
-          <Button
-            variant={activeLink === "/reports" ? "default" : "ghost"}
-            className="w-full justify-start"
-            asChild
+          {/* Reports Menu */}
+          <Collapsible
+            open={isReportsMenuOpen}
+            onOpenChange={setIsReportsMenuOpen}
           >
-            <Link
-              href="/reports"
-              onClick={() => handleLinkClick("/reports")}
-            >
-              <FileText className="mr-2 h-4 w-4" />
-              Unassigned Reports
-            </Link>
-          </Button>
+            <CollapsibleTrigger asChild>
+              <Button
+                variant="ghost"
+                className="w-full justify-start"
+              >
+                <FileText className="mr-2 h-4 w-4" />
+                <span className="ml-0.4">Reports</span>
+                {isReportsMenuOpen ? (
+                  <ChevronDown className="ml-auto h-4 w-4" />
+                ) : (
+                  <ChevronRight className="ml-auto h-4 w-4" />
+                )}
+              </Button>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="space-y-1 ml-9 mt-1">
+              <Button
+                variant={activeLink === "/reports" ? "default" : "ghost"}
+                className="w-full justify-start pl-6"
+                asChild
+              >
+                <Link
+                  href="/reports"
+                  onClick={() => handleLinkClick("/reports")}
+                >
+                  Unassigned Reports
+                </Link>
+              </Button>
+              <Button
+                variant={activeLink === "/assignedReports" ? "default" : "ghost"}
+                className="w-full justify-start pl-6"
+                asChild
+              >
+                <Link
+                  href="/assignedReports"
+                  onClick={() => handleLinkClick("/assignedReports")}
+                >
+                  Assigned Reports
+                </Link>
+              </Button>
+            </CollapsibleContent>
+          </Collapsible>
         </div>
       );
     }

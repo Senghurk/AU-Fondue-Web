@@ -86,5 +86,64 @@
   }
 }
 
+/* Print styles for Daily Reports */
+@media print {
+  /* Hide all navigation and UI elements */
+  nav,
+  aside,
+  header,
+  .print\\:hidden,
+  [class*="sidebar"],
+  [class*="Sidebar"],
+  [class*="navigation"],
+  [class*="Navigation"],
+  button:not(.print-button),
+  .fixed,
+  .sticky {
+    display: none !important;
+  }
+
+  /* Hide layout wrapper elements */
+  body > div > div > div:first-child {
+    display: none !important;
+  }
+
+  /* Make main content full width */
+  main {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* Remove all backgrounds and borders from layout */
+  body,
+  body > div,
+  body > div > div {
+    background: white !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Ensure the report content is visible */
+  .flex-1 {
+    flex: none !important;
+    width: 100% !important;
+  }
+
+  /* Remove rounded corners and shadows from main */
+  .bg-card {
+    background: white !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+
+  /* Page setup */
+  @page {
+    size: A4 landscape;
+    margin: 10mm;
+  }
+}
+
 /* Legacy styles - most replaced by shadcn/ui components */
 

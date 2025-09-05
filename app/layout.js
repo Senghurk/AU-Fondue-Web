@@ -54,7 +54,7 @@ export default function RootLayout({ children }) {
           {isPublicPage ? (
             <div className="w-full min-h-screen">{children}</div>
           ) : (
-            <div className="min-h-screen flex flex-col">
+            <div className="min-h-screen flex flex-col print:min-h-0 print:block">
               {/* Top bar */}
               <TopBar
                 activeTopLink={activeTopLink}
@@ -66,10 +66,10 @@ export default function RootLayout({ children }) {
               />
 
               {/* Page layout */}
-              <div className="flex-1 flex relative">
+              <div className="flex-1 flex relative print:block print:w-full">
                 {/* Desktop Sidebar */}
                 {!isMobile && (
-                  <div className="w-80 p-6 pr-3">
+                  <div className="w-80 p-6 pr-3 print:hidden">
                     <SideBar
                       activeTopLink={activeTopLink}
                       activeLink={activeLink}
@@ -84,11 +84,11 @@ export default function RootLayout({ children }) {
                   <>
                     {/* Backdrop */}
                     <div 
-                      className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+                      className="fixed inset-0 bg-black/50 z-40 lg:hidden print:hidden"
                       onClick={() => setSidebarOpen(false)}
                     />
                     {/* Sidebar */}
-                    <div className="fixed left-0 top-0 h-full w-80 bg-white z-50 shadow-xl lg:hidden transform transition-transform duration-300">
+                    <div className="fixed left-0 top-0 h-full w-80 bg-white z-50 shadow-xl lg:hidden transform transition-transform duration-300 print:hidden">
                       <div className="p-6">
                         <SideBar
                           activeTopLink={activeTopLink}
@@ -103,7 +103,7 @@ export default function RootLayout({ children }) {
                 )}
 
                 {/* Page content */}
-                <main className={`flex-1 bg-card rounded-lg overflow-auto ${
+                <main className={`flex-1 bg-card rounded-lg overflow-auto print:bg-white print:rounded-none print:p-0 print:overflow-visible ${
                   isMobile ? 'p-4' : 'p-6 pl-3'
                 }`}>
                   {children}
