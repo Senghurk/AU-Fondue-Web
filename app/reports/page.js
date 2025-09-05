@@ -902,26 +902,26 @@ export default function ReportsPage() {
                     {/* Action Controls */}
                     <div className="border-t border-gray-100 pt-3">
                       <div className="space-y-3">
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-800 mb-2">
-                        Assign Staff Member
-                      </label>
-                      <div className="relative">
-                        <select
-                          value={assignments[report.id] || ""}
-                          onChange={(e) =>
-                            handleAssignStaff(report.id, e.target.value)
-                          }
-                          className="w-full pl-3 pr-10 py-2 text-sm bg-gradient-to-br from-white to-gray-50 border-2 border-gray-200 rounded-xl shadow-sm appearance-none cursor-pointer transition-all duration-200 hover:border-blue-300 hover:shadow-md focus:outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-500 focus:bg-white"
-                        >
-                          <option value="" className="text-gray-500">Choose a staff member...</option>
+                        <div>
+                          <label className="block text-sm font-semibold text-gray-800 mb-2">
+                            Assign Staff Member
+                          </label>
+                          <div className="relative">
+                            <select
+                              value={assignments[report.id] || ""}
+                              onChange={(e) =>
+                                handleAssignStaff(report.id, e.target.value)
+                              }
+                              className="w-full pl-4 pr-12 py-2.5 text-sm bg-gradient-to-br from-white to-gray-50 border-2 border-gray-200 rounded-xl shadow-sm appearance-none cursor-pointer transition-all duration-200 hover:border-blue-300 hover:shadow-md focus:outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-500 focus:bg-white"
+                            >
+                              <option value="" className="text-gray-500">Choose a staff member...</option>
                           {staffMembers.map((staff) => (
                             <option key={staff.id} value={staff.id} className="py-2">
                               {staff.name}
                             </option>
                           ))}
                         </select>
-                        <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
+                        <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                           <svg className="w-5 h-5 text-blue-500 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                           </svg>

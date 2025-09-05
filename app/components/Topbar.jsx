@@ -43,7 +43,7 @@ export default function Topbar({ activeTopLink, setActiveTopLink, setActiveLink,
   };
 
   return (
-    <header className="bg-gradient-to-r from-slate-50 to-gray-100 border-b border-gray-200 shadow-sm">
+    <header className="bg-gradient-to-r from-slate-50 to-gray-100 border-b border-gray-200 shadow-sm print:hidden">
       <div className="flex items-center justify-between px-4 sm:px-6 py-4">
         {/* Mobile Menu Button & App Title */}
         <div className="flex items-center gap-3">
