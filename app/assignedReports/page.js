@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { getBackendUrl } from "../config/api";
 import ReportDetailsModal from "../components/ReportDetailsModal";
+import { Badge } from "@/components/ui/badge";
 
 export default function AssignedReportsPage() {
   const backendUrl = getBackendUrl();
@@ -28,6 +29,11 @@ export default function AssignedReportsPage() {
 
   const [isUpdating, setIsUpdating] = useState(false);
   const [updateMessage, setUpdateMessage] = useState(null);
+  
+  // Delete functionality
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [reportToDelete, setReportToDelete] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Media viewer (prevents downloads; shows images/videos inline)
   const [mediaViewerOpen, setMediaViewerOpen] = useState(false);
@@ -79,24 +85,71 @@ export default function AssignedReportsPage() {
   // ------- Helpers: notifications ----------
   const UpdateFeedback = ({ message, onClose }) => {
     if (!message) return null;
-    const style =
-      message.type === "success"
-        ? "bg-green-100 border-green-400 text-green-700"
-        : message.type === "warning"
-        ? "bg-yellow-100 border-yellow-400 text-yellow-700"
-        : message.type === "error"
-        ? "bg-red-100 border-red-400 text-red-700"
-        : "bg-blue-100 border-blue-400 text-blue-700";
+    
+    const getStyles = () => {
+      switch(message.type) {
+        case "success":
+          return {
+            bg: "bg-gradient-to-r from-green-500 to-emerald-600",
+            icon: (
+              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            )
+          };
+        case "warning":
+          return {
+            bg: "bg-gradient-to-r from-yellow-500 to-amber-600",
+            icon: (
+              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            )
+          };
+        case "error":
+          return {
+            bg: "bg-gradient-to-r from-red-500 to-rose-600",
+            icon: (
+              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            )
+          };
+        default:
+          return {
+            bg: "bg-gradient-to-r from-blue-500 to-indigo-600",
+            icon: (
+              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            )
+          };
+      }
+    };
+    
+    const { bg, icon } = getStyles();
+    
     return (
-      <div className={`border px-4 py-3 rounded mb-4 relative ${style}`} role="alert">
-        <div className="flex justify-between items-center">
-          <span className="block sm:inline">{message.text}</span>
-          <button
-            className="text-current hover:text-gray-600 ml-4 text-xl font-bold"
-            onClick={onClose}
-          >
-            ×
-          </button>
+      <div className="fixed inset-0 flex items-center justify-center z-[100] pointer-events-none">
+        <div className="pointer-events-auto animate-[slideDown_0.3s_ease-out] transform">
+          <div className={`${bg} rounded-2xl shadow-2xl px-6 py-4 max-w-md mx-auto`}>
+            <div className="flex items-center gap-4">
+              <div className="flex-shrink-0 bg-white/20 backdrop-blur-sm rounded-full p-2">
+                {icon}
+              </div>
+              <div className="flex-1">
+                <p className="text-white font-semibold text-lg">{message.text}</p>
+              </div>
+              <button
+                onClick={onClose}
+                className="flex-shrink-0 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full p-1.5 transition-all duration-200 group"
+              >
+                <svg className="w-5 h-5 text-white group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -171,10 +224,11 @@ export default function AssignedReportsPage() {
 
   const fetchReports = async () => {
     try {
-      const response = await fetch(`${backendUrl}/issues/assigned`);
+      const response = await fetch(`${backendUrl}/issues/assigned?page=0&size=100`);
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
       
       const data = await response.json();
+      console.log('Assigned reports from backend:', data); // Debug to see if remarkType is coming
       if (Array.isArray(data)) setReports(data);
       else setReports([]);
     } catch (error) {
@@ -229,7 +283,7 @@ export default function AssignedReportsPage() {
     });
   };
 
-  const handleOpenModal = (report, type) => {
+  const handleOpenModal = async (report, type) => {
     setSelectedReport(report);
     setModalType(type);
     setStatus(report.status || "PENDING");
@@ -243,6 +297,34 @@ export default function AssignedReportsPage() {
       // Mark as viewed when details are opened
       if (isNewReport(report)) {
         markReportAsViewed(report.id);
+        
+        // Also mark 'new' remark as viewed in backend
+        if (report.remarkType === 'new' && !report.remarkViewed) {
+          try {
+            const response = await fetch(`${backendUrl}/issues/${report.id}/remark/view`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                adminEmail: 'admin@au.edu'
+              })
+            });
+            
+            if (response.ok) {
+              // Update the report in the local state to reflect the viewed status
+              setReports(prevReports => 
+                prevReports.map(r => 
+                  r.id === report.id 
+                    ? { ...r, remarkViewed: true }
+                    : r
+                )
+              );
+            }
+          } catch (error) {
+            console.error('Error marking remark as viewed:', error);
+          }
+        }
       }
     }
   };
@@ -272,13 +354,30 @@ export default function AssignedReportsPage() {
       return;
     }
 
+    // Validate status and remark combination
+    if (status === "COMPLETED" && resolutionType !== "OK") {
+      setUpdateMessage({
+        type: "error",
+        text: "When status is COMPLETED, remark must be OK.",
+      });
+      return;
+    }
+    
+    if ((status === "PENDING" || status === "IN PROGRESS") && resolutionType === "OK") {
+      setUpdateMessage({
+        type: "error",
+        text: "OK remark can only be used with COMPLETED status.",
+      });
+      return;
+    }
+
     const formData = new FormData();
     formData.append("issueId", selectedReport.id);
     formData.append("status", status);
     formData.append("comment", comments);
     formData.append("updatedBy", "admin@au.edu");
-    // NEW: resolution type
-    formData.append("resolutionType", resolutionType);
+    // Send remark to backend
+    formData.append("remark", resolutionType);
 
     photos.forEach((photo) => formData.append("photos", photo));
 
@@ -298,46 +397,109 @@ export default function AssignedReportsPage() {
 
       const result = await response.json();
 
-      let message = "Report updated successfully";
-      if (result.notificationSent) {
-        message += ". Push notification sent to user.";
-      } else if (result.notificationError) {
-        message += `. Warning: Notification failed - ${result.notificationError}`;
-      }
-
-      setUpdateMessage({
-        type: result.notificationSent ? "success" : "warning",
-        text: message,
-      });
-
       // Save the remark to localStorage for display on report cards
       if (resolutionType && selectedReport) {
         saveRemarkToStorage(selectedReport.id, resolutionType);
       }
 
+      // Reset form fields
       setStatus("PENDING");
       setComments("");
       setPhotos([]);
-      setIsModalOpen(false);
-      fetchReports();
+      setResolutionType("");
+      
+      // Refresh the reports list
+      await fetchReports();
 
-      setTimeout(() => setUpdateMessage(null), 5000);
+      // Show success message right before closing modal
+      setUpdateMessage({
+        type: "success",
+        text: "Report updated successfully",
+      });
+
+      // Close modal after showing success message
+      setTimeout(() => {
+        setIsModalOpen(false);
+        setUpdateMessage(null);
+      }, 2000);
     } catch (error) {
       console.error("Error updating report:", error);
       setUpdateMessage({
         type: "error",
-        text: `Failed to update the report: ${error.message}`,
+        text: error instanceof Error ? `Failed to update the report: ${error.message}` : "Failed to update the report",
       });
     } finally {
       setIsUpdating(false);
     }
   };
 
+  // Delete report handler
+  const handleDeleteClick = (report, e) => {
+    e.stopPropagation(); // Prevent card click event
+    setReportToDelete(report);
+    setDeleteConfirmOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!reportToDelete) return;
+
+    setIsDeleting(true);
+    try {
+      const response = await fetch(`${backendUrl}/issues/reports/${reportToDelete.id}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        // Show success message
+        setUpdateMessage({
+          type: "success",
+          text: "Report deleted successfully",
+        });
+
+        // Refresh the reports list
+        await fetchReports();
+
+        // Close dialog and clear state
+        setDeleteConfirmOpen(false);
+        setReportToDelete(null);
+
+        // Clear message after delay
+        setTimeout(() => setUpdateMessage(null), 2000);
+      } else {
+        throw new Error(`Failed to delete: ${response.status}`);
+      }
+    } catch (error) {
+      console.error("Delete error:", error);
+      setUpdateMessage({
+        type: "error",
+        text: error instanceof Error ? `Failed to delete report: ${error.message}` : "Failed to delete report",
+      });
+      setTimeout(() => setUpdateMessage(null), 3000);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteConfirmOpen(false);
+    setReportToDelete(null);
+  };
+
   // Get the latest remark from stored data or report updates
   const getLatestRemark = (report) => {
-    // First check if we have a stored remark for this report
+    // First check if report has remarkType from backend
+    if (report.remarkType && ['OK', 'RF', 'PR'].includes(report.remarkType)) {
+      return report.remarkType;
+    }
+    
+    // Then check if we have a stored remark for this report
     if (reportRemarks[report.id]) {
       return reportRemarks[report.id];
+    }
+    
+    // Check if report has a remark property (might be named differently)
+    if (report.remark && ['OK', 'RF', 'PR'].includes(report.remark)) {
+      return report.remark;
     }
     
     // Fallback to report updates if available
@@ -350,6 +512,10 @@ export default function AssignedReportsPage() {
       for (const update of sortedUpdates) {
         if (update.resolutionType && ['OK', 'RF', 'PR'].includes(update.resolutionType)) {
           return update.resolutionType;
+        }
+        // Also check if remark field exists
+        if (update.remark && ['OK', 'RF', 'PR'].includes(update.remark)) {
+          return update.remark;
         }
       }
     }
@@ -391,8 +557,14 @@ export default function AssignedReportsPage() {
     }
   });
 
-  // Check if report is new (within last 24 hours and not viewed)
+  // Check if report is new (within last 24 hours and not viewed, or has 'new' remark)
   const isNewReport = (report) => {
+    // Check if report has 'new' remark from backend
+    if (report.remarkType === 'new' && !report.remarkViewed) {
+      return true;
+    }
+    
+    // Fallback to time-based check
     const reportDate = new Date(report.createdAt);
     const now = new Date();
     const diffHours = (now - reportDate) / (1000 * 60 * 60);
@@ -417,51 +589,61 @@ export default function AssignedReportsPage() {
     }
   };
 
-  // Render remark tag with appropriate styling
-  const renderRemarkTag = (remark) => {
-    if (!remark) return null;
-
-    const remarkStyles = {
-      'OK': {
-        bgColor: 'bg-green-100',
-        textColor: 'text-green-800',
-        borderColor: 'border-green-300',
-        icon: (
-          <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-          </svg>
-        )
+  // Render status badge using Badge component
+  const renderStatusBadge = (status) => {
+    const statusConfig = {
+      'PENDING': {
+        className: 'bg-yellow-100 text-yellow-800 border-yellow-300 hover:bg-yellow-100',
       },
-      'RF': {
-        bgColor: 'bg-orange-100',
-        textColor: 'text-orange-800', 
-        borderColor: 'border-orange-300',
-        icon: (
-          <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-            <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-          </svg>
-        )
+      'IN PROGRESS': {
+        className: 'bg-blue-100 text-blue-800 border-blue-300 hover:bg-blue-100',
       },
-      'PR': {
-        bgColor: 'bg-purple-100',
-        textColor: 'text-purple-800',
-        borderColor: 'border-purple-300',
-        icon: (
-          <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-          </svg>
-        )
+      'COMPLETED': {
+        className: 'bg-green-100 text-green-800 border-green-300 hover:bg-green-100',
       }
     };
 
-    const style = remarkStyles[remark];
-    if (!style) return null;
+    const config = statusConfig[status] || statusConfig['PENDING'];
+    
+    return (
+      <Badge className={config.className} variant="outline">
+        {status}
+      </Badge>
+    );
+  };
+
+  // Render remark tag using Badge component
+  const renderRemarkTag = (remark) => {
+    if (!remark) return null;
+
+    const remarkConfig = {
+      'OK': {
+        className: 'bg-green-100 text-green-800 border-green-300 hover:bg-green-100 px-1.5',
+      },
+      'RF': {
+        className: 'bg-orange-100 text-orange-800 border-orange-300 hover:bg-orange-100 px-1',
+      },
+      'PR': {
+        className: 'bg-purple-100 text-purple-800 border-purple-300 hover:bg-purple-100 px-1',
+      }
+    };
+
+    const config = remarkConfig[remark];
+    if (!config) return null;
 
     return (
-      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold ${style.bgColor} ${style.textColor} border ${style.borderColor} ml-2`}>
-        {style.icon}
+      <Badge className={`ml-2 ${config.className}`} variant="compact">
         {remark}
-      </span>
+      </Badge>
+    );
+  };
+
+  // Render NEW badge
+  const renderNewBadge = () => {
+    return (
+      <Badge className="bg-green-100 text-green-800 border-green-300 hover:bg-green-100" variant="outline">
+        NEW
+      </Badge>
     );
   };
 
@@ -486,7 +668,8 @@ export default function AssignedReportsPage() {
 
   return (
     <div className="flex-1 p-6">
-      {updateMessage && (
+      {/* Show UpdateFeedback for delete messages on main page */}
+      {updateMessage && !isModalOpen && (
         <UpdateFeedback
           message={updateMessage}
           onClose={() => setUpdateMessage(null)}
@@ -646,7 +829,7 @@ export default function AssignedReportsPage() {
                       {/* Header with gradient background */}
                       <div className="bg-gradient-to-r from-purple-50 to-pink-50 px-4 py-3 border-b border-gray-100">
                         <div className="flex justify-between items-start">
-                          <div className="flex-1 min-w-0">
+                          <div className="flex-1 min-w-0 pr-10">
                             <h3 className="text-base font-bold text-gray-900 truncate mb-1">
                               {report.description?.substring(0, 45)}...
                             </h3>
@@ -655,26 +838,8 @@ export default function AssignedReportsPage() {
                             </p>
                           </div>
                           <div className="ml-4 flex-shrink-0 flex flex-col gap-1">
-                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold border ${
-                              report.status === "IN PROGRESS"
-                                ? "bg-blue-100 text-blue-800 border-blue-200"
-                                : "bg-red-100 text-red-800 border-red-200"
-                            }`}>
-                              <div className={`w-1.5 h-1.5 rounded-full mr-1.5 ${
-                                report.status === "IN PROGRESS"
-                                  ? "bg-blue-500"
-                                  : "bg-red-500"
-                              }`}></div>
-                              {report.status}
-                            </span>
-                            {isNewReport(report) && (
-                              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800 border border-green-200">
-                                <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                                </svg>
-                                NEW
-                              </span>
-                            )}
+                            {renderStatusBadge(report.status)}
+                            {isNewReport(report) && renderNewBadge()}
                             {renderRemarkTag(getLatestRemark(report))}
                           </div>
                         </div>
@@ -791,27 +956,41 @@ export default function AssignedReportsPage() {
 
                         {/* Action Controls */}
                         <div className="border-t border-gray-100 pt-3">
-                          <div className="flex gap-3">
+                          <div className="space-y-2">
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => handleOpenModal(report, "update")}
+                                className="flex-1 bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded-xl font-semibold transition-all duration-200 shadow-sm hover:shadow-md text-sm"
+                              >
+                                <div className="flex items-center justify-center gap-1.5">
+                                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                                  </svg>
+                                  Update
+                                </div>
+                              </button>
+                              <button
+                                onClick={() => handleOpenModal(report, "details")}
+                                className="flex-1 bg-gray-500 hover:bg-gray-600 text-white px-3 py-2 rounded-xl font-semibold transition-all duration-200 shadow-sm hover:shadow-md text-sm"
+                              >
+                                <div className="flex items-center justify-center gap-1.5">
+                                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                                  </svg>
+                                  Details
+                                </div>
+                              </button>
+                            </div>
                             <button
-                              onClick={() => handleOpenModal(report, "update")}
-                              className="flex-1 bg-gradient-to-r from-green-500 to-green-600 text-white px-3 py-2 rounded-xl font-semibold hover:from-green-600 hover:to-green-700 transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 text-sm"
+                              onClick={(e) => handleDeleteClick(report, e)}
+                              className="w-full bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-xl font-semibold transition-all duration-200 shadow-sm hover:shadow-md text-sm"
+                              title="Delete Report"
                             >
                               <div className="flex items-center justify-center gap-2">
-                                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                  <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                 </svg>
-                                Update
-                              </div>
-                            </button>
-                            <button
-                              onClick={() => handleOpenModal(report, "details")}
-                              className="flex-1 bg-gradient-to-r from-purple-500 to-purple-600 text-white px-3 py-2 rounded-xl font-semibold hover:from-purple-600 hover:to-purple-700 transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 text-sm"
-                            >
-                              <div className="flex items-center justify-center gap-2">
-                                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                                </svg>
-                                Details
+                                Delete Report
                               </div>
                             </button>
                           </div>
@@ -871,7 +1050,7 @@ export default function AssignedReportsPage() {
                           {/* Header with gradient background */}
                           <div className="bg-gradient-to-r from-green-50 to-emerald-50 px-4 py-3 border-b border-gray-100">
                             <div className="flex justify-between items-start">
-                              <div className="flex-1 min-w-0">
+                              <div className="flex-1 min-w-0 pr-10">
                                 <h3 className="text-base font-bold text-gray-900 truncate mb-1">
                                   {report.description?.substring(0, 45)}...
                                 </h3>
@@ -879,19 +1058,10 @@ export default function AssignedReportsPage() {
                                   Report #{report.id}
                                 </p>
                               </div>
-                              <div className="ml-4 flex-shrink-0">
-                                <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold border ${
-                                  report.status === "IN PROGRESS"
-                                    ? "bg-blue-100 text-blue-800 border-blue-200"
-                                    : "bg-red-100 text-red-800 border-red-200"
-                                }`}>
-                                  <div className={`w-1.5 h-1.5 rounded-full mr-1.5 ${
-                                    report.status === "IN PROGRESS"
-                                      ? "bg-blue-500"
-                                      : "bg-red-500"
-                                  }`}></div>
-                                  {report.status}
-                                </span>
+                              <div className="ml-4 flex-shrink-0 flex flex-col gap-1">
+                                {renderStatusBadge(report.status)}
+                                {isNewReport(report) && renderNewBadge()}
+                                {renderRemarkTag(getLatestRemark(report))}
                               </div>
                             </div>
                           </div>
@@ -1007,31 +1177,45 @@ export default function AssignedReportsPage() {
 
                             {/* Action Controls */}
                             <div className="border-t border-gray-100 pt-3">
-                              <div className="flex gap-3">
-                                <button
-                                  onClick={() => handleOpenModal(report, "update")}
-                                  className="flex-1 bg-gradient-to-r from-green-500 to-green-600 text-white px-3 py-2 rounded-xl font-semibold hover:from-green-600 hover:to-green-700 transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 text-sm"
-                                >
-                                  <div className="flex items-center justify-center gap-2">
-                                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                      <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                                    </svg>
-                                    Update
-                                  </div>
-                                </button>
-                                <button
-                                  onClick={() => handleOpenModal(report, "details")}
-                                  className="flex-1 bg-gradient-to-r from-gray-500 to-gray-600 text-white px-3 py-2 rounded-xl font-semibold hover:from-gray-600 hover:to-gray-700 transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 text-sm"
-                                >
-                                  <div className="flex items-center justify-center gap-2">
-                                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                              <div className="space-y-2">
+                                <div className="flex gap-2">
+                                  <button
+                                    onClick={() => handleOpenModal(report, "update")}
+                                    className="flex-1 bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded-xl font-semibold transition-all duration-200 shadow-sm hover:shadow-md text-sm"
+                                  >
+                                    <div className="flex items-center justify-center gap-1.5">
+                                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                                      </svg>
+                                      Update
+                                    </div>
+                                  </button>
+                                  <button
+                                    onClick={() => handleOpenModal(report, "details")}
+                                    className="flex-1 bg-gray-500 hover:bg-gray-600 text-white px-3 py-2 rounded-xl font-semibold transition-all duration-200 shadow-sm hover:shadow-md text-sm"
+                                  >
+                                    <div className="flex items-center justify-center gap-1.5">
+                                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                                     </svg>
                                     Details
                                   </div>
                                 </button>
                               </div>
+                              <button
+                                onClick={(e) => handleDeleteClick(report, e)}
+                                className="w-full bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-xl font-semibold transition-all duration-200 shadow-sm hover:shadow-md text-sm"
+                                title="Delete Report"
+                              >
+                                <div className="flex items-center justify-center gap-2">
+                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                  </svg>
+                                  Delete Report
+                                </div>
+                              </button>
                             </div>
+                          </div>
                           </div>
                         </div>
                       ))}
@@ -1072,6 +1256,14 @@ export default function AssignedReportsPage() {
 
               {/* Content */}
               <div className="p-8">
+                {/* Update Feedback Message */}
+                {updateMessage && (
+                  <UpdateFeedback
+                    message={updateMessage}
+                    onClose={() => setUpdateMessage(null)}
+                  />
+                )}
+                
                 {modalType === "update" ? (
                   <>
                     {/* UPDATE FORM */}
@@ -1164,11 +1356,11 @@ export default function AssignedReportsPage() {
                         <div className="bg-white/70 rounded-lg p-4 text-sm text-gray-700 space-y-2">
                           <div className="flex items-start gap-2">
                             <span className="font-semibold text-blue-600 min-w-[24px]">RF:</span>
-                            <span>Requisition Form - Materials or supplies need to be procured through proper channels</span>
+                            <span>Materials or supplies need to be procured through proper channels</span>
                           </div>
                           <div className="flex items-start gap-2">
                             <span className="font-semibold text-purple-600 min-w-[24px]">PR:</span>
-                            <span>Purchase Request - External contractor or vendor assistance is required for resolution</span>
+                            <span>External contractor or vendor assistance is required</span>
                           </div>
                         </div>
                       </div>
@@ -1451,6 +1643,64 @@ export default function AssignedReportsPage() {
                 Your browser does not support video playbook.
               </video>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Dialog */}
+      {deleteConfirmOpen && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden">
+            <div className="bg-gradient-to-r from-red-500 to-red-600 px-6 py-4">
+              <h3 className="text-xl font-bold text-white">Confirm Delete</h3>
+            </div>
+            <div className="p-6">
+              <div className="flex items-start gap-4 mb-6">
+                <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
+                  <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                </div>
+                <div className="flex-1">
+                  <p className="text-gray-900 font-medium mb-2">
+                    Are you sure you want to delete this report?
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    Report #{reportToDelete?.id}: {reportToDelete?.description?.substring(0, 50)}...
+                  </p>
+                  <p className="text-sm text-red-600 mt-2 font-medium">
+                    This action cannot be undone.
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-3">
+                <button
+                  onClick={handleDeleteCancel}
+                  disabled={isDeleting}
+                  className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-800 font-semibold py-2.5 px-4 rounded-xl transition-all duration-200"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleDeleteConfirm}
+                  disabled={isDeleting}
+                  className={`flex-1 font-semibold py-2.5 px-4 rounded-xl transition-all duration-200 ${
+                    isDeleting 
+                      ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
+                      : 'bg-red-600 hover:bg-red-700 text-white'
+                  }`}
+                >
+                  {isDeleting ? (
+                    <div className="flex items-center justify-center gap-2">
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      Deleting...
+                    </div>
+                  ) : (
+                    'Delete Report'
+                  )}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

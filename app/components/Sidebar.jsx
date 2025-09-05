@@ -1,6 +1,6 @@
 "use client"; // Enables client-side interactivity
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Button } from "../../components/ui/button";
 import { Card } from "../../components/ui/card";
@@ -26,6 +26,13 @@ import { useAuth } from "../context/AuthContext";
 export default function Sidebar({ activeTopLink, activeLink, setActiveLink, isMobile, onNavigate }) {
   const [isReportsMenuOpen, setIsReportsMenuOpen] = useState(false);
   const { user, isAdmin, isOMStaff } = useAuth();
+
+  // Automatically expand Reports menu when on reports pages
+  useEffect(() => {
+    if (activeLink === "/reports" || activeLink === "/assignedReports") {
+      setIsReportsMenuOpen(true);
+    }
+  }, [activeLink]);
 
   const handleLinkClick = (link) => {
     setActiveLink(link);
