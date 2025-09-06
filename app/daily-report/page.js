@@ -26,60 +26,6 @@ function diffHM(startISO, endISO) {
   return `${h}h ${m}m`;
 }
 
-// Sample rows if the API returns nothing (so the page is demonstrable)
-function sampleRowsFor(dateStr) {
-  const d = new Date(dateStr);
-  const at = (h, m) =>
-    format(new Date(d.getFullYear(), d.getMonth(), d.getDate(), h, m), "dd/MM/yyyy HH:mm");
-
-  return [
-    {
-      no: 1,
-      id: 1,
-      thaiReportId: generateThaiReportId(d, 1),
-      reportedTime: at(9, 15),
-      location: "Library - 2nd Floor",
-      problem: "Broken air conditioner — not cooling",
-      requester: "u6440041",
-      supervisor: "Gunter",
-      status: "COMPLETED",
-      category: "Facilities",
-      isOK: true,
-      isPR: false,
-      isRF: false,
-    },
-    {
-      no: 2,
-      id: 2,
-      thaiReportId: generateThaiReportId(d, 2),
-      reportedTime: at(10, 20),
-      location: "Cafeteria",
-      problem: "Water leakage under sink",
-      requester: "u6400002",
-      supervisor: "John Pork",
-      status: "IN PROGRESS",
-      category: "Plumbing",
-      isOK: false,
-      isPR: false,
-      isRF: true,
-    },
-    {
-      no: 3,
-      id: 3,
-      thaiReportId: generateThaiReportId(d, 3),
-      reportedTime: at(14, 30),
-      location: "Office CL13",
-      problem: "Printer not working",
-      requester: "u6440123",
-      supervisor: "Mike",
-      status: "PENDING",
-      category: "IT Equipment",
-      isOK: false,
-      isPR: true,
-      isRF: false,
-    },
-  ];
-}
 
 export default function DailyReportsPage() {
   const backendUrl = getBackendUrl();
@@ -144,7 +90,7 @@ export default function DailyReportsPage() {
           location: r.customLocation || r.location || "-",
           problem: r.description || "-",
           requester: r.reportedBy?.username || "-",
-          supervisor: r.assignedTo?.name || "-",
+          supervisor: r.assignedTo?.staffId || r.assignedTo?.name || "-",
           status: r.status || "-",
           category: r.category || "-",
           remarkType: r.remarkType || "",

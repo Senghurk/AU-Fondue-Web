@@ -48,6 +48,7 @@ export default function StaffManagementPage() {
   const [staffToDelete, setStaffToDelete] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
+  const [staffDeletionInfo, setStaffDeletionInfo] = useState(null);
 
   // Fetch staff list
   const fetchStaff = async () => {
@@ -264,6 +265,41 @@ export default function StaffManagementPage() {
     }
   };
 
+  // Check if staff can be deleted
+  const checkStaffDeletion = async (staff) => {
+    try {
+      const response = await fetch(`${backendUrl}/staff/${staff.id}/can-delete`);
+      const data = await response.json();
+      
+      setStaffDeletionInfo({
+        canDelete: data.canDelete,
+        incompleteReports: data.incompleteReports || 0
+      });
+      
+      if (data.canDelete) {
+        setStaffToDelete(staff);
+        setDeleteConfirmOpen(true);
+      } else {
+        toast({
+          variant: "error",
+          title: (
+            <div className="flex items-center gap-2">
+              <AlertCircle className="h-4 w-4" />
+              Cannot Delete Staff Member
+            </div>
+          ),
+          description: `${staff.name} has ${data.incompleteReports} incomplete assigned report(s). All reports must be marked as 'Completed' before deletion.`,
+          duration: 7000,
+        });
+      }
+    } catch (error) {
+      console.error("Failed to check deletion eligibility:", error);
+      // Fallback to direct deletion attempt
+      setStaffToDelete(staff);
+      setDeleteConfirmOpen(true);
+    }
+  };
+
   // Delete staff
   const handleDeleteStaff = async () => {
     if (!staffToDelete) return;
@@ -275,7 +311,27 @@ export default function StaffManagementPage() {
         method: "DELETE",
       });
 
-      if (!response.ok) throw new Error("Failed to delete staff");
+      const data = await response.json();
+
+      if (!response.ok) {
+        // Check if the error is about incomplete reports
+        if (data.message && data.message.includes("assigned report")) {
+          toast({
+            variant: "error",
+            title: (
+              <div className="flex items-center gap-2">
+                <AlertCircle className="h-4 w-4" />
+                Cannot Delete Staff Member
+              </div>
+            ),
+            description: data.message,
+            duration: 7000,
+          });
+        } else {
+          throw new Error(data.message || "Failed to delete staff");
+        }
+        return;
+      }
 
       toast({
         variant: "success",
@@ -301,7 +357,7 @@ export default function StaffManagementPage() {
             Deletion Failed
           </div>
         ),
-        description: "Failed to delete staff member. Please try again.",
+        description: error.message || "Failed to delete staff member. Please try again.",
       });
     } finally {
       setIsDeleting(false);
@@ -514,10 +570,7 @@ export default function StaffManagementPage() {
                     <Button 
                       variant="destructive" 
                       size="sm"
-                      onClick={() => {
-                        setStaffToDelete(staff);
-                        setDeleteConfirmOpen(true);
-                      }}
+                      onClick={() => checkStaffDeletion(staff)}
                     >
                       <X className="h-4 w-4" />
                     </Button>
