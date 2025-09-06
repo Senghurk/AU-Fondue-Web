@@ -246,9 +246,9 @@ export default function OrderMaterialPage() {
             <CheckCircle className="h-5 w-5 text-green-600" />
           </div>
           <div className="flex-1">
-            <h3 className="font-semibold text-gray-900 mb-1">Images Uploaded Successfully</h3>
+            <h3 className="font-semibold text-gray-900 mb-1">Images Attached Successfully</h3>
             <p className="text-sm text-gray-600">
-              {uploadedCount} image{uploadedCount > 1 ? 's have' : ' has'} been uploaded successfully. 
+              {uploadedCount} image{uploadedCount > 1 ? 's have' : ' has'} been attached successfully. 
               {4 - images.length > 0 ? ` You can still add ${4 - images.length} more image${4 - images.length > 1 ? 's' : ''}.` : ' You have reached the maximum limit.'}
             </p>
           </div>
@@ -593,10 +593,12 @@ export default function OrderMaterialPage() {
           {/* Footer Information */}
           <div className="mt-8 pt-6 border-t space-y-2 text-sm text-gray-600">
             <p><strong>Operations and Maintenance Division</strong></p>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4">
-              <p>Prepared on: {getFormattedDate()}</p>
-              <p>Revision: 1</p>
-              <p>Effective Date: {getFormattedDate()}</p>
+            <div className="mt-4">
+              <div className="flex justify-between">
+                <p>Prepared on: {getFormattedDate()}</p>
+                <p>Effective Date: {getFormattedDate()}</p>
+              </div>
+              <p className="text-center mt-2">Revision: 1</p>
             </div>
             <div className="mt-6">
               <p className="font-semibold">Head of Operations and Maintenance Division</p>
@@ -819,10 +821,15 @@ export default function OrderMaterialPage() {
             fontSize: '9pt'
           }}>
             <div style={{fontWeight: 'bold', fontSize: '10pt'}}>Operations and Maintenance Division</div>
-            <div style={{display: 'flex', justifyContent: 'space-between', marginTop: '6px', fontSize: '8pt'}}>
-              <span>Prepared on: {getFormattedDate()}</span>
-              <span>Revision: 1</span>
-              <span>Effective Date: {getFormattedDate()}</span>
+            <div style={{marginTop: '6px', fontSize: '8pt'}}>
+              <div style={{display: 'flex', justifyContent: 'space-between'}}>
+                <span>Prepared on: {getFormattedDate()}</span>
+                <span style={{visibility: 'hidden'}}>Spacer</span>
+                <span>Effective Date: {getFormattedDate()}</span>
+              </div>
+              <div style={{textAlign: 'center', marginTop: '4px'}}>
+                <span>Revision: 1</span>
+              </div>
             </div>
             <div style={{marginTop: '8px'}}>
               <div style={{fontWeight: 'bold', fontSize: '10pt'}}>Head of Operations and Maintenance Division</div>

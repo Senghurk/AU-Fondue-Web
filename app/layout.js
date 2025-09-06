@@ -21,7 +21,7 @@ export default function RootLayout({ children }) {
   useEffect(() => {
     setActiveLink(pathname);
     // Set activeTopLink based on the pathname
-    if (pathname === "/admins" || pathname === "/user-list") {
+    if (pathname === "/admins" || pathname === "/staff-management") {
       setActiveTopLink("/admins");
     } else {
       setActiveTopLink("/");
@@ -43,7 +43,7 @@ export default function RootLayout({ children }) {
   }, []);
 
   // ✅ Pages that should NOT have admin layout
-  const isPublicPage = pathname === "/" || pathname === "/Log-in" || pathname === "/Sign-up";
+  const isPublicPage = pathname === "/" || pathname === "/Log-in" || pathname === "/Sign-up" || pathname === "/change-password" || pathname === "/reset-password";
 
   return (
     <html lang="en" className={GeistSans.variable}>

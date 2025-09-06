@@ -4,8 +4,14 @@ import { useState, useEffect } from "react";
 import { getBackendUrl } from "../config/api";
 import ReportDetailsModal from "../components/ReportDetailsModal";
 import { Badge } from "@/components/ui/badge";
+import { usePasswordCheck } from "../hooks/usePasswordCheck";
+import { useAuth } from "../context/AuthContext";
+import { authenticatedFetch } from "../utils/apiHelper";
 
 export default function AssignedReportsPage() {
+  // Check if password needs to be changed
+  usePasswordCheck();
+  const { user, isAdmin } = useAuth();
   const backendUrl = getBackendUrl();
   const sastoken =
     "?sv=2024-11-04&ss=bfqt&srt=co&sp=rwdlacupiytfx&se=2027-07-16T22:11:38Z&st=2025-07-16T13:56:38Z&spr=https,http&sig=5xb1czmfngshEckXBdlhtw%2BVe%2B5htYpCnXyhPw9tnHk%3D";
@@ -232,13 +238,20 @@ export default function AssignedReportsPage() {
 
   const fetchReports = async () => {
     try {
-      const response = await fetch(`${backendUrl}/issues/assigned?page=0&size=100`);
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      const response = await authenticatedFetch(`${backendUrl}/issues/assigned?page=0&size=100`);
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Failed to fetch assigned reports:', errorText);
+        throw new Error(`Failed to load assigned reports`);
+      }
       
       const data = await response.json();
-      console.log('Assigned reports from backend:', data); // Debug to see if remarkType is coming
-      if (Array.isArray(data)) setReports(data);
-      else setReports([]);
+      if (Array.isArray(data)) {
+        setReports(data);
+      } else {
+        setReports([]);
+      }
     } catch (error) {
       console.error("Error fetching reports:", error);
       throw error;
@@ -453,7 +466,7 @@ export default function AssignedReportsPage() {
 
     setIsDeleting(true);
     try {
-      const response = await fetch(`${backendUrl}/issues/reports/${reportToDelete.id}`, {
+      const response = await authenticatedFetch(`${backendUrl}/issues/reports/${reportToDelete.id}`, {
         method: 'DELETE',
       });
 
@@ -989,18 +1002,21 @@ export default function AssignedReportsPage() {
                                 </div>
                               </button>
                             </div>
-                            <button
-                              onClick={(e) => handleDeleteClick(report, e)}
-                              className="w-full bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-xl font-semibold transition-all duration-200 shadow-sm hover:shadow-md text-sm"
-                              title="Delete Report"
-                            >
-                              <div className="flex items-center justify-center gap-2">
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                </svg>
-                                Delete Report
-                              </div>
-                            </button>
+                            {/* Only show delete button for admins, not OM staff */}
+                            {isAdmin() && (
+                              <button
+                                onClick={(e) => handleDeleteClick(report, e)}
+                                className="w-full bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-xl font-semibold transition-all duration-200 shadow-sm hover:shadow-md text-sm"
+                                title="Delete Report"
+                              >
+                                <div className="flex items-center justify-center gap-2">
+                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                  </svg>
+                                  Delete Report
+                                </div>
+                              </button>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -1210,18 +1226,21 @@ export default function AssignedReportsPage() {
                                   </div>
                                 </button>
                               </div>
-                              <button
-                                onClick={(e) => handleDeleteClick(report, e)}
-                                className="w-full bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-xl font-semibold transition-all duration-200 shadow-sm hover:shadow-md text-sm"
-                                title="Delete Report"
-                              >
-                                <div className="flex items-center justify-center gap-2">
-                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                  </svg>
-                                  Delete Report
-                                </div>
-                              </button>
+                              {/* Only show delete button for admins, not OM staff */}
+                              {isAdmin() && (
+                                <button
+                                  onClick={(e) => handleDeleteClick(report, e)}
+                                  className="w-full bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-xl font-semibold transition-all duration-200 shadow-sm hover:shadow-md text-sm"
+                                  title="Delete Report"
+                                >
+                                  <div className="flex items-center justify-center gap-2">
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                    Delete Report
+                                  </div>
+                                </button>
+                              )}
                             </div>
                           </div>
                           </div>

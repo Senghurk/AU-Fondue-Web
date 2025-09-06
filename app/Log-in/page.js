@@ -30,8 +30,24 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      // Bypass Microsoft OAuth - directly call backend API for admin authentication
-      console.log("Bypassing admin authentication");
+      // For testing: Use a prompt to get admin email
+      // In production, this should use Microsoft OAuth
+      const adminEmail = prompt("Enter your @au.edu admin email:", "u6440041@au.edu");
+      
+      if (!adminEmail) {
+        setIsLoading(false);
+        return;
+      }
+      
+      if (!adminEmail.endsWith("@au.edu")) {
+        toast({
+          variant: "error",
+          title: "Invalid Email",
+          description: "Admin must use an @au.edu email address",
+        });
+        setIsLoading(false);
+        return;
+      }
       
       const backendUrl = getBackendUrl();
       const response = await fetch(`${backendUrl}/auth/admin/login`, {
@@ -40,8 +56,8 @@ export default function LoginPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          email: "admin@au.edu",
-          accessToken: "bypass-token"
+          email: adminEmail,
+          accessToken: "test-token-" + Date.now()
         })
       });
 
@@ -122,7 +138,7 @@ export default function LoginPage() {
     setIsLoading(true);
     
     try {
-      if (!staffCredentials.omId.trim()) {
+      if (!staffCredentials.omId.trim() || !staffCredentials.password) {
         toast({
           variant: "error",
           title: (
@@ -131,14 +147,16 @@ export default function LoginPage() {
               Missing Information
             </div>
           ),
-          description: "Please enter an OM ID.",
+          description: !staffCredentials.omId.trim() 
+            ? "Please enter your Staff ID." 
+            : "Please enter your password.",
         });
         setIsLoading(false);
         return;
       }
 
-      // Bypass credential validation - directly call backend API for staff authentication
-      console.log("Bypassing staff authentication for:", staffCredentials.omId);
+      // Validate staff credentials
+      console.log("Authenticating staff:", staffCredentials.omId);
       
       const backendUrl = getBackendUrl();
       const response = await fetch(`${backendUrl}/auth/staff/login`, {
@@ -147,8 +165,8 @@ export default function LoginPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          omId: staffCredentials.omId,
-          password: "bypass-password"
+          omId: staffCredentials.omId.toUpperCase(),
+          password: staffCredentials.password
         })
       });
 
@@ -170,11 +188,12 @@ export default function LoginPage() {
       }
 
       // Extract user data from backend response
-      const { userType, userId, name, email, firstLogin, token } = result.data;
+      const { userType, userId, staffId, name, email, firstLogin, token } = result.data;
       
       const userData = {
         userId: userId,
         omId: staffCredentials.omId,
+        staffId: staffId || staffCredentials.omId,
         name: name || `Staff ${staffCredentials.omId}`,
         email: email,
         role: 'OM_STAFF',
@@ -186,33 +205,48 @@ export default function LoginPage() {
       // Clear any existing toasts on successful login
       clearAllToasts();
       
-      // Show success toast
-      toast({
-        variant: "success",
-        title: (
-          <div className="flex items-center gap-2">
-            <CheckCircle className="h-4 w-4" />
-            Login Successful!
-          </div>
-        ),
-        description: `Welcome back, ${userData.name}!`,
-      });
-      
-      login(userData);
-
-      // Set theme to light for staff users
-      setLightTheme();
-      
-      // If it's first login, might want to redirect to password change page
+      // Check if it's first login
       if (firstLogin) {
-        // You can add a password change flow here if needed
-        console.log("First login detected for staff:", staffCredentials.omId);
+        // Show first login toast
+        toast({
+          variant: "warning",
+          title: (
+            <div className="flex items-center gap-2">
+              <AlertCircle className="h-4 w-4" />
+              Password Change Required
+            </div>
+          ),
+          description: "You must change your password before continuing.",
+        });
+        
+        login(userData);
+        setLightTheme();
+        
+        // Redirect to password change page for first login
+        setTimeout(() => {
+          router.push("/change-password");
+        }, 1000);
+      } else {
+        // Show success toast for regular login
+        toast({
+          variant: "success",
+          title: (
+            <div className="flex items-center gap-2">
+              <CheckCircle className="h-4 w-4" />
+              Login Successful!
+            </div>
+          ),
+          description: `Welcome back, ${userData.name}!`,
+        });
+        
+        login(userData);
+        setLightTheme();
+        
+        // Redirect to reports page for normal login
+        setTimeout(() => {
+          router.push("/reports");
+        }, 1500);
       }
-      
-      // Redirect OM Staff to Unassigned Reports instead of dashboard (with slight delay for toast visibility)
-      setTimeout(() => {
-        router.push("/reports");
-      }, 1500);
       
     } catch (error) {
       console.error("Staff login failed:", error);
@@ -427,9 +461,9 @@ export default function LoginPage() {
                         </svg>
                       </div>
                       <div>
-                        <h4 className="text-blue-800 font-semibold text-sm">Development Mode</h4>
+                        <h4 className="text-blue-800 font-semibold text-sm">Microsoft Authentication</h4>
                         <p className="text-blue-700 text-sm mt-1">
-                          Authentication is bypassed for development. Click the button above to access the admin dashboard.
+                          Sign in with your AU Microsoft account (@au.edu) to access the admin dashboard.
                         </p>
                       </div>
                     </div>
@@ -535,7 +569,7 @@ export default function LoginPage() {
                         <Input
                           id="omId"
                           type="text"
-                          placeholder="Enter your OM ID (e.g., OM1, OM12)"
+                          placeholder="Enter your OM ID (e.g., OM01, OM12)"
                           value={staffCredentials.omId}
                           onChange={(e) => setStaffCredentials({ ...staffCredentials, omId: e.target.value })}
                           className="text-lg py-4 pl-12 bg-gray-50 border-gray-200 focus:bg-white focus:border-blue-500 transition-all duration-200"
@@ -554,11 +588,11 @@ export default function LoginPage() {
                         <Input
                           id="password"
                           type="password"
-                          placeholder="Password not required (development mode)"
+                          placeholder="Enter your password"
                           value={staffCredentials.password}
                           onChange={(e) => setStaffCredentials({ ...staffCredentials, password: e.target.value })}
-                          className="text-lg py-4 pl-12 bg-gray-100 border-gray-200 cursor-not-allowed"
-                          disabled
+                          className="text-lg py-4 pl-12"
+                          required
                         />
                         <div className="absolute left-4 top-1/2 transform -translate-y-1/2">
                           <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -572,13 +606,13 @@ export default function LoginPage() {
                   {/* Login Button */}
                   <div className="relative">
                     <div className={`absolute inset-0 rounded-xl blur opacity-75 ${
-                      staffCredentials.omId.trim() ? 'bg-gradient-to-r from-gray-500 to-gray-600' : 'bg-gray-300'
+                      staffCredentials.omId.trim() && staffCredentials.password ? 'bg-gradient-to-r from-gray-500 to-gray-600' : 'bg-gray-300'
                     }`}></div>
                     <Button
                       onClick={handleStaffLogin}
-                      disabled={isLoading || !staffCredentials.omId.trim()}
+                      disabled={isLoading || !staffCredentials.omId.trim() || !staffCredentials.password}
                       className={`relative w-full text-white py-6 text-lg font-semibold rounded-xl transition-all duration-300 transform hover:scale-[1.02] min-h-[64px] ${
-                        staffCredentials.omId.trim() 
+                        staffCredentials.omId.trim() && staffCredentials.password
                           ? 'bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700' 
                           : 'bg-gray-300 cursor-not-allowed'
                       }`}
@@ -606,9 +640,9 @@ export default function LoginPage() {
                         </svg>
                       </div>
                       <div>
-                        <h4 className="text-amber-800 font-semibold text-sm">Development Mode</h4>
+                        <h4 className="text-amber-800 font-semibold text-sm">Staff Authentication</h4>
                         <p className="text-amber-700 text-sm mt-1">
-                          Enter any OM ID (e.g., OM1, OM2, OM12). Password validation is bypassed.
+                          Use your Staff ID (e.g., OM01, OM02) and password to login.
                         </p>
                       </div>
                     </div>
