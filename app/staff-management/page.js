@@ -12,8 +12,11 @@ import {
   RefreshCw,
   CheckCircle,
   AlertCircle,
-  X
+  X,
+  Cloud
 } from "lucide-react";
+import { sendPasswordResetEmail } from "firebase/auth";
+import { auth } from "../firebaseClient";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card";
 import { Input } from "../../components/ui/input";
@@ -44,6 +47,7 @@ export default function StaffManagementPage() {
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [staffToDelete, setStaffToDelete] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
 
   // Fetch staff list
   const fetchStaff = async () => {
@@ -133,46 +137,68 @@ export default function StaffManagementPage() {
   // Reset staff password
   const handleResetPassword = async (staff) => {
     setIsResetting(true);
+    console.log("Starting password reset for:", staff.email);
     
     try {
-      const response = await fetch(`${backendUrl}/staff/reset-password`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          staffId: staff.id,
-          staffEmail: staff.email
-        }),
+      // Use Firebase Client SDK to send password reset email
+      console.log("Sending password reset email via Firebase...");
+      
+      // Send password reset email - use Firebase's default flow
+      // The email template in Firebase Console needs to be configured with custom action URL
+      await sendPasswordResetEmail(auth, staff.email);
+      
+      console.log("Firebase sendPasswordResetEmail completed successfully");
+
+      // Also update backend to track the reset request
+      try {
+        await fetch(`${backendUrl}/staff/reset-password`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            staffId: staff.id,
+            staffEmail: staff.email
+          }),
+        });
+      } catch (backendError) {
+        console.error("Failed to update backend:", backendError);
+        // Continue even if backend update fails
+      }
+
+      // Success toast with professional design
+      toast({
+        variant: "success",
+        title: (
+          <div className="flex items-center gap-2">
+            <Mail className="h-4 w-4" />
+            Password Reset Email Sent
+          </div>
+        ),
+        description: (
+          <div className="space-y-1">
+            <p>A password reset email has been sent to:</p>
+            <p className="font-medium">{staff.email}</p>
+            <p className="text-sm text-gray-500">Click the link in the email to reset password on Firebase's secure page</p>
+            <p className="text-xs text-gray-400 mt-2">After resetting, return here to login with the new password</p>
+          </div>
+        ),
+        duration: 8000,
       });
 
-      const result = await response.json();
-
-      if (result.success) {
-        // Success toast with professional design
-        toast({
-          variant: "success",
-          title: (
-            <div className="flex items-center gap-2">
-              <Mail className="h-4 w-4" />
-              Password Reset Link Sent
-            </div>
-          ),
-          description: (
-            <div className="space-y-1">
-              <p>A password reset link has been sent to:</p>
-              <p className="font-medium">{staff.email}</p>
-              <p className="text-sm text-gray-500">The link will expire in 24 hours</p>
-            </div>
-          ),
-          duration: 5000,
-        });
-
-        // Update staff list to show reset was requested
-        fetchStaff();
-      } else {
-        throw new Error(result.message || "Failed to send reset link");
-      }
+      // Update staff list to show reset was requested
+      fetchStaff();
     } catch (error) {
-      console.error("Failed to reset password:", error);
+      console.error("Failed to send password reset email:", error);
+      
+      // Provide user-friendly error messages
+      let errorMessage = "Failed to send password reset email";
+      if (error.code === 'auth/user-not-found') {
+        errorMessage = "No account found with this email address. Please ensure the staff member has been added to Firebase.";
+      } else if (error.code === 'auth/invalid-email') {
+        errorMessage = "Invalid email address format";
+      } else if (error.code === 'auth/too-many-requests') {
+        errorMessage = "Too many password reset attempts. Please try again later.";
+      }
+      
       toast({
         variant: "error",
         title: (
@@ -181,11 +207,60 @@ export default function StaffManagementPage() {
             Password Reset Failed
           </div>
         ),
-        description: error.message || "Failed to send password reset link",
+        description: errorMessage,
       });
     } finally {
       setIsResetting(false);
       setResetPasswordStaffId(null);
+    }
+  };
+
+  // Sync all staff with Firebase
+  const handleSyncWithFirebase = async () => {
+    setIsSyncing(true);
+    
+    try {
+      const response = await fetch(`${backendUrl}/staff/sync-firebase`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        toast({
+          variant: "success",
+          title: (
+            <div className="flex items-center gap-2">
+              <CheckCircle className="h-4 w-4" />
+              Firebase Sync Complete
+            </div>
+          ),
+          description: (
+            <div className="space-y-1">
+              <p>{result.message}</p>
+              <p className="text-sm">Now staff can receive password reset emails</p>
+            </div>
+          ),
+          duration: 5000,
+        });
+      } else {
+        throw new Error(result.message || "Sync failed");
+      }
+    } catch (error) {
+      console.error("Sync failed:", error);
+      toast({
+        variant: "error",
+        title: (
+          <div className="flex items-center gap-2">
+            <AlertCircle className="h-4 w-4" />
+            Sync Failed
+          </div>
+        ),
+        description: error.message || "Failed to sync staff with Firebase",
+      });
+    } finally {
+      setIsSyncing(false);
     }
   };
 
@@ -251,6 +326,25 @@ export default function StaffManagementPage() {
             className="w-full"
           />
         </div>
+        
+        <Button
+          onClick={handleSyncWithFirebase}
+          disabled={isSyncing}
+          variant="outline"
+          className="flex items-center gap-2"
+        >
+          {isSyncing ? (
+            <>
+              <Cloud className="h-4 w-4 animate-pulse" />
+              Syncing...
+            </>
+          ) : (
+            <>
+              <Cloud className="h-4 w-4" />
+              Sync with Firebase
+            </>
+          )}
+        </Button>
         
         <Dialog open={isAddingStaff} onOpenChange={setIsAddingStaff}>
           <DialogTrigger asChild>
