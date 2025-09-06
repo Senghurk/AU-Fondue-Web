@@ -13,7 +13,13 @@ import {
   CheckCircle,
   AlertCircle,
   X,
-  Cloud
+  Cloud,
+  Search,
+  Key,
+  User,
+  ChevronLeft,
+  ChevronRight,
+  AlertTriangle
 } from "lucide-react";
 import { sendPasswordResetEmail } from "firebase/auth";
 import { auth } from "../firebaseClient";
@@ -27,8 +33,17 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
   DialogTrigger,
 } from "../../components/ui/dialog";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "../../components/ui/table";
 
 export default function StaffManagementPage() {
   const backendUrl = getBackendUrl();
@@ -44,14 +59,20 @@ export default function StaffManagementPage() {
   });
   const [resetPasswordStaffId, setResetPasswordStaffId] = useState(null);
   const [isResetting, setIsResetting] = useState(false);
+  const [resetPasswordDialogOpen, setResetPasswordDialogOpen] = useState(false);
+  const [selectedStaffForReset, setSelectedStaffForReset] = useState(null);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [staffToDelete, setStaffToDelete] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
   const [staffDeletionInfo, setStaffDeletionInfo] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   // Fetch staff list
   const fetchStaff = async () => {
+    setIsLoading(true);
     try {
       const response = await fetch(`${backendUrl}/staff`);
       const data = await response.json();
@@ -63,6 +84,8 @@ export default function StaffManagementPage() {
         title: "Error",
         description: "Failed to fetch staff list",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -75,6 +98,17 @@ export default function StaffManagementPage() {
     staff.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     staff.staffId?.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  // Pagination logic
+  const totalPages = Math.ceil(filteredStaff.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedStaff = filteredStaff.slice(startIndex, endIndex);
+
+  // Reset page when searching
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery]);
 
   // Add new staff
   const handleAddStaff = async () => {
@@ -99,38 +133,33 @@ export default function StaffManagementPage() {
         body: JSON.stringify(newStaff),
       });
 
-      if (!response.ok) {
-        const error = await response.text();
-        throw new Error(error);
-      }
+      if (!response.ok) throw new Error("Failed to add staff");
 
-      const addedStaff = await response.json();
-      
       toast({
         variant: "success",
         title: (
           <div className="flex items-center gap-2">
             <CheckCircle className="h-4 w-4" />
-            Staff Added Successfully
+            Staff Member Added
           </div>
         ),
-        description: `${addedStaff.name} has been added with default password: OMstaff123`,
+        description: `${newStaff.name} has been added successfully`,
       });
 
-      // Reset form and refresh list
-      setNewStaff({
-        staffId: "",
-        name: "",
-        email: ""
-      });
-      setIsAddingStaff(false);
       fetchStaff();
+      setIsAddingStaff(false);
+      setNewStaff({ staffId: "", name: "", email: "" });
     } catch (error) {
       console.error("Failed to add staff:", error);
       toast({
         variant: "error",
-        title: "Error",
-        description: "Failed to add staff member: " + error.message,
+        title: (
+          <div className="flex items-center gap-2">
+            <AlertCircle className="h-4 w-4" />
+            Failed to Add Staff
+          </div>
+        ),
+        description: error.message || "Could not add staff member",
       });
     }
   };
@@ -170,34 +199,30 @@ export default function StaffManagementPage() {
         variant: "success",
         title: (
           <div className="flex items-center gap-2">
-            <Mail className="h-4 w-4" />
+            <CheckCircle className="h-4 w-4" />
             Password Reset Email Sent
           </div>
         ),
         description: (
           <div className="space-y-1">
-            <p>A password reset email has been sent to:</p>
-            <p className="font-medium">{staff.email}</p>
-            <p className="text-sm text-gray-500">Click the link in the email to reset password on Firebase's secure page</p>
-            <p className="text-xs text-gray-400 mt-2">After resetting, return here to login with the new password</p>
+            <p>Reset link sent to <strong>{staff.email}</strong></p>
+            <p className="text-sm text-gray-500">The link will expire in 1 hour</p>
           </div>
         ),
-        duration: 8000,
+        duration: 5000,
       });
-
-      // Update staff list to show reset was requested
-      fetchStaff();
     } catch (error) {
-      console.error("Failed to send password reset email:", error);
+      console.error("Password reset failed:", error);
       
-      // Provide user-friendly error messages
-      let errorMessage = "Failed to send password reset email";
+      // Handle specific Firebase errors
+      let errorMessage = "Failed to send reset email. Please try again.";
       if (error.code === 'auth/user-not-found') {
-        errorMessage = "No account found with this email address. Please ensure the staff member has been added to Firebase.";
+        // Staff doesn't exist in Firebase yet
+        errorMessage = "Staff member not found in authentication system. Use 'Sync with Firebase' first.";
       } else if (error.code === 'auth/invalid-email') {
-        errorMessage = "Invalid email address format";
+        errorMessage = "Invalid email address format.";
       } else if (error.code === 'auth/too-many-requests') {
-        errorMessage = "Too many password reset attempts. Please try again later.";
+        errorMessage = "Too many reset attempts. Please try again later.";
       }
       
       toast({
@@ -213,10 +238,12 @@ export default function StaffManagementPage() {
     } finally {
       setIsResetting(false);
       setResetPasswordStaffId(null);
+      setResetPasswordDialogOpen(false);
+      setSelectedStaffForReset(null);
     }
   };
 
-  // Sync all staff with Firebase
+  // Sync staff with Firebase
   const handleSyncWithFirebase = async () => {
     setIsSyncing(true);
     
@@ -225,31 +252,27 @@ export default function StaffManagementPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
       });
-      
+
       const result = await response.json();
-      
-      if (result.success) {
-        toast({
-          variant: "success",
-          title: (
-            <div className="flex items-center gap-2">
-              <CheckCircle className="h-4 w-4" />
-              Firebase Sync Complete
-            </div>
-          ),
-          description: (
-            <div className="space-y-1">
-              <p>{result.message}</p>
-              <p className="text-sm">Now staff can receive password reset emails</p>
-            </div>
-          ),
-          duration: 5000,
-        });
-      } else {
-        throw new Error(result.message || "Sync failed");
+
+      if (!response.ok) {
+        throw new Error(result.message || "Failed to sync with Firebase");
       }
+
+      toast({
+        variant: "success",
+        title: (
+          <div className="flex items-center gap-2">
+            <CheckCircle className="h-4 w-4" />
+            Firebase Sync Complete
+          </div>
+        ),
+        description: `${result.synced || 0} staff members synced with Firebase`,
+      });
+
+      fetchStaff();
     } catch (error) {
-      console.error("Sync failed:", error);
+      console.error("Firebase sync failed:", error);
       toast({
         variant: "error",
         title: (
@@ -366,286 +389,438 @@ export default function StaffManagementPage() {
 
   return (
     <div className="flex-1 p-6">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold mb-2">Staff Management</h1>
-        <p className="text-gray-600">Manage staff accounts and reset passwords</p>
-      </div>
-
-      {/* Search and Add Staff */}
-      <div className="mb-6 flex items-center gap-4">
-        <div className="flex-1 max-w-md">
-          <Input
-            type="text"
-            placeholder="Search staff by name, email, or ID..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full"
-          />
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Header */}
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Staff Management</h1>
+          <p className="text-gray-600 mt-2">
+            Manage staff accounts and reset passwords
+          </p>
         </div>
-        
-        <Button
-          onClick={handleSyncWithFirebase}
-          disabled={isSyncing}
-          variant="outline"
-          className="flex items-center gap-2"
-        >
-          {isSyncing ? (
-            <>
-              <Cloud className="h-4 w-4 animate-pulse" />
-              Syncing...
-            </>
-          ) : (
-            <>
-              <Cloud className="h-4 w-4" />
-              Sync with Firebase
-            </>
-          )}
-        </Button>
-        
+
+        {/* Stats Cards */}
+        <div className="grid gap-4 md:grid-cols-3">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Total Staff
+              </CardTitle>
+              <Users className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{staffList.length}</div>
+              <p className="text-xs text-muted-foreground">
+                Active staff members
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Main Content Card */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <CardTitle>Staff Members</CardTitle>
+                <CardDescription>
+                  Manage staff members who handle maintenance reports
+                </CardDescription>
+              </div>
+              <div className="flex gap-2">
+                <Button 
+                  onClick={handleSyncWithFirebase}
+                  variant="outline"
+                  disabled={isSyncing}
+                >
+                  {isSyncing ? (
+                    <>
+                      <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                      Syncing...
+                    </>
+                  ) : (
+                    <>
+                      <Cloud className="mr-2 h-4 w-4" />
+                      Sync with Firebase
+                    </>
+                  )}
+                </Button>
+                <Button 
+                  onClick={() => setIsAddingStaff(true)}
+                  className="bg-black hover:bg-gray-800"
+                >
+                  <UserPlus className="mr-2 h-4 w-4" />
+                  Add Staff
+                </Button>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {/* Search Bar */}
+            <div className="mb-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                <Input
+                  type="text"
+                  placeholder="Search staff by name, email, or OM ID..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+            </div>
+
+            {/* Staff Table */}
+            <div className="rounded-md border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[50px]">#</TableHead>
+                    <TableHead>OM ID</TableHead>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Date Added</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {isLoading ? (
+                    <TableRow>
+                      <TableCell colSpan={6} className="text-center py-8">
+                        <div className="flex items-center justify-center">
+                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ) : paginatedStaff.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={6} className="text-center py-8 text-gray-500">
+                        No staff members found
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    paginatedStaff.map((staff, index) => (
+                      <TableRow key={staff.id}>
+                        <TableCell className="font-medium">{startIndex + index + 1}</TableCell>
+                        <TableCell>
+                          {staff.staffId ? (
+                            <div className="inline-flex items-center">
+                              <span className="inline-flex items-center px-3 py-1.5 rounded-md bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200">
+                                <svg className="w-4 h-4 mr-1.5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2" />
+                                </svg>
+                                <span className="font-semibold text-blue-900 tracking-wide text-sm">
+                                  {staff.staffId}
+                                </span>
+                              </span>
+                            </div>
+                          ) : (
+                            <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-gray-100 text-gray-500 text-sm">
+                              <svg className="w-4 h-4 mr-1 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                              Not Assigned
+                            </span>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
+                              <User className="h-4 w-4 text-blue-600" />
+                            </div>
+                            <span className="font-medium">{staff.name}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <Mail className="h-4 w-4 text-gray-400" />
+                            {staff.email}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <Calendar className="h-4 w-4 text-gray-400" />
+                            {staff.createdAt ? new Date(staff.createdAt).toLocaleDateString() : 'N/A'}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center justify-end gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setSelectedStaffForReset(staff);
+                                setResetPasswordDialogOpen(true);
+                              }}
+                            >
+                              <Key className="h-4 w-4" />
+                            </Button>
+                            
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => checkStaffDeletion(staff)}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+
+            {/* Pagination */}
+            {filteredStaff.length > itemsPerPage && (
+              <div className="mt-6 flex items-center justify-between">
+                <div className="text-sm text-gray-600">
+                  Showing {startIndex + 1} to {Math.min(endIndex, filteredStaff.length)} of {filteredStaff.length} staff members
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                    disabled={currentPage === 1}
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                    Previous
+                  </Button>
+                  
+                  {/* Page numbers */}
+                  <div className="flex items-center gap-1">
+                    {[...Array(totalPages)].map((_, i) => {
+                      const pageNum = i + 1;
+                      const isCurrentPage = pageNum === currentPage;
+                      
+                      // Show first page, last page, current page, and pages around current
+                      const showPage = pageNum === 1 || 
+                                      pageNum === totalPages || 
+                                      Math.abs(pageNum - currentPage) <= 1;
+                      
+                      if (!showPage && pageNum === 2 && currentPage > 3) {
+                        return <span key={i} className="px-1 text-gray-400">...</span>;
+                      }
+                      
+                      if (!showPage && pageNum === totalPages - 1 && currentPage < totalPages - 2) {
+                        return <span key={i} className="px-1 text-gray-400">...</span>;
+                      }
+                      
+                      if (!showPage) return null;
+                      
+                      return (
+                        <Button
+                          key={i}
+                          variant={isCurrentPage ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => setCurrentPage(pageNum)}
+                          className={isCurrentPage ? "bg-blue-600 hover:bg-blue-700" : ""}
+                        >
+                          {pageNum}
+                        </Button>
+                      );
+                    })}
+                  </div>
+                  
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                    disabled={currentPage === totalPages}
+                  >
+                    Next
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Add Staff Dialog */}
         <Dialog open={isAddingStaff} onOpenChange={setIsAddingStaff}>
-          <DialogTrigger asChild>
-            <Button className="flex items-center gap-2">
-              <UserPlus className="h-4 w-4" />
-              Add Staff
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="sm:max-w-md">
             <DialogHeader>
               <DialogTitle>Add New Staff Member</DialogTitle>
               <DialogDescription>
-                Create a new staff account. They will receive the default password: OMstaff123
+                Enter the details for the new staff member. Default password is OMstaff123.
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 mt-4">
-              <div>
-                <Label htmlFor="staffId">Staff ID (e.g., OM01)</Label>
+              <div className="space-y-2">
+                <Label htmlFor="staffId">OM ID *</Label>
                 <Input
                   id="staffId"
+                  placeholder="e.g., OM01"
                   value={newStaff.staffId}
                   onChange={(e) => setNewStaff({ ...newStaff, staffId: e.target.value })}
-                  placeholder="OM01"
                 />
               </div>
-              <div>
-                <Label htmlFor="name">Full Name</Label>
+              <div className="space-y-2">
+                <Label htmlFor="name">Full Name *</Label>
                 <Input
                   id="name"
+                  placeholder="Enter staff member's full name"
                   value={newStaff.name}
                   onChange={(e) => setNewStaff({ ...newStaff, name: e.target.value })}
-                  placeholder="John Doe"
                 />
               </div>
-              <div>
-                <Label htmlFor="email">Email Address</Label>
+              <div className="space-y-2">
+                <Label htmlFor="email">Email Address *</Label>
                 <Input
                   id="email"
                   type="email"
+                  placeholder="Enter email address"
                   value={newStaff.email}
                   onChange={(e) => setNewStaff({ ...newStaff, email: e.target.value })}
-                  placeholder="john.doe@example.com"
                 />
               </div>
               <div className="bg-blue-50 p-3 rounded-md">
                 <p className="text-sm text-blue-800">
-                  <strong>Note:</strong> The staff member will login with their Staff ID and the default password <code className="bg-blue-100 px-1 rounded">OMstaff123</code>
+                  <strong>Note:</strong> The staff member will need to change their password on first login.
                 </p>
               </div>
-              <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={() => setIsAddingStaff(false)}>
+            </div>
+            <DialogFooter className="mt-6">
+              <Button variant="outline" onClick={() => setIsAddingStaff(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleAddStaff} className="bg-black hover:bg-gray-800">
+                Add Staff Member
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Reset Password Dialog */}
+        <Dialog open={resetPasswordDialogOpen} onOpenChange={setResetPasswordDialogOpen}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Reset Staff Password</DialogTitle>
+              <DialogDescription>
+                Are you sure you want to reset the password for <strong>{selectedStaffForReset?.name}</strong>?
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-3 mt-4">
+              <div className="bg-amber-50 p-3 rounded-md">
+                <p className="text-sm text-amber-800">
+                  A password reset link will be sent to:
+                </p>
+                <p className="font-medium text-amber-900 mt-1">{selectedStaffForReset?.email}</p>
+              </div>
+              <p className="text-sm text-gray-600">
+                The staff member will receive an email with instructions to create a new password.
+              </p>
+              <div className="flex justify-end gap-2 mt-4">
+                <Button 
+                  variant="outline" 
+                  onClick={() => {
+                    setResetPasswordDialogOpen(false);
+                    setSelectedStaffForReset(null);
+                  }}
+                >
                   Cancel
                 </Button>
-                <Button onClick={handleAddStaff}>
-                  Add Staff Member
+                <Button 
+                  onClick={() => {
+                    handleResetPassword(selectedStaffForReset);
+                    setResetPasswordDialogOpen(false);
+                    setSelectedStaffForReset(null);
+                  }}
+                  className="bg-black hover:bg-gray-800"
+                  disabled={isResetting}
+                >
+                  {isResetting ? (
+                    <>
+                      <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                      Sending...
+                    </>
+                  ) : (
+                    "Send Reset Link"
+                  )}
                 </Button>
               </div>
             </div>
           </DialogContent>
         </Dialog>
-      </div>
 
-      {/* Staff List */}
-      <div className="grid gap-4">
-        {filteredStaff.length === 0 ? (
-          <Card>
-            <CardContent className="text-center py-8">
-              <Users className="h-12 w-12 text-gray-400 mx-auto mb-3" />
-              <p className="text-gray-500">No staff members found</p>
-            </CardContent>
-          </Card>
-        ) : (
-          filteredStaff.map((staff) => (
-            <Card key={staff.id} className="hover:shadow-md transition-shadow">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <Shield className="h-5 w-5 text-blue-500" />
-                      <div>
-                        <h3 className="text-lg font-semibold">{staff.name}</h3>
-                        <div className="flex items-center gap-2 mt-1">
-                          <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-medium">
-                            ID: {staff.staffId || 'N/A'}
-                          </span>
-                          {staff.firstLogin && (
-                            <span className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs">
-                              First Login Pending
+        {/* Delete Confirmation Dialog */}
+        <Dialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600">
+                <AlertCircle className="h-5 w-5" />
+                Confirm Deletion
+              </DialogTitle>
+              <DialogDescription className="pt-3">
+                <div className="space-y-3">
+                  <p>Are you sure you want to delete this staff member?</p>
+                  {staffToDelete && (
+                    <div className="bg-gray-50 p-3 rounded-md space-y-2">
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium">Name:</span>
+                        <span>{staffToDelete.name}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium">OM ID:</span>
+                        {staffToDelete.staffId ? (
+                          <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200">
+                            <svg className="w-3.5 h-3.5 mr-1 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2" />
+                            </svg>
+                            <span className="font-semibold text-blue-900 tracking-wide text-xs">
+                              {staffToDelete.staffId}
                             </span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="space-y-1 text-sm text-gray-600">
-                      <div className="flex items-center gap-2">
-                        <Mail className="h-4 w-4" />
-                        <span>{staff.email}</span>
+                          </span>
+                        ) : (
+                          <span className="text-gray-500 text-sm">Not Assigned</span>
+                        )}
                       </div>
                       <div className="flex items-center gap-2">
-                        <Calendar className="h-4 w-4" />
-                        <span>Added: {new Date(staff.createdAt || Date.now()).toLocaleDateString()}</span>
+                        <span className="font-medium">Email:</span>
+                        <span>{staffToDelete.email}</span>
                       </div>
-                      {staff.passwordResetRequestedAt && (
-                        <div className="text-orange-600">
-                          <span>Password reset requested: {new Date(staff.passwordResetRequestedAt).toLocaleString()}</span>
-                        </div>
-                      )}
                     </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          className="flex items-center gap-2"
-                          disabled={isResetting && resetPasswordStaffId === staff.id}
-                        >
-                          {isResetting && resetPasswordStaffId === staff.id ? (
-                            <>
-                              <RefreshCw className="h-4 w-4 animate-spin" />
-                              Sending...
-                            </>
-                          ) : (
-                            <>
-                              <RefreshCw className="h-4 w-4" />
-                              Reset Password
-                            </>
-                          )}
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent>
-                        <DialogHeader>
-                          <DialogTitle>Reset Staff Password</DialogTitle>
-                          <DialogDescription>
-                            Are you sure you want to reset the password for <strong>{staff.name}</strong>?
-                          </DialogDescription>
-                        </DialogHeader>
-                        <div className="space-y-3 mt-4">
-                          <div className="bg-amber-50 p-3 rounded-md">
-                            <p className="text-sm text-amber-800">
-                              A password reset link will be sent to:
-                            </p>
-                            <p className="font-medium text-amber-900 mt-1">{staff.email}</p>
-                          </div>
-                          <p className="text-sm text-gray-600">
-                            The staff member will receive an email with instructions to create a new password.
-                          </p>
-                          <div className="flex justify-end gap-2 mt-4">
-                            <Button variant="outline" onClick={() => {}}>
-                              Cancel
-                            </Button>
-                            <Button 
-                              onClick={() => {
-                                setResetPasswordStaffId(staff.id);
-                                handleResetPassword(staff);
-                              }}
-                              className="bg-blue-600 hover:bg-blue-700"
-                            >
-                              Send Reset Link
-                            </Button>
-                          </div>
-                        </div>
-                      </DialogContent>
-                    </Dialog>
-                    
-                    <Button 
-                      variant="destructive" 
-                      size="sm"
-                      onClick={() => checkStaffDeletion(staff)}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
+                  )}
+                  <div className="bg-amber-50 border border-amber-200 p-3 rounded-md">
+                    <p className="text-sm text-amber-800">
+                      <strong>Warning:</strong> This action cannot be undone. All data associated with this staff member will be permanently deleted.
+                    </p>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-          ))
-        )}
-      </div>
-      
-      {/* Delete Confirmation Dialog */}
-      <Dialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-red-600">
-              <AlertCircle className="h-5 w-5" />
-              Confirm Deletion
-            </DialogTitle>
-            <DialogDescription className="pt-3">
-              <div className="space-y-3">
-                <p>Are you sure you want to delete this staff member?</p>
-                {staffToDelete && (
-                  <div className="bg-gray-50 p-3 rounded-md space-y-2">
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium">Name:</span>
-                      <span>{staffToDelete.name}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium">Staff ID:</span>
-                      <span>{staffToDelete.staffId || 'N/A'}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium">Email:</span>
-                      <span>{staffToDelete.email}</span>
-                    </div>
-                  </div>
+              </DialogDescription>
+            </DialogHeader>
+            <div className="flex justify-end gap-3 mt-4">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setDeleteConfirmOpen(false);
+                  setStaffToDelete(null);
+                }}
+                disabled={isDeleting}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={handleDeleteStaff}
+                disabled={isDeleting}
+                className="bg-red-600 hover:bg-red-700"
+              >
+                {isDeleting ? (
+                  <>
+                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                    Deleting...
+                  </>
+                ) : (
+                  "Delete Staff Member"
                 )}
-                <div className="bg-amber-50 border border-amber-200 p-3 rounded-md">
-                  <p className="text-sm text-amber-800">
-                    <strong>Warning:</strong> This action cannot be undone. All data associated with this staff member will be permanently deleted.
-                  </p>
-                </div>
-              </div>
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex justify-end gap-3 mt-4">
-            <Button
-              variant="outline"
-              onClick={() => {
-                setDeleteConfirmOpen(false);
-                setStaffToDelete(null);
-              }}
-              disabled={isDeleting}
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={handleDeleteStaff}
-              disabled={isDeleting}
-              className="bg-red-600 hover:bg-red-700"
-            >
-              {isDeleting ? (
-                <>
-                  <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                  Deleting...
-                </>
-              ) : (
-                "Delete Staff Member"
-              )}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
     </div>
   );
 }
