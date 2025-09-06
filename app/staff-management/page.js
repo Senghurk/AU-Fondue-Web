@@ -37,8 +37,7 @@ export default function StaffManagementPage() {
   const [newStaff, setNewStaff] = useState({
     staffId: "",
     name: "",
-    email: "",
-    dateAdded: new Date().toISOString().split('T')[0]
+    email: ""
   });
   const [resetPasswordStaffId, setResetPasswordStaffId] = useState(null);
   const [isResetting, setIsResetting] = useState(false);
@@ -117,8 +116,7 @@ export default function StaffManagementPage() {
       setNewStaff({
         staffId: "",
         name: "",
-        email: "",
-        dateAdded: new Date().toISOString().split('T')[0]
+        email: ""
       });
       setIsAddingStaff(false);
       fetchStaff();
@@ -295,15 +293,6 @@ export default function StaffManagementPage() {
                   value={newStaff.email}
                   onChange={(e) => setNewStaff({ ...newStaff, email: e.target.value })}
                   placeholder="john.doe@example.com"
-                />
-              </div>
-              <div>
-                <Label htmlFor="dateAdded">Date Added</Label>
-                <Input
-                  id="dateAdded"
-                  type="date"
-                  value={newStaff.dateAdded}
-                  onChange={(e) => setNewStaff({ ...newStaff, dateAdded: e.target.value })}
                 />
               </div>
               <div className="bg-blue-50 p-3 rounded-md">
