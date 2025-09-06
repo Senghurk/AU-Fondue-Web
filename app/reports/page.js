@@ -129,7 +129,11 @@ export default function ReportsPage() {
         setLoading(true);
         setError(null);
         
-        await Promise.all([fetchReports(), fetchStaffMembers()]);
+        // Fetch reports immediately
+        await fetchReports();
+        
+        // Fetch staff members after checking user auth
+        await fetchStaffMembers();
       } catch (error) {
         console.error("Error fetching data:", error);
         setError("Failed to load reports. Please try refreshing the page.");
@@ -138,8 +142,12 @@ export default function ReportsPage() {
       }
     };
 
-    fetchData();
-  }, []);
+    // Only fetch data when we have user info (or confirmed no user)
+    // This prevents fetching all staff when the auth context is still loading
+    if (user !== undefined) {
+      fetchData();
+    }
+  }, [user]); // Add user as dependency
 
   const fetchReports = async () => {
     try {
@@ -161,22 +169,37 @@ export default function ReportsPage() {
 
   const fetchStaffMembers = async () => {
     try {
+      // First check localStorage directly as a fallback
+      const userStr = localStorage.getItem('user');
+      let currentUser = user;
+      
+      // If user from context is not available yet, try localStorage
+      if (!currentUser && userStr) {
+        try {
+          currentUser = JSON.parse(userStr);
+        } catch (e) {
+          console.error("Error parsing user from localStorage:", e);
+        }
+      }
+      
       // Check if current user is staff
-      if (user && (user.userType === 'staff' || user.userType === 'om_staff')) {
+      if (currentUser && (currentUser.userType === 'staff' || currentUser.userType === 'om_staff')) {
         // For staff users, only show their own account in the dropdown
         const currentStaff = {
-          id: user.userId,
-          name: user.name || user.fullName || user.staffId || 'Current Staff',
-          staffId: user.staffId
+          id: currentUser.userId,
+          name: currentUser.name || currentUser.fullName || currentUser.staffId || 'Current Staff',
+          staffId: currentUser.staffId || currentUser.omId
         };
         setStaffMembers([currentStaff]);
+        console.log('Staff user detected, showing only current staff:', currentStaff);
       } else {
-        // For admins, fetch all staff members
+        // For admins or when no user is logged in, fetch all staff members
         const res = await fetch(`${backendUrl}/staff`);
         if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
         
         const data = await res.json();
         setStaffMembers(data);
+        console.log('Admin/no user detected, showing all staff members');
       }
     } catch (error) {
       console.error("Error fetching staff:", error);

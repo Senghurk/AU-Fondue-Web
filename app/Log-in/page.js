@@ -173,16 +173,37 @@ export default function LoginPage() {
       const result = await response.json();
       
       if (!response.ok || !result.success) {
-        toast({
-          variant: "error",
-          title: (
-            <div className="flex items-center gap-2">
-              <X className="h-4 w-4" />
-              Login Failed
-            </div>
-          ),
-          description: result.message || "Staff login failed.",
-        });
+        // Check if this is a default password security warning
+        if (result.errorType === "DEFAULT_PASSWORD_EXPIRED") {
+          toast({
+            variant: "error",
+            title: (
+              <div className="flex items-center gap-2">
+                <AlertCircle className="h-5 w-5 text-red-600" />
+                Security Alert
+              </div>
+            ),
+            description: (
+              <div className="space-y-1">
+                <p className="font-semibold text-red-700">Default password no longer valid!</p>
+                <p className="text-sm">Your password has been changed. Please use your new password to login.</p>
+                <p className="text-xs text-gray-600 mt-2">For security reasons, the default password cannot be used after you've set a new password.</p>
+              </div>
+            ),
+            duration: 8000, // Show for longer since it's important
+          });
+        } else {
+          toast({
+            variant: "error",
+            title: (
+              <div className="flex items-center gap-2">
+                <X className="h-4 w-4" />
+                Login Failed
+              </div>
+            ),
+            description: result.message || "Staff login failed.",
+          });
+        }
         setIsLoading(false);
         return;
       }
@@ -463,7 +484,7 @@ export default function LoginPage() {
                       <div>
                         <h4 className="text-blue-800 font-semibold text-sm">Microsoft Authentication</h4>
                         <p className="text-blue-700 text-sm mt-1">
-                          Sign in with your AU Microsoft account (@au.edu) to access the admin dashboard.
+                          Sign in with your AU account (@au.edu) to access the admin dashboard.
                         </p>
                       </div>
                     </div>
