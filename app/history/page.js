@@ -135,7 +135,7 @@ export default function HistoryPage() {
     <div className="flex-1 p-6">
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Report History</h1>
+        <h1 className="text-3xl font-bold">Completed Report History</h1>
         <button
           onClick={exportToExcel}
           className="px-4 py-2 bg-green-500 text-white text-sm font-medium rounded hover:bg-green-600"
