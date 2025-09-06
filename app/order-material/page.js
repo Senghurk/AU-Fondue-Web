@@ -9,7 +9,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/ca
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
 import { Textarea } from "../../components/ui/textarea";
-import { Printer, Upload, X, AlertCircle, CheckCircle, Expand, ZoomIn, ZoomOut, Download } from "lucide-react";
+import { Printer, Upload, X, AlertCircle, CheckCircle, Expand, ZoomIn, ZoomOut, Download, CalendarIcon } from "lucide-react";
+import { format } from "date-fns";
 
 export default function OrderMaterialPage() {
   const router = useRouter();
@@ -20,17 +21,11 @@ export default function OrderMaterialPage() {
   const [uploadedCount, setUploadedCount] = useState(0);
   const [selectedImage, setSelectedImage] = useState(null);
   const [imageZoom, setImageZoom] = useState(1);
+  const [currentDateTime, setCurrentDateTime] = useState(new Date());
   
   // Form data state
   const [formData, setFormData] = useState({
     no: "SE68080067",
-    date: new Date().toLocaleDateString('en-GB', {
-      day: '2-digit',
-      month: '2-digit', 
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    }).replace(',', ''),
     equipmentCode: "",
     system: "",
     department: "Maintenance",
@@ -76,6 +71,15 @@ export default function OrderMaterialPage() {
     return () => unsubscribe();
   }, [router]);
 
+  // Update current date/time every second
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentDateTime(new Date());
+    }, 1000);
+    
+    return () => clearInterval(timer);
+  }, []);
+
   const handleInputChange = (field, value) => {
     setFormData(prev => ({
       ...prev,
@@ -84,7 +88,21 @@ export default function OrderMaterialPage() {
   };
 
   const handlePrint = () => {
-    window.print();
+    // Update to current date/time when printing
+    setCurrentDateTime(new Date());
+    setTimeout(() => {
+      window.print();
+    }, 100);
+  };
+  
+  // Get formatted date and time for display
+  const getFormattedDateTime = () => {
+    return format(currentDateTime, 'dd/MM/yyyy HH:mm');
+  };
+  
+  // Get formatted date only
+  const getFormattedDate = () => {
+    return format(currentDateTime, 'dd/MM/yyyy');
   };
 
   const handleImageUpload = (e) => {
@@ -314,12 +332,12 @@ export default function OrderMaterialPage() {
               />
             </div>
             <div className="w-full sm:w-auto">
-              <Label className="text-sm font-semibold">Date:</Label>
-              <Input 
-                value={formData.date}
-                onChange={(e) => handleInputChange('date', e.target.value)}
-                className="mt-1 min-h-[44px]"
-              />
+              <Label className="text-sm font-semibold">Date & Time:</Label>
+              <div className="mt-1 p-3 bg-gray-50 rounded-md border min-h-[44px] flex items-center">
+                <CalendarIcon className="mr-2 h-4 w-4 text-gray-500" />
+                <span className="text-gray-700 font-mono">{getFormattedDateTime()}</span>
+                <span className="ml-2 text-xs text-gray-500">(Current time)</span>
+              </div>
             </div>
           </div>
 
@@ -548,9 +566,9 @@ export default function OrderMaterialPage() {
           <div className="mt-8 pt-6 border-t space-y-2 text-sm text-gray-600">
             <p><strong>Operations and Maintenance Division</strong></p>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4">
-              <p>Prepared on: 04/04/2018</p>
+              <p>Prepared on: {getFormattedDate()}</p>
               <p>Revision: 1</p>
-              <p>Effective Date: 04/04/2018</p>
+              <p>Effective Date: {getFormattedDate()}</p>
             </div>
             <div className="mt-6">
               <p className="font-semibold">Head of Operations and Maintenance Division</p>
@@ -638,7 +656,7 @@ export default function OrderMaterialPage() {
                 <td style={{border: '1px solid #000', padding: '6px 8px', fontWeight: 'bold', width: '15%', backgroundColor: '#f5f5f5', fontSize: '10pt'}}>No.</td>
                 <td style={{border: '1px solid #000', padding: '6px 8px', width: '35%', fontSize: '10pt'}}>{formData.no}</td>
                 <td style={{border: '1px solid #000', padding: '6px 8px', fontWeight: 'bold', width: '15%', backgroundColor: '#f5f5f5', fontSize: '10pt'}}>Date:</td>
-                <td style={{border: '1px solid #000', padding: '6px 8px', width: '35%', fontSize: '10pt'}}>{formData.date}</td>
+                <td style={{border: '1px solid #000', padding: '6px 8px', width: '35%', fontSize: '10pt'}}>{getFormattedDateTime()}</td>
               </tr>
               <tr>
                 <td style={{border: '1px solid #000', padding: '6px 8px', fontWeight: 'bold', backgroundColor: '#f5f5f5', fontSize: '10pt'}}>Equipment Code:</td>
@@ -774,9 +792,9 @@ export default function OrderMaterialPage() {
           }}>
             <div style={{fontWeight: 'bold', fontSize: '10pt'}}>Operations and Maintenance Division</div>
             <div style={{display: 'flex', justifyContent: 'space-between', marginTop: '6px', fontSize: '8pt'}}>
-              <span>Prepared on: 04/04/2018</span>
+              <span>Prepared on: {getFormattedDate()}</span>
               <span>Revision: 1</span>
-              <span>Effective Date: 04/04/2018</span>
+              <span>Effective Date: {getFormattedDate()}</span>
             </div>
             <div style={{marginTop: '8px'}}>
               <div style={{fontWeight: 'bold', fontSize: '10pt'}}>Head of Operations and Maintenance Division</div>
