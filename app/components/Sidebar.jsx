@@ -113,20 +113,20 @@ export default function Sidebar({ activeTopLink, activeLink, setActiveLink, isMo
                   onClick={() => handleLinkClick("/admins")}
                 >
                   <Shield className="mr-2 h-4 w-4" />
-                  Admin List
+                  Admin Management
                 </Link>
               </Button>
               <Button
-                variant={activeLink === "/user-list" ? "default" : "ghost"}
+                variant={activeLink === "/staff-management" ? "default" : "ghost"}
                 className="w-full justify-start"
                 asChild
               >
                 <Link
-                  href="/user-list"
-                  onClick={() => handleLinkClick("/user-list")}
+                  href="/staff-management"
+                  onClick={() => handleLinkClick("/staff-management")}
                 >
                   <Users className="mr-2 h-4 w-4" />
-                  OM Staff List
+                  Staff Management
                 </Link>
               </Button>
             </div>

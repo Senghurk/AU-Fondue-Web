@@ -89,7 +89,7 @@ export default function AdminListPage() {
   return (
     <div className="flex-1 p-6">
       <h1 className="text-3xl font-bold mb-6">Admin Management</h1>
-      <p className="text-gray-600 mb-4">Add or manage admins with AU Microsoft accounts.</p>
+      <p className="text-gray-600 mb-4">Manage system administrators with AU Microsoft accounts (@au.edu).</p>
 
       <div className="mb-4 flex items-center space-x-4">
         <input
