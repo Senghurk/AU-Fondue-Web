@@ -22,6 +22,7 @@ export default function OrderMaterialPage() {
   const [selectedImage, setSelectedImage] = useState(null);
   const [imageZoom, setImageZoom] = useState(1);
   const [currentDateTime, setCurrentDateTime] = useState(new Date());
+  const [rejectedFilesCount, setRejectedFilesCount] = useState(0);
   
   // Form data state
   const [formData, setFormData] = useState({
@@ -107,44 +108,64 @@ export default function OrderMaterialPage() {
 
   const handleImageUpload = (e) => {
     const files = Array.from(e.target.files);
-    const remainingSlots = 4 - images.length;
+    const currentCount = images.length;
+    const remainingSlots = 4 - currentCount;
     
-    // Show alert if trying to upload more than allowed
-    if (files.length > remainingSlots && remainingSlots > 0) {
-      setShowMaxImagesAlert(true);
-      setTimeout(() => setShowMaxImagesAlert(false), 8000);
-    } else if (remainingSlots === 0) {
-      setShowMaxImagesAlert(true);
-      setTimeout(() => setShowMaxImagesAlert(false), 8000);
+    // Hide any existing alerts first
+    setShowSuccessAlert(false);
+    setShowMaxImagesAlert(false);
+    
+    // Check if no slots remaining
+    if (remainingSlots === 0) {
+      setRejectedFilesCount(files.length);
+      setTimeout(() => {
+        setShowMaxImagesAlert(true);
+        setTimeout(() => setShowMaxImagesAlert(false), 8000);
+      }, 100);
       e.target.value = '';
       return;
     }
     
-    const filesToAdd = files.slice(0, remainingSlots);
-    let successCount = 0;
+    // Reject entire upload if it would exceed limit
+    if (files.length > remainingSlots) {
+      setRejectedFilesCount(files.length);
+      setTimeout(() => {
+        setShowMaxImagesAlert(true);
+        setTimeout(() => setShowMaxImagesAlert(false), 8000);
+      }, 100);
+      e.target.value = '';
+      return; // Don't process any files at all
+    }
     
-    filesToAdd.forEach((file) => {
+    // Only process files if they ALL fit within the limit
+    let successCount = 0;
+    const newImages = [];
+    
+    files.forEach((file) => {
       if (file.type.startsWith('image/')) {
         successCount++;
         const reader = new FileReader();
         reader.onload = (event) => {
-          setImages(prev => [...prev, {
+          newImages.push({
             id: Date.now() + Math.random(),
             file: file,
             url: event.target.result,
             name: file.name
-          }]);
+          });
+          
+          // Only update state after all images are read
+          if (newImages.length === successCount) {
+            setImages(prev => [...prev, ...newImages]);
+            setUploadedCount(successCount);
+            setTimeout(() => {
+              setShowSuccessAlert(true);
+              setTimeout(() => setShowSuccessAlert(false), 7000);
+            }, 100);
+          }
         };
         reader.readAsDataURL(file);
       }
     });
-    
-    // Show success notification if images were uploaded
-    if (successCount > 0) {
-      setUploadedCount(successCount);
-      setShowSuccessAlert(true);
-      setTimeout(() => setShowSuccessAlert(false), 7000);
-    }
     
     // Reset the input
     e.target.value = '';
@@ -194,10 +215,17 @@ export default function OrderMaterialPage() {
             <AlertCircle className="h-5 w-5 text-orange-600" />
           </div>
           <div className="flex-1">
-            <h3 className="font-semibold text-gray-900 mb-1">Maximum Images Reached</h3>
+            <h3 className="font-semibold text-gray-900 mb-1">Upload Rejected - Maximum Images Exceeded</h3>
             <p className="text-sm text-gray-600">
-              You can only attach up to 4 images. {images.length > 0 ? `You currently have ${images.length} image${images.length > 1 ? 's' : ''} attached.` : ''} 
-              {4 - images.length > 0 ? ` You can add ${4 - images.length} more image${4 - images.length > 1 ? 's' : ''}.` : ' Please remove an existing image to add a new one.'}
+              {rejectedFilesCount > 0 ? 
+                `Cannot upload ${rejectedFilesCount} image${rejectedFilesCount > 1 ? 's' : ''}. ` : 
+                ''
+              }
+              You can only attach up to 4 images total. {images.length > 0 ? `You currently have ${images.length} image${images.length > 1 ? 's' : ''} attached.` : ''} 
+              {4 - images.length > 0 ? 
+                ` You can only add ${4 - images.length} more image${4 - images.length > 1 ? 's' : ''}.` : 
+                ' Please remove existing images before adding new ones.'
+              }
             </p>
           </div>
           <button
