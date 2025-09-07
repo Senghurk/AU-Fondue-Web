@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { getBackendUrl } from "../config/api";
 import { useToast } from "../context/ToastContext";
+import { useAuth } from "../context/AuthContext";
 import { 
   Shield, 
   UserPlus, 
@@ -42,6 +43,7 @@ import {
 export default function AdminManagementPage() {
   const backendUrl = getBackendUrl();
   const { toast } = useToast();
+  const { user } = useAuth();
   
   const [adminList, setAdminList] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -246,6 +248,22 @@ export default function AdminManagementPage() {
 
   // Open delete confirmation
   const confirmDelete = (admin) => {
+    // Prevent self-deletion
+    if (user && user.email === admin.email) {
+      toast({
+        variant: "error",
+        title: (
+          <div className="flex items-center gap-2">
+            <AlertCircle className="h-4 w-4" />
+            Action Not Allowed
+          </div>
+        ),
+        description: "You cannot delete your own administrator account while logged in.",
+        duration: 5000,
+      });
+      return;
+    }
+    
     setAdminToDelete(admin);
     setDeleteConfirmOpen(true);
   };
@@ -373,14 +391,35 @@ export default function AdminManagementPage() {
                           </div>
                         </TableCell>
                         <TableCell className="text-right">
-                          <Button
-                            variant="destructive"
-                            size="sm"
-                            onClick={() => confirmDelete(admin)}
-                            disabled={adminList.length <= 1}
-                          >
-                            <X className="h-4 w-4" />
-                          </Button>
+                          {user && user.email === admin.email ? (
+                            <div className="relative inline-block group">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                disabled
+                                className="opacity-50 cursor-not-allowed bg-gray-100 border-gray-300"
+                                title="You cannot delete your own account"
+                              >
+                                <X className="h-4 w-4 text-gray-400" />
+                              </Button>
+                              <div className="absolute bottom-full right-0 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-md whitespace-nowrap invisible group-hover:visible transition-all duration-200 z-50">
+                                <div className="relative">
+                                  Cannot delete your own account
+                                  <div className="absolute top-full right-4 w-0 h-0 border-l-4 border-l-transparent border-r-4 border-r-transparent border-t-4 border-t-gray-900"></div>
+                                </div>
+                              </div>
+                            </div>
+                          ) : (
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => confirmDelete(admin)}
+                              disabled={adminList.length <= 1}
+                              title={adminList.length <= 1 ? "Cannot delete the last admin" : "Delete admin"}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          )}
                         </TableCell>
                       </TableRow>
                     ))
