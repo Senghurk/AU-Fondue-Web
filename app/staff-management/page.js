@@ -13,7 +13,6 @@ import {
   CheckCircle,
   AlertCircle,
   X,
-  Cloud,
   Search,
   Key,
   User,
@@ -57,6 +56,11 @@ export default function StaffManagementPage() {
     name: "",
     email: ""
   });
+  const [validationErrors, setValidationErrors] = useState({
+    staffId: "",
+    email: ""
+  });
+  const [isCheckingDuplicate, setIsCheckingDuplicate] = useState(false);
   const [resetPasswordStaffId, setResetPasswordStaffId] = useState(null);
   const [isResetting, setIsResetting] = useState(false);
   const [resetPasswordDialogOpen, setResetPasswordDialogOpen] = useState(false);
@@ -64,7 +68,6 @@ export default function StaffManagementPage() {
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [staffToDelete, setStaffToDelete] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [isSyncing, setIsSyncing] = useState(false);
   const [staffDeletionInfo, setStaffDeletionInfo] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -90,7 +93,9 @@ export default function StaffManagementPage() {
   };
 
   useEffect(() => {
-    fetchStaff();
+    // Automatically sync with Firebase when page loads
+    // This will also fetch staff list after syncing
+    syncWithFirebase();
   }, []);
 
   const filteredStaff = staffList.filter((staff) =>
@@ -111,7 +116,31 @@ export default function StaffManagementPage() {
   }, [searchQuery]);
 
   // Add new staff
+  // Check if OM ID already exists
+  const checkDuplicateOMID = async (omId) => {
+    if (!omId.trim()) return;
+    
+    setIsCheckingDuplicate(true);
+    try {
+      // Check if OM ID already exists in current staff list
+      const exists = staffList.some(staff => staff.staffId === omId);
+      if (exists) {
+        setValidationErrors(prev => ({
+          ...prev,
+          staffId: `OM ID '${omId}' is already exist in the system`
+        }));
+      } else {
+        setValidationErrors(prev => ({ ...prev, staffId: "" }));
+      }
+    } finally {
+      setIsCheckingDuplicate(false);
+    }
+  };
+
   const handleAddStaff = async () => {
+    // Clear previous validation errors
+    setValidationErrors({ staffId: "", email: "" });
+
     if (!newStaff.staffId.trim() || !newStaff.name.trim() || !newStaff.email.trim()) {
       toast({
         variant: "error",
@@ -126,6 +155,21 @@ export default function StaffManagementPage() {
       return;
     }
 
+    // Check for validation errors before submitting
+    if (validationErrors.staffId || validationErrors.email) {
+      toast({
+        variant: "error",
+        title: (
+          <div className="flex items-center gap-2">
+            <AlertCircle className="h-4 w-4" />
+            Validation Error
+          </div>
+        ),
+        description: "Please fix the validation errors before submitting",
+      });
+      return;
+    }
+
     try {
       const response = await fetch(`${backendUrl}/staff`, {
         method: "POST",
@@ -133,7 +177,48 @@ export default function StaffManagementPage() {
         body: JSON.stringify(newStaff),
       });
 
-      if (!response.ok) throw new Error("Failed to add staff");
+      const data = await response.json();
+
+      if (!response.ok) {
+        // Handle specific error types from backend
+        if (data.errorType === "DUPLICATE_OM_ID") {
+          setValidationErrors(prev => ({ ...prev, staffId: data.message }));
+          toast({
+            variant: "error",
+            title: (
+              <div className="flex items-center gap-2">
+                <AlertCircle className="h-4 w-4" />
+                Duplicate OM ID
+              </div>
+            ),
+            description: data.message,
+          });
+        } else if (data.errorType === "DUPLICATE_EMAIL") {
+          setValidationErrors(prev => ({ ...prev, email: data.message }));
+          toast({
+            variant: "error",
+            title: (
+              <div className="flex items-center gap-2">
+                <AlertCircle className="h-4 w-4" />
+                Duplicate Email
+              </div>
+            ),
+            description: data.message,
+          });
+        } else {
+          toast({
+            variant: "error",
+            title: (
+              <div className="flex items-center gap-2">
+                <AlertCircle className="h-4 w-4" />
+                Failed to Add Staff
+              </div>
+            ),
+            description: data.message || "Could not add staff member",
+          });
+        }
+        return;
+      }
 
       toast({
         variant: "success",
@@ -149,6 +234,7 @@ export default function StaffManagementPage() {
       fetchStaff();
       setIsAddingStaff(false);
       setNewStaff({ staffId: "", name: "", email: "" });
+      setValidationErrors({ staffId: "", email: "" });
     } catch (error) {
       console.error("Failed to add staff:", error);
       toast({
@@ -243,10 +329,8 @@ export default function StaffManagementPage() {
     }
   };
 
-  // Sync staff with Firebase
-  const handleSyncWithFirebase = async () => {
-    setIsSyncing(true);
-    
+  // Sync staff with Firebase (silent auto-sync)
+  const syncWithFirebase = async () => {
     try {
       const response = await fetch(`${backendUrl}/staff/sync-firebase`, {
         method: "POST",
@@ -259,32 +343,24 @@ export default function StaffManagementPage() {
         throw new Error(result.message || "Failed to sync with Firebase");
       }
 
-      toast({
-        variant: "success",
-        title: (
-          <div className="flex items-center gap-2">
-            <CheckCircle className="h-4 w-4" />
-            Firebase Sync Complete
-          </div>
-        ),
-        description: `${result.synced || 0} staff members synced with Firebase`,
-      });
-
+      // Silent sync - only log to console
+      console.log(`Firebase sync complete: ${result.synced || 0} staff members synced`);
+      
+      // Refresh staff list after sync
       fetchStaff();
     } catch (error) {
       console.error("Firebase sync failed:", error);
+      // Only show error if sync fails
       toast({
         variant: "error",
         title: (
           <div className="flex items-center gap-2">
             <AlertCircle className="h-4 w-4" />
-            Sync Failed
+            Firebase Sync Error
           </div>
         ),
-        description: error.message || "Failed to sync staff with Firebase",
+        description: "Failed to sync with Firebase. Some features may be limited.",
       });
-    } finally {
-      setIsSyncing(false);
     }
   };
 
@@ -426,32 +502,13 @@ export default function StaffManagementPage() {
                   Manage staff members who handle maintenance reports
                 </CardDescription>
               </div>
-              <div className="flex gap-2">
-                <Button 
-                  onClick={handleSyncWithFirebase}
-                  variant="outline"
-                  disabled={isSyncing}
-                >
-                  {isSyncing ? (
-                    <>
-                      <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
-                      Syncing...
-                    </>
-                  ) : (
-                    <>
-                      <Cloud className="mr-2 h-4 w-4" />
-                      Sync with Firebase
-                    </>
-                  )}
-                </Button>
-                <Button 
-                  onClick={() => setIsAddingStaff(true)}
-                  className="bg-black hover:bg-gray-800"
-                >
-                  <UserPlus className="mr-2 h-4 w-4" />
-                  Add Staff
-                </Button>
-              </div>
+              <Button 
+                onClick={() => setIsAddingStaff(true)}
+                className="bg-black hover:bg-gray-800"
+              >
+                <UserPlus className="mr-2 h-4 w-4" />
+                Add Staff
+              </Button>
             </div>
           </CardHeader>
           <CardContent>
@@ -654,8 +711,25 @@ export default function StaffManagementPage() {
                   id="staffId"
                   placeholder="e.g., OM01"
                   value={newStaff.staffId}
-                  onChange={(e) => setNewStaff({ ...newStaff, staffId: e.target.value })}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setNewStaff({ ...newStaff, staffId: value });
+                    // Check for duplicate on blur or after a delay
+                    if (value.trim()) {
+                      checkDuplicateOMID(value);
+                    } else {
+                      setValidationErrors(prev => ({ ...prev, staffId: "" }));
+                    }
+                  }}
+                  onBlur={() => checkDuplicateOMID(newStaff.staffId)}
+                  className={validationErrors.staffId ? "border-red-500" : ""}
                 />
+                {validationErrors.staffId && (
+                  <p className="text-sm text-red-500 mt-1 flex items-center gap-1">
+                    <AlertCircle className="h-3 w-3" />
+                    {validationErrors.staffId}
+                  </p>
+                )}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="name">Full Name *</Label>
@@ -673,8 +747,21 @@ export default function StaffManagementPage() {
                   type="email"
                   placeholder="Enter email address"
                   value={newStaff.email}
-                  onChange={(e) => setNewStaff({ ...newStaff, email: e.target.value })}
+                  onChange={(e) => {
+                    setNewStaff({ ...newStaff, email: e.target.value });
+                    // Clear email error when user types
+                    if (validationErrors.email) {
+                      setValidationErrors(prev => ({ ...prev, email: "" }));
+                    }
+                  }}
+                  className={validationErrors.email ? "border-red-500" : ""}
                 />
+                {validationErrors.email && (
+                  <p className="text-sm text-red-500 mt-1 flex items-center gap-1">
+                    <AlertCircle className="h-3 w-3" />
+                    {validationErrors.email}
+                  </p>
+                )}
               </div>
               <div className="bg-blue-50 p-3 rounded-md">
                 <p className="text-sm text-blue-800">
@@ -683,10 +770,18 @@ export default function StaffManagementPage() {
               </div>
             </div>
             <DialogFooter className="mt-6">
-              <Button variant="outline" onClick={() => setIsAddingStaff(false)}>
+              <Button variant="outline" onClick={() => {
+                setIsAddingStaff(false);
+                setNewStaff({ staffId: "", name: "", email: "" });
+                setValidationErrors({ staffId: "", email: "" });
+              }}>
                 Cancel
               </Button>
-              <Button onClick={handleAddStaff} className="bg-black hover:bg-gray-800">
+              <Button 
+                onClick={handleAddStaff} 
+                className="bg-black hover:bg-gray-800"
+                disabled={isCheckingDuplicate || !!validationErrors.staffId || !!validationErrors.email}
+              >
                 Add Staff Member
               </Button>
             </DialogFooter>

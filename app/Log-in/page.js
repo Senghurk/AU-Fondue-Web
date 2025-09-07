@@ -11,6 +11,8 @@ import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
 import { Shield, Users, ArrowLeft, AlertCircle, X, CheckCircle } from "lucide-react";
 import { useToast } from "../context/ToastContext";
+import { auth } from "../firebaseClient";
+import { signInWithPopup, OAuthProvider } from "firebase/auth";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -30,25 +32,88 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      // For testing: Use a prompt to get admin email
-      // In production, this should use Microsoft OAuth
-      const adminEmail = prompt("Enter your @au.edu admin email:", "u6440041@au.edu");
+      // Initialize Microsoft OAuth provider
+      const provider = new OAuthProvider('microsoft.com');
       
-      if (!adminEmail) {
+      // Configure the provider for organizational accounts
+      provider.setCustomParameters({
+        // Use 'organizations' for any organizational account
+        // Or use AU's specific tenant ID if you have it
+        tenant: 'organizations', // Changed from 'consumers' to 'organizations'
+        prompt: 'select_account',
+        // Optional: Add domain hint to pre-select AU domain
+        domain_hint: 'au.edu'
+      });
+      
+      // Add the AU email domain hint
+      provider.addScope('email');
+      provider.addScope('profile');
+      
+      // Sign in with Microsoft using Firebase
+      let result;
+      try {
+        result = await signInWithPopup(auth, provider);
+      } catch (popupError) {
+        // Immediately handle popup errors
         setIsLoading(false);
-        return;
+        
+        if (popupError.code === 'auth/popup-closed-by-user') {
+          toast({
+            variant: "error",
+            title: "Sign-in Cancelled",
+            description: "Sign-in popup was closed. Please try again.",
+          });
+          return;
+        } else if (popupError.code === 'auth/cancelled-popup-request') {
+          toast({
+            variant: "error",
+            title: "Popup Error",
+            description: "Another sign-in popup is already open.",
+          });
+          return;
+        } else if (popupError.code === 'auth/popup-blocked') {
+          toast({
+            variant: "error",
+            title: "Popup Blocked",
+            description: "Sign-in popup was blocked by your browser. Please allow popups for this site.",
+          });
+          return;
+        }
+        throw popupError; // Re-throw for other errors
       }
       
-      if (!adminEmail.endsWith("@au.edu")) {
+      const user = result.user;
+      
+      // Extract the email from the Microsoft account
+      const adminEmail = user.email;
+      
+      if (!adminEmail) {
         toast({
           variant: "error",
-          title: "Invalid Email",
-          description: "Admin must use an @au.edu email address",
+          title: "Authentication Failed",
+          description: "Could not retrieve email from Microsoft account",
         });
         setIsLoading(false);
         return;
       }
       
+      // Verify it's an @au.edu email
+      if (!adminEmail.endsWith("@au.edu")) {
+        toast({
+          variant: "error",
+          title: "Invalid Email Domain",
+          description: "Only @au.edu email addresses are allowed for administrators",
+        });
+        // Sign out from Firebase
+        await auth.signOut();
+        setIsLoading(false);
+        return;
+      }
+      
+      // Get the ID token for backend verification
+      const idToken = await user.getIdToken();
+      
+      // Verify with backend that this user is registered as an admin
       const backendUrl = getBackendUrl();
       const response = await fetch(`${backendUrl}/auth/admin/login`, {
         method: 'POST',
@@ -57,7 +122,9 @@ export default function LoginPage() {
         },
         body: JSON.stringify({
           email: adminEmail,
-          accessToken: "test-token-" + Date.now()
+          accessToken: idToken,
+          displayName: user.displayName,
+          uid: user.uid
         })
       });
 
@@ -114,14 +181,15 @@ export default function LoginPage() {
       }, 1500);
     } catch (error) {
       console.error("Login failed:", error);
+      setIsLoading(false);
       
       let errorMessage = "Login failed: ";
-      if (error.message.includes('Failed to fetch')) {
+      if (error.message && error.message.includes('Failed to fetch')) {
         errorMessage += "Cannot connect to server. Please check your internet connection or contact support.";
-      } else if (error.message.includes('Backend check failed')) {
+      } else if (error.message && error.message.includes('Backend check failed')) {
         errorMessage += "Server authentication error. Please try again or contact support.";
       } else {
-        errorMessage += error.message;
+        errorMessage += error.message || "An unknown error occurred";
       }
       
       toast({
@@ -129,8 +197,13 @@ export default function LoginPage() {
         title: "Login Error",
         description: errorMessage,
       });
-    } finally {
-      setIsLoading(false);
+      
+      // Sign out from Firebase if login failed
+      try {
+        await auth.signOut();
+      } catch (signOutError) {
+        console.error("Error signing out:", signOutError);
+      }
     }
   };
 
@@ -482,9 +555,9 @@ export default function LoginPage() {
                         </svg>
                       </div>
                       <div>
-                        <h4 className="text-blue-800 font-semibold text-sm">Microsoft Authentication</h4>
+                        <h4 className="text-blue-800 font-semibold text-sm">Microsoft Authentication Required</h4>
                         <p className="text-blue-700 text-sm mt-1">
-                          Sign in with your AU account (@au.edu) to access the admin dashboard.
+                          Sign in with your @au.edu Microsoft account. Only registered administrators can access the dashboard.
                         </p>
                       </div>
                     </div>
