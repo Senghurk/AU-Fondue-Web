@@ -262,29 +262,30 @@ export default function StaffManagementPage() {
     console.log("Starting password reset for:", staff.email);
     
     try {
-      // Use Firebase Client SDK to send password reset email
-      console.log("Sending password reset email via Firebase...");
+      // First, ensure staff exists in Firebase through backend
+      console.log("Ensuring staff exists in Firebase...");
+      const ensureResponse = await fetch(`${backendUrl}/staff/reset-password`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          staffId: staff.id,
+          staffEmail: staff.email
+        }),
+      });
+
+      if (!ensureResponse.ok) {
+        const errorData = await ensureResponse.json();
+        throw new Error(errorData.message || "Failed to prepare password reset");
+      }
+
+      console.log("Staff confirmed in Firebase, sending reset email...");
       
-      // Send password reset email - Firebase will use the URL configured in email template
+      // Now send password reset email via Firebase Client SDK
+      // Firebase will use the URL configured in email template
       // Do NOT use action code settings - let Firebase use the template configuration
       await sendPasswordResetEmail(auth, staff.email);
       
       console.log("Firebase sendPasswordResetEmail completed successfully");
-
-      // Also update backend to track the reset request
-      try {
-        await fetch(`${backendUrl}/staff/reset-password`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            staffId: staff.id,
-            staffEmail: staff.email
-          }),
-        });
-      } catch (backendError) {
-        console.error("Failed to update backend:", backendError);
-        // Continue even if backend update fails
-      }
 
       // Success toast with professional design
       toast({
@@ -310,11 +311,15 @@ export default function StaffManagementPage() {
       let errorMessage = "Failed to send reset email. Please try again.";
       if (error.code === 'auth/user-not-found') {
         // Staff doesn't exist in Firebase yet
-        errorMessage = "Staff member not found in authentication system. Use 'Sync with Firebase' first.";
+        errorMessage = `No Firebase account found for ${staff.email}. This staff member needs to be re-added to create their authentication account.`;
       } else if (error.code === 'auth/invalid-email') {
-        errorMessage = "Invalid email address format.";
+        errorMessage = `Invalid email address format: ${staff.email}`;
       } else if (error.code === 'auth/too-many-requests') {
         errorMessage = "Too many reset attempts. Please try again later.";
+      } else if (error.message && error.message.includes("Firebase")) {
+        errorMessage = error.message;
+      } else if (error.message && error.message.includes("Failed to prepare")) {
+        errorMessage = `Unable to setup password reset for ${staff.email}. The staff member may need to be re-added.`;
       }
       
       toast({
