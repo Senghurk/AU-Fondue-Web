@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { usePasswordCheck } from "../hooks/usePasswordCheck";
 import { useAuth } from "../context/AuthContext";
 import { authenticatedFetch } from "../utils/apiHelper";
+import { formatDate, formatDateTime } from "../utils/dateFormatter";
 
 export default function AssignedReportsPage() {
   // Check if password needs to be changed
@@ -909,7 +910,7 @@ export default function AssignedReportsPage() {
                               </svg>
                             </div>
                             <div>
-                              <p className="font-medium text-gray-900 text-sm">{new Date(report.createdAt).toLocaleDateString()}</p>
+                              <p className="font-medium text-gray-900 text-sm">{formatDate(report.createdAt)}</p>
                               <p className="text-gray-500 text-xs">Date reported</p>
                             </div>
                           </div>
@@ -1133,7 +1134,7 @@ export default function AssignedReportsPage() {
                                   </svg>
                                 </div>
                                 <div>
-                                  <p className="font-medium text-gray-900 text-sm">{new Date(report.createdAt).toLocaleDateString()}</p>
+                                  <p className="font-medium text-gray-900 text-sm">{formatDate(report.createdAt)}</p>
                                   <p className="text-gray-500 text-xs">Date reported</p>
                                 </div>
                               </div>
@@ -1518,10 +1519,7 @@ export default function AssignedReportsPage() {
                       </p>
                       <p>
                         <strong>Reported At:</strong>{" "}
-                        {new Date(selectedReport.createdAt).toLocaleString(
-                          "en-GB",
-                          { timeZone: "Asia/Bangkok" }
-                        )}
+                        {formatDateTime(selectedReport.createdAt)}
                       </p>
                     </div>
 
@@ -1593,10 +1591,7 @@ export default function AssignedReportsPage() {
                             )}
                             <p>
                               <strong>Updated At:</strong>{" "}
-                              {new Date(update.updateTime).toLocaleString(
-                                "en-GB",
-                                { timeZone: "Asia/Bangkok" }
-                              )}
+                              {formatDateTime(update.updateTime)}
                             </p>
                             {update.photoUrls?.length > 0 && (
                               <div className="mt-2 flex gap-2">

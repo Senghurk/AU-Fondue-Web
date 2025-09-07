@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { getBackendUrl } from "../config/api";
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
+import { formatDate, formatDateTime } from "../utils/dateFormatter";
 
 export default function HistoryPage() {
   const [completedReports, setCompletedReports] = useState([]);
@@ -97,12 +98,8 @@ export default function HistoryPage() {
         report.category,
         report.assignedTo?.name || "Unassigned",
         "Completed",
-        new Date(report.createdAt).toLocaleString("en-GB", {
-          timeZone: "Asia/Bangkok",
-        }),
-        new Date(report.updatedAt).toLocaleString("en-GB", {
-          timeZone: "Asia/Bangkok",
-        }),
+        formatDateTime(report.createdAt),
+        formatDateTime(report.updatedAt),
         getDuration(report.createdAt, report.updatedAt),
       ]);
     });
@@ -214,14 +211,10 @@ export default function HistoryPage() {
                       Completed
                     </td>
                     <td className="p-3 text-sm">
-                      {new Date(report.createdAt).toLocaleString("en-GB", {
-                        timeZone: "Asia/Bangkok",
-                      })}
+                      {formatDateTime(report.createdAt)}
                     </td>
                     <td className="p-3 text-sm">
-                      {new Date(report.updatedAt).toLocaleString("en-GB", {
-                        timeZone: "Asia/Bangkok",
-                      })}
+                      {formatDateTime(report.updatedAt)}
                     </td>
                     <td className="p-3 text-sm">
                       {getDuration(report.createdAt, report.updatedAt)}

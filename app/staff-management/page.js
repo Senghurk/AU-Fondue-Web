@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { getBackendUrl } from "../config/api";
 import { useToast } from "../context/ToastContext";
+import { formatDate } from "../utils/dateFormatter";
 import { 
   Users, 
   UserPlus, 
@@ -674,7 +675,7 @@ export default function StaffManagementPage() {
                         <TableCell>
                           <div className="flex items-center gap-2">
                             <Calendar className="h-4 w-4 text-gray-400" />
-                            {staff.createdAt ? new Date(staff.createdAt).toLocaleDateString() : 'N/A'}
+                            {formatDate(staff.createdAt)}
                           </div>
                         </TableCell>
                         <TableCell>

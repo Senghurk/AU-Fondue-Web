@@ -5,6 +5,7 @@ import React from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../context/AuthContext";
 import { getBackendUrl } from "../config/api";
+import { formatDate } from "../utils/dateFormatter";
 
 import {
   FileText,
@@ -182,7 +183,7 @@ export default function HomePage() {
           const dateCounts = {};
 
           allIssues.forEach((issue) => {
-            const date = new Date(issue.createdAt).toISOString().split("T")[0]; // "YYYY-MM-DD"
+            const date = formatDate(issue.createdAt); // "DD/MM/YYYY"
             dateCounts[date] = (dateCounts[date] || 0) + 1;
           });
 

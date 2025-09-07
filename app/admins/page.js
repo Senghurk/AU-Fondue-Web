@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { getBackendUrl } from "../config/api";
 import { useToast } from "../context/ToastContext";
 import { useAuth } from "../context/AuthContext";
+import { formatDate } from "../utils/dateFormatter";
 import { 
   Shield, 
   UserPlus, 
@@ -379,15 +380,7 @@ export default function AdminManagementPage() {
                         <TableCell>
                           <div className="flex items-center gap-2">
                             <Calendar className="h-4 w-4 text-gray-400" />
-                            {admin.createdAt ? (
-                              new Date(admin.createdAt).toLocaleDateString('en-US', {
-                                year: 'numeric',
-                                month: 'short',
-                                day: 'numeric'
-                              })
-                            ) : (
-                              'N/A'
-                            )}
+                            {formatDate(admin.createdAt)}
                           </div>
                         </TableCell>
                         <TableCell className="text-right">

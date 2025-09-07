@@ -1,4 +1,6 @@
 "use client";
+
+import { formatDate } from "../utils/dateFormatter";
 import { useState } from "react";
 
 export default function GeneralSettingsPage() {
@@ -244,7 +246,7 @@ export default function GeneralSettingsPage() {
             </div>
             <div>
               <p className="font-medium text-gray-700">Last Updated:</p>
-              <p className="text-gray-600">{new Date().toLocaleDateString()}</p>
+              <p className="text-gray-600">{formatDate(new Date())}</p>
             </div>
             <div>
               <p className="font-medium text-gray-700">Version:</p>
