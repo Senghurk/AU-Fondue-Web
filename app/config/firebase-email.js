@@ -18,10 +18,12 @@ export const getPasswordResetActionCodeSettings = () => {
   const baseUrl = getProductionUrl();
   
   return {
-    // URL where the user will be redirected after clicking the link
-    url: `${baseUrl}/reset-password`,
-    // This must be true for password reset to work with custom URL
-    handleCodeInApp: true,
+    // URL where the user will be redirected after the password reset is complete
+    // This is the "continue URL" - where to go AFTER reset, not the reset page itself
+    url: `${baseUrl}/Log-in`,
+    // IMPORTANT: Do NOT use handleCodeInApp for password reset
+    // handleCodeInApp: false means Firebase handles the reset page
+    handleCodeInApp: false,
   };
 };
 
