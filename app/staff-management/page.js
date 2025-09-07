@@ -18,7 +18,8 @@ import {
   User,
   ChevronLeft,
   ChevronRight,
-  AlertTriangle
+  AlertTriangle,
+  Pencil
 } from "lucide-react";
 import { sendPasswordResetEmail } from "firebase/auth";
 import { auth } from "../firebaseClient";
@@ -72,6 +73,10 @@ export default function StaffManagementPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+  const [isRenamingStaff, setIsRenamingStaff] = useState(false);
+  const [staffToRename, setStaffToRename] = useState(null);
+  const [newStaffName, setNewStaffName] = useState("");
+  const [isUpdating, setIsUpdating] = useState(false);
 
   // Fetch staff list
   const fetchStaff = async () => {
@@ -399,6 +404,79 @@ export default function StaffManagementPage() {
     }
   };
 
+  // Rename staff
+  const handleRenameStaff = async () => {
+    if (!staffToRename || !newStaffName.trim()) {
+      toast({
+        variant: "error",
+        title: (
+          <div className="flex items-center gap-2">
+            <AlertCircle className="h-4 w-4" />
+            Invalid Name
+          </div>
+        ),
+        description: "Staff name cannot be empty",
+      });
+      return;
+    }
+
+    // Check if name is the same
+    if (newStaffName.trim() === staffToRename.name) {
+      setIsRenamingStaff(false);
+      setStaffToRename(null);
+      setNewStaffName("");
+      return;
+    }
+
+    setIsUpdating(true);
+
+    try {
+      const response = await fetch(`${backendUrl}/staff/${staffToRename.id}/name`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: newStaffName.trim() }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to update staff name");
+      }
+
+      toast({
+        variant: "success",
+        title: (
+          <div className="flex items-center gap-2">
+            <CheckCircle className="h-4 w-4" />
+            Name Updated
+          </div>
+        ),
+        description: `Staff name changed from "${staffToRename.name}" to "${newStaffName.trim()}"`,
+        duration: 5000,
+      });
+
+      // Refresh staff list
+      fetchStaff();
+      setIsRenamingStaff(false);
+      setStaffToRename(null);
+      setNewStaffName("");
+    } catch (error) {
+      console.error("Failed to update staff name:", error);
+      toast({
+        variant: "error",
+        title: (
+          <div className="flex items-center gap-2">
+            <AlertCircle className="h-4 w-4" />
+            Update Failed
+          </div>
+        ),
+        description: error.message || "Failed to update staff name",
+      });
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
   // Delete staff
   const handleDeleteStaff = async () => {
     if (!staffToDelete) return;
@@ -605,9 +683,24 @@ export default function StaffManagementPage() {
                               variant="outline"
                               size="sm"
                               onClick={() => {
+                                setStaffToRename(staff);
+                                setNewStaffName(staff.name);
+                                setIsRenamingStaff(true);
+                              }}
+                              className="hover:bg-gray-100"
+                              title="Rename staff"
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                            
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
                                 setSelectedStaffForReset(staff);
                                 setResetPasswordDialogOpen(true);
                               }}
+                              title="Reset password"
                             >
                               <Key className="h-4 w-4" />
                             </Button>
@@ -616,6 +709,7 @@ export default function StaffManagementPage() {
                               variant="destructive"
                               size="sm"
                               onClick={() => checkStaffDeletion(staff)}
+                              title="Delete staff"
                             >
                               <X className="h-4 w-4" />
                             </Button>
@@ -913,6 +1007,85 @@ export default function StaffManagementPage() {
                 )}
               </Button>
             </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Rename Staff Dialog */}
+        <Dialog open={isRenamingStaff} onOpenChange={(open) => {
+          if (!open) {
+            setIsRenamingStaff(false);
+            setStaffToRename(null);
+            setNewStaffName("");
+          }
+        }}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Pencil className="h-5 w-5" />
+                Rename Staff Member
+              </DialogTitle>
+              <DialogDescription>
+                Change the name for {staffToRename?.name}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 mt-4">
+              <div className="space-y-2">
+                <Label htmlFor="newStaffName">New Name</Label>
+                <Input
+                  id="newStaffName"
+                  value={newStaffName}
+                  onChange={(e) => setNewStaffName(e.target.value)}
+                  placeholder="Enter new name"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !isUpdating) {
+                      handleRenameStaff();
+                    }
+                  }}
+                />
+              </div>
+              {staffToRename?.staffId && (
+                <div className="bg-blue-50 p-3 rounded-md">
+                  <p className="text-sm text-blue-800">
+                    <strong>OM ID:</strong> {staffToRename.staffId} (will not change)
+                  </p>
+                </div>
+              )}
+              <div className="bg-amber-50 p-3 rounded-md">
+                <p className="text-sm text-amber-800">
+                  <strong>Note:</strong> The staff member's name will be updated across all reports and records.
+                </p>
+              </div>
+            </div>
+            <DialogFooter className="mt-6">
+              <Button 
+                variant="outline"
+                onClick={() => {
+                  setIsRenamingStaff(false);
+                  setStaffToRename(null);
+                  setNewStaffName("");
+                }}
+                disabled={isUpdating}
+              >
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleRenameStaff}
+                className="bg-black hover:bg-gray-800"
+                disabled={isUpdating || !newStaffName.trim() || newStaffName.trim() === staffToRename?.name}
+              >
+                {isUpdating ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Updating...
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle className="mr-2 h-4 w-4" />
+                    Update Name
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
       </div>
