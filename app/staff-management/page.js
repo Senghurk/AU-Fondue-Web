@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { sendPasswordResetEmail } from "firebase/auth";
 import { auth } from "../firebaseClient";
+import { getPasswordResetActionCodeSettings } from "../config/firebase-email";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card";
 import { Input } from "../../components/ui/input";
@@ -261,12 +262,14 @@ export default function StaffManagementPage() {
     console.log("Starting password reset for:", staff.email);
     
     try {
-      // Use Firebase Client SDK to send password reset email
-      console.log("Sending password reset email via Firebase...");
+      // Use Firebase Client SDK to send password reset email with custom URL
+      console.log("Sending password reset email via Firebase with custom URL...");
       
-      // Send password reset email - use Firebase's default flow
-      // The email template in Firebase Console needs to be configured with custom action URL
-      await sendPasswordResetEmail(auth, staff.email);
+      // Get custom action code settings for production
+      const actionCodeSettings = getPasswordResetActionCodeSettings();
+      
+      // Send password reset email with custom action URL
+      await sendPasswordResetEmail(auth, staff.email, actionCodeSettings);
       
       console.log("Firebase sendPasswordResetEmail completed successfully");
 
