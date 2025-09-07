@@ -63,6 +63,17 @@ export default function AdminManagementPage() {
     try {
       const response = await fetch(`${backendUrl}/admin`);
       const data = await response.json();
+      
+      // Debug log to check if createdAt is being received
+      console.log('Fetched admins:', data);
+      if (data && data.length > 0) {
+        console.log('Sample admin data:', {
+          username: data[0].username,
+          email: data[0].email,
+          createdAt: data[0].createdAt
+        });
+      }
+      
       setAdminList(data);
     } catch (error) {
       console.error("Failed to fetch admins:", error);
@@ -352,7 +363,15 @@ export default function AdminManagementPage() {
                         <TableCell>
                           <div className="flex items-center gap-2">
                             <Calendar className="h-4 w-4 text-gray-400" />
-                            {admin.createdAt ? new Date(admin.createdAt).toLocaleDateString() : 'N/A'}
+                            {admin.createdAt ? (
+                              new Date(admin.createdAt).toLocaleDateString('en-US', {
+                                year: 'numeric',
+                                month: 'short',
+                                day: 'numeric'
+                              })
+                            ) : (
+                              'N/A'
+                            )}
                           </div>
                         </TableCell>
                         <TableCell className="text-right">
