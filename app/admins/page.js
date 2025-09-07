@@ -47,7 +47,6 @@ export default function AdminManagementPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isAddingAdmin, setIsAddingAdmin] = useState(false);
   const [newAdmin, setNewAdmin] = useState({
-    username: "",
     email: ""
   });
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
@@ -118,7 +117,7 @@ export default function AdminManagementPage() {
 
   // Add new admin
   const handleAddAdmin = async () => {
-    if (!newAdmin.username.trim() || !newAdmin.email.trim()) {
+    if (!newAdmin.email.trim()) {
       toast({
         variant: "error",
         title: (
@@ -127,7 +126,7 @@ export default function AdminManagementPage() {
             Missing Information
           </div>
         ),
-        description: "Please fill in all required fields",
+        description: "Please enter the admin's email address",
       });
       return;
     }
@@ -170,12 +169,11 @@ export default function AdminManagementPage() {
             Admin Added Successfully
           </div>
         ),
-        description: `${addedAdmin.username} has been added as an administrator`,
+        description: `Admin with email ${addedAdmin.email} has been added`,
       });
 
       // Reset form and refresh list
       setNewAdmin({
-        username: "",
         email: ""
       });
       setIsAddingAdmin(false);
@@ -475,17 +473,7 @@ export default function AdminManagementPage() {
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <Label htmlFor="username">Admin Username</Label>
-              <Input
-                id="username"
-                placeholder="Enter username"
-                value={newAdmin.username}
-                onChange={(e) => setNewAdmin({...newAdmin, username: e.target.value})}
-                className="mt-1"
-              />
-            </div>
-            <div>
-              <Label htmlFor="email">Admin Email</Label>
+              <Label htmlFor="email">Admin Email *</Label>
               <Input
                 id="email"
                 type="email"
@@ -500,13 +488,27 @@ export default function AdminManagementPage() {
                 </p>
               )}
             </div>
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <div className="flex items-start gap-2">
+                <Shield className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                <div className="text-sm space-y-1">
+                  <p className="font-semibold text-blue-900">Microsoft Authentication</p>
+                  <p className="text-blue-800">
+                    The admin's display name will be automatically fetched from their Microsoft account when they first log in.
+                  </p>
+                  <p className="text-blue-700 text-xs">
+                    Example: "SAI OAN HSENG HURK -" for u6440041@au.edu
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
           <DialogFooter className="mt-6">
             <Button
               variant="outline"
               onClick={() => {
                 setIsAddingAdmin(false);
-                setNewAdmin({ username: "", email: "" });
+                setNewAdmin({ email: "" });
               }}
             >
               Cancel
@@ -514,7 +516,7 @@ export default function AdminManagementPage() {
             <Button 
               onClick={handleAddAdmin}
               className="bg-black hover:bg-gray-800"
-              disabled={!newAdmin.username || !newAdmin.email || !newAdmin.email.toLowerCase().endsWith("@au.edu")}
+              disabled={!newAdmin.email || !newAdmin.email.toLowerCase().endsWith("@au.edu")}
             >
               Add Admin
             </Button>
