@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Calendar } from "../../components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "../../components/ui/popover";
+import { formatDate } from "../utils/dateFormatter";
 import { Button } from "../../components/ui/button";
 import { 
   Pagination, 
@@ -448,7 +449,7 @@ export default function UserListPage() {
                       }`}
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
-                      {selectedDate ? selectedDate.toLocaleDateString() : "Select today's date"}
+                      {selectedDate ? formatDate(selectedDate) : "Select today's date"}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">

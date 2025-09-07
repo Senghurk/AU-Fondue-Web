@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { usePasswordCheck } from "../hooks/usePasswordCheck";
 import { useAuth } from "../context/AuthContext";
 import { authenticatedFetch } from "../utils/apiHelper";
+import { formatDate } from "../utils/dateFormatter";
 
 export default function ReportsPage() {
   // Check if password needs to be changed
@@ -617,7 +618,7 @@ export default function ReportsPage() {
                               </svg>
                             </div>
                             <div>
-                              <p className="font-medium text-gray-900 text-sm">{new Date(report.createdAt).toLocaleDateString()}</p>
+                              <p className="font-medium text-gray-900 text-sm">{formatDate(report.createdAt)}</p>
                               <p className="text-gray-500 text-xs">Date reported</p>
                             </div>
                           </div>
@@ -864,7 +865,7 @@ export default function ReportsPage() {
                           </svg>
                         </div>
                         <div>
-                          <p className="font-medium text-gray-900 text-sm">{new Date(report.createdAt).toLocaleDateString()}</p>
+                          <p className="font-medium text-gray-900 text-sm">{formatDate(report.createdAt)}</p>
                           <p className="text-gray-500 text-xs">Date reported</p>
                         </div>
                       </div>
