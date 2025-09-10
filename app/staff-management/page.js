@@ -108,7 +108,23 @@ export default function StaffManagementPage() {
     staff.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     staff.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     staff.staffId?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  ).sort((a, b) => {
+    // Natural sort by staffId (e.g., OM01, OM02, OM10, OM100)
+    const aMatch = a.staffId?.match(/^([A-Z]+)(\d+)$/);
+    const bMatch = b.staffId?.match(/^([A-Z]+)(\d+)$/);
+    
+    if (aMatch && bMatch) {
+      // Compare prefix first (e.g., "OM")
+      const prefixCompare = aMatch[1].localeCompare(bMatch[1]);
+      if (prefixCompare !== 0) return prefixCompare;
+      
+      // Compare numeric part
+      return parseInt(aMatch[2]) - parseInt(bMatch[2]);
+    }
+    
+    // Fallback to regular string comparison if pattern doesn't match
+    return (a.staffId || '').localeCompare(b.staffId || '');
+  });
 
   // Pagination logic
   const totalPages = Math.ceil(filteredStaff.length / itemsPerPage);
