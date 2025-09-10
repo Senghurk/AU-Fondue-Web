@@ -65,28 +65,28 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-[#fdfdfd] text-gray-900">
       {/* Top Navigation Bar */}
-      <header className="w-full px-8 py-5 flex justify-between items-center bg-white shadow-sm sticky top-0 z-50">
+      <header className="w-full px-4 sm:px-8 py-4 sm:py-5 flex justify-between items-center bg-white shadow-sm sticky top-0 z-50">
         <div className="flex items-center">
-          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 tracking-tight">
             AU Fondue
             <span className="text-red-600 font-normal"> Admin</span>
           </h1>
         </div>
-        <nav className="flex items-center gap-8">
+        <nav className="flex items-center gap-3 sm:gap-8">
           <a
             href="#features"
-            className="text-gray-600 hover:text-gray-900 font-medium transition-colors"
+            className="hidden sm:block text-gray-600 hover:text-gray-900 font-medium transition-colors"
           >
             Features
           </a>
           <a
             href="#about"
-            className="text-gray-600 hover:text-gray-900 font-medium transition-colors"
+            className="hidden sm:block text-gray-600 hover:text-gray-900 font-medium transition-colors"
           >
             About
           </a>
           <Button
-            className="px-6 py-2.5 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-md shadow-sm transition-all duration-200"
+            className="px-4 sm:px-6 py-2 sm:py-2.5 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-md shadow-sm transition-all duration-200 text-sm sm:text-base"
             onClick={() => (window.location.href = "/Log-in")}
           >
             Login
@@ -95,16 +95,16 @@ export default function Home() {
       </header>
 
       {/* Hero Section */}
-      <div className="max-w-6xl mx-auto px-10 py-20 text-center">
+      <div className="max-w-6xl mx-auto px-6 sm:px-10 py-12 sm:py-20 text-center">
         <div className="mb-8">
-          <div className="inline-flex items-center px-4 py-2 rounded-full bg-red-50 text-red-700 text-sm font-medium mb-6">
+          <div className="inline-flex items-center px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-red-50 text-red-700 text-xs sm:text-sm font-medium mb-4 sm:mb-6">
             Campus Management Made Simple
           </div>
-          <h1 className="text-5xl md:text-7xl font-bold leading-tight mb-6 text-gray-900 tracking-tight">
+          <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-tight mb-4 sm:mb-6 text-gray-900 tracking-tight">
             Streamline Your
-            <span className="text-red-600 block">Campus Operations</span>
+            <span className="text-red-600 block mt-1 sm:mt-2">Campus Operations</span>
           </h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8 leading-relaxed">
+          <p className="text-base sm:text-lg md:text-xl text-gray-600 max-w-3xl mx-auto mb-6 sm:mb-8 leading-relaxed px-4 sm:px-0">
             Transform how your university handles maintenance reports. From
             instant issue tracking to advanced analytics, AU Fondue Admin
             empowers your staff to resolve campus issues faster than ever
@@ -112,9 +112,9 @@ export default function Home() {
           </p>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center mb-8 sm:mb-12 px-4 sm:px-0">
           <Button
-            className="flex items-center gap-3 bg-red-600 hover:bg-red-700 text-white px-8 py-4 text-lg rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
+            className="flex items-center gap-2 sm:gap-3 bg-red-600 hover:bg-red-700 text-white px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 w-full sm:w-auto"
             onClick={() =>
               window.open(
                 "https://play.google.com/store/apps/details?id=com.yourapp.au_fondue",
@@ -129,7 +129,7 @@ export default function Home() {
           </Button>
 
           <Button
-            className="flex items-center gap-2 bg-white hover:bg-gray-50 text-gray-700 border-2 border-gray-200 hover:border-gray-300 px-8 py-4 text-lg rounded-lg shadow-md hover:shadow-lg transition-all duration-300"
+            className="flex items-center gap-2 bg-white hover:bg-gray-50 text-gray-700 border-2 border-gray-200 hover:border-gray-300 px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg rounded-lg shadow-md hover:shadow-lg transition-all duration-300 w-full sm:w-auto"
             onClick={() => (window.location.href = "/Log-in")}
           >
             <svg
@@ -156,32 +156,32 @@ export default function Home() {
         </div>
 
         {/* Stats Section */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
-          <div className="text-center p-6">
-            <div className="text-4xl font-bold text-red-600 mb-2">50%</div>
-            <div className="text-gray-600">Faster Resolution Time</div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-8 max-w-4xl mx-auto px-4 sm:px-0">
+          <div className="text-center p-4 sm:p-6">
+            <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-red-600 mb-1 sm:mb-2">50%</div>
+            <div className="text-sm sm:text-base text-gray-600">Faster Resolution Time</div>
           </div>
-          <div className="text-center p-6">
-            <div className="text-4xl font-bold text-red-600 mb-2">Next-Gen</div>
-            <div className="text-gray-600">Campus Management</div>
+          <div className="text-center p-4 sm:p-6">
+            <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-red-600 mb-1 sm:mb-2">Next-Gen</div>
+            <div className="text-sm sm:text-base text-gray-600">Campus Management</div>
           </div>
-          <div className="text-center p-6">
-            <div className="text-4xl font-bold text-red-600 mb-2">24/7</div>
-            <div className="text-gray-600">Real-time Monitoring</div>
+          <div className="text-center p-4 sm:p-6">
+            <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-red-600 mb-1 sm:mb-2">24/7</div>
+            <div className="text-sm sm:text-base text-gray-600">Real-time Monitoring</div>
           </div>
         </div>
       </div>
 
       {/* What is AU Fondue Admin Section */}
-      <section className="bg-gradient-to-b from-gray-50 to-white py-20 px-6">
+      <section className="bg-gradient-to-b from-gray-50 to-white py-12 sm:py-20 px-4 sm:px-6">
         <div className="max-w-5xl mx-auto text-center">
-          <div className="inline-flex items-center px-4 py-2 rounded-full bg-blue-50 text-blue-700 text-sm font-medium mb-6">
+          <div className="inline-flex items-center px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-blue-50 text-blue-700 text-xs sm:text-sm font-medium mb-4 sm:mb-6">
             Powerful Campus Management
           </div>
-          <h2 className="text-4xl md:text-5xl font-bold mb-6 text-gray-900">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6 text-gray-900">
             What is AU Fondue Admin?
           </h2>
-          <p className="text-xl text-gray-600 leading-relaxed max-w-4xl mx-auto">
+          <p className="text-base sm:text-lg md:text-xl text-gray-600 leading-relaxed max-w-4xl mx-auto px-2 sm:px-0">
             AU Fondue Admin is the comprehensive backend platform designed
             specifically for university's Operation & Maintenance's  Admin and staff
             to efficiently manage maintenance issue reports. From intelligent

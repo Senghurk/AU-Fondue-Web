@@ -86,6 +86,27 @@
   }
 }
 
+/* Mobile-specific toast adjustments */
+@media (max-width: 640px) {
+  /* Ensure toasts don't overlap with sticky headers */
+  .fixed[class*="toast"], 
+  [class*="toast-container"] {
+    top: 4rem !important; /* Account for mobile header height */
+  }
+  
+  /* Prevent text overflow on mobile */
+  h1, h2, h3 {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+  
+  /* Ensure proper spacing for mobile */
+  .px-8 {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+
 /* Print styles for Daily Reports */
 @media print {
   /* Hide all navigation and UI elements */
