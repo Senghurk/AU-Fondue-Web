@@ -96,7 +96,12 @@ export default function AdminManagementPage() {
   const filteredAdmins = adminList.filter((admin) =>
     admin.username?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     admin.email?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  ).sort((a, b) => {
+    // Sort by createdAt date (oldest to newest)
+    const dateA = a.createdAt ? new Date(a.createdAt) : new Date(0);
+    const dateB = b.createdAt ? new Date(b.createdAt) : new Date(0);
+    return dateA - dateB;
+  });
 
   // Pagination logic
   const totalPages = Math.ceil(filteredAdmins.length / itemsPerPage);

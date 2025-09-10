@@ -652,9 +652,9 @@ export default function LoginPage() {
             {/* Login Card */}
             <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-2xl">
               <CardContent className="p-8">
-                <div className="space-y-6">
+                <div className="space-y-5">
                   {/* Form Fields */}
-                  <div className="space-y-4">
+                  <div className="space-y-5">
                     <div className="space-y-2">
                       <Label htmlFor="omId" className="text-sm font-semibold text-gray-700">
                         OM ID
@@ -695,6 +695,37 @@ export default function LoginPage() {
                         </div>
                       </div>
                     </div>
+                    
+                    {/* Default Password Info - with proper spacing */}
+                    <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-3">
+                        <div className="flex items-start gap-2">
+                          <svg className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          <div className="text-sm">
+                            <p className="text-blue-800 dark:text-blue-300 font-medium">Default Password</p>
+                            <p className="text-blue-700 dark:text-blue-400">For new staff members: <span className="font-semibold">OMstaff123</span></p>
+                            <p className="text-blue-600 dark:text-blue-500 text-xs mt-1">You will be forced to change password on first login</p>
+                          </div>
+                        </div>
+                    </div>
+                  </div>
+
+                  {/* Development Notice */}
+                  <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+                    <div className="flex items-start space-x-3">
+                      <div className="flex-shrink-0">
+                        <svg className="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                        </svg>
+                      </div>
+                      <div>
+                        <h4 className="text-amber-800 font-semibold text-sm">Staff Authentication</h4>
+                        <p className="text-amber-700 text-sm mt-1">
+                          Use your Staff ID (e.g., OM01, OM02) and password to login.
+                        </p>
+                      </div>
+                    </div>
                   </div>
 
                   {/* Login Button */}
@@ -723,23 +754,6 @@ export default function LoginPage() {
                         </>
                       )}
                     </Button>
-                  </div>
-
-                  {/* Development Notice */}
-                  <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
-                    <div className="flex items-start space-x-3">
-                      <div className="flex-shrink-0">
-                        <svg className="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                        </svg>
-                      </div>
-                      <div>
-                        <h4 className="text-amber-800 font-semibold text-sm">Staff Authentication</h4>
-                        <p className="text-amber-700 text-sm mt-1">
-                          Use your Staff ID (e.g., OM01, OM02) and password to login.
-                        </p>
-                      </div>
-                    </div>
                   </div>
 
                   {/* Features */}
