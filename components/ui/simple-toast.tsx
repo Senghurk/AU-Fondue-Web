@@ -31,18 +31,18 @@ export function SimpleToast({ id, title, description, variant = "default", onClo
   return (
     <div
       className={cn(
-        "relative flex w-full items-start justify-between space-x-4 overflow-hidden rounded-md border p-4 pr-8 transition-all animate-in slide-in-from-top-2 fade-in-0",
+        "relative flex w-full items-start justify-between space-x-3 sm:space-x-4 overflow-hidden rounded-md border p-3 sm:p-4 pr-10 sm:pr-8 transition-all animate-in slide-in-from-top-2 fade-in-0",
         variantStyles[variant]
       )}
     >
-      <div className="grid gap-2 flex-1">
+      <div className="grid gap-1 sm:gap-2 flex-1 max-w-full">
         {title && (
-          <div className="text-sm font-semibold">
+          <div className="text-xs sm:text-sm font-semibold break-words">
             {title}
           </div>
         )}
         {description && (
-          <div className="text-sm leading-relaxed opacity-90">
+          <div className="text-xs sm:text-sm leading-relaxed opacity-90 break-words">
             {description}
           </div>
         )}
