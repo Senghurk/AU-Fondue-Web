@@ -69,7 +69,7 @@ export default function Sidebar({ activeTopLink, activeLink, setActiveLink, isMo
             <CollapsibleContent className="space-y-1 ml-9 mt-1">
               <Button
                 variant={activeLink === "/reports" ? "default" : "ghost"}
-                className="w-full justify-start pl-6"
+                className="w-full justify-start pl-6 dark:text-gray-200 dark:hover:text-white"
                 asChild
               >
                 <Link
@@ -81,7 +81,7 @@ export default function Sidebar({ activeTopLink, activeLink, setActiveLink, isMo
               </Button>
               <Button
                 variant={activeLink === "/assignedReports" ? "default" : "ghost"}
-                className="w-full justify-start pl-6"
+                className="w-full justify-start pl-6 dark:text-gray-200 dark:hover:text-white"
                 asChild
               >
                 <Link

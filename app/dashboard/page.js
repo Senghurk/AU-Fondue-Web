@@ -249,20 +249,20 @@ export default function HomePage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       {/* Modern Header Section */}
-      <div className="bg-white/80 backdrop-blur-sm border-b border-gray-200/50 sticky top-0 z-40">
+      <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-b border-gray-200/50 dark:border-gray-700/50 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 lg:px-6 py-4 sm:py-6">
           <div className="flex items-center justify-between">
             <div className="min-w-0 flex-1">
-              <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-gray-800 to-blue-800 bg-clip-text text-transparent truncate pr-2">
+              <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-gray-800 to-blue-800 dark:from-gray-100 dark:to-blue-400 bg-clip-text text-transparent truncate pr-2">
                 Welcome{userName ? `, ${userName}` : ", Admin"}
               </h1>
-              <p className="text-gray-600 mt-1 sm:mt-2 text-xs sm:text-sm lg:text-base">
+              <p className="text-gray-600 dark:text-gray-400 mt-1 sm:mt-2 text-xs sm:text-sm lg:text-base">
                 Your comprehensive maintenance management dashboard
               </p>
             </div>
-            <div className="hidden lg:flex items-center space-x-2 text-sm text-gray-500">
+            <div className="hidden lg:flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
               <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
               <span>System Online</span>
             </div>
@@ -279,14 +279,14 @@ export default function HomePage() {
                 <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-200"></div>
                 <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-600 border-t-transparent absolute top-0"></div>
               </div>
-              <span className="text-gray-600 text-lg">Loading dashboard...</span>
+              <span className="text-gray-600 dark:text-gray-400 text-lg">Loading dashboard...</span>
             </div>
           </div>
         )}
 
         {/* Enhanced Error State */}
         {error && (
-          <div className="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded-r-lg shadow-sm">
+          <div className="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 text-red-700 dark:text-red-400 p-4 rounded-r-lg shadow-sm">
             <div className="flex items-center">
               <svg className="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
@@ -305,12 +305,12 @@ export default function HomePage() {
               {stats.map((stat, index) => (
                 <div key={index} className="group relative">
                   <div className={`absolute inset-0 ${stat.color} rounded-2xl blur-xl opacity-20 group-hover:opacity-30 transition-opacity duration-300`}></div>
-                  <Card className="relative bg-white/90 backdrop-blur-sm border-0 shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden">
+                  <Card className="relative bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border-0 shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden">
                     <CardContent className="p-4 sm:p-6">
                       <div className="flex items-center justify-between">
                         <div className="space-y-1 sm:space-y-2 min-w-0 flex-1">
-                          <p className="text-xs sm:text-sm font-medium text-gray-600 uppercase tracking-wide truncate">{stat.label}</p>
-                          <p className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800">{stat.value}</p>
+                          <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide truncate">{stat.label}</p>
+                          <p className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800 dark:text-gray-100">{stat.value}</p>
                         </div>
                         <div className={`p-3 sm:p-4 rounded-2xl ${stat.color} shadow-lg flex-shrink-0`}>
                           <div className="text-white">
@@ -318,7 +318,7 @@ export default function HomePage() {
                           </div>
                         </div>
                       </div>
-                      <div className="mt-3 sm:mt-4 h-1 w-full bg-gray-100 rounded-full overflow-hidden">
+                      <div className="mt-3 sm:mt-4 h-1 w-full bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
                         <div className={`h-full ${stat.color} rounded-full transition-all duration-1000 ease-out`} style={{ width: `${Math.min(100, (stat.value / Math.max(...stats.map(s => s.value))) * 100)}%` }}></div>
                       </div>
                     </CardContent>
@@ -330,11 +330,11 @@ export default function HomePage() {
             {/* Redesigned Quick Actions Grid */}
             <div className="space-y-6">
               <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+                <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-200 flex items-center gap-2">
                   <div className="w-1 h-8 bg-gradient-to-b from-blue-500 to-indigo-500 rounded-full"></div>
                   Quick Actions
                 </h2>
-                <div className="text-sm text-gray-500 flex items-center gap-2">
+                <div className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-2">
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
                   </svg>
@@ -346,16 +346,16 @@ export default function HomePage() {
                 {quickLinks.map((link, index) => (
                   <Card
                     key={index}
-                    className="group cursor-pointer bg-white/90 backdrop-blur-sm border-0 shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 overflow-hidden"
+                    className="group cursor-pointer bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border-0 shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 overflow-hidden"
                     onClick={() => handleNavigate(link.path)}
                   >
                     <CardContent className="p-6 relative">
                       {/* Animated Gradient Background */}
-                      <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 to-indigo-100/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                      <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 to-indigo-100/50 dark:from-blue-900/20 dark:to-indigo-900/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                       
                       {/* Floating Action Indicator */}
-                      <div className="absolute top-4 right-4 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 transform scale-75 group-hover:scale-100">
-                        <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <div className="absolute top-4 right-4 w-8 h-8 bg-blue-100 dark:bg-blue-900/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 transform scale-75 group-hover:scale-100">
+                        <svg className="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                         </svg>
                       </div>
@@ -366,19 +366,19 @@ export default function HomePage() {
                             {link.icon}
                           </div>
                           <div className="flex-1">
-                            <h3 className="text-lg font-semibold text-gray-800 group-hover:text-blue-700 transition-colors duration-300">
+                            <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 group-hover:text-blue-700 dark:group-hover:text-blue-400 transition-colors duration-300">
                               {link.label}
                             </h3>
                           </div>
                         </div>
                         
-                        <p className="text-sm text-gray-600 leading-relaxed">
+                        <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
                           {link.description}
                         </p>
                         
                         {/* Enhanced Action Footer */}
-                        <div className="flex items-center justify-between pt-2 border-t border-gray-100">
-                          <span className="text-xs font-medium text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center gap-1">
+                        <div className="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-gray-700">
+                          <span className="text-xs font-medium text-blue-600 dark:text-blue-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center gap-1">
                             <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                             </svg>
@@ -397,12 +397,12 @@ export default function HomePage() {
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
               {/* Enhanced Pie Chart */}
               {pieData.length > 0 && (
-                <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
-                  <CardHeader className="border-b border-gray-100">
-                    <CardTitle className="text-xl font-semibold text-gray-800 flex items-center gap-3">
+                <Card className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border-0 shadow-xl">
+                  <CardHeader className="border-b border-gray-100 dark:border-gray-700">
+                    <CardTitle className="text-xl font-semibold text-gray-800 dark:text-gray-200 flex items-center gap-3">
                       <div className="w-3 h-3 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full"></div>
                       Reports by Category
-                      <div className="ml-auto text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
+                      <div className="ml-auto text-xs bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 px-2 py-1 rounded-full">
                         {pieData.length} categories
                       </div>
                     </CardTitle>
@@ -433,12 +433,12 @@ export default function HomePage() {
 
               {/* Enhanced Line Chart */}
               {reportsOverTime.length > 0 && (
-                <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
-                  <CardHeader className="border-b border-gray-100">
-                    <CardTitle className="text-xl font-semibold text-gray-800 flex items-center gap-3">
+                <Card className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border-0 shadow-xl">
+                  <CardHeader className="border-b border-gray-100 dark:border-gray-700">
+                    <CardTitle className="text-xl font-semibold text-gray-800 dark:text-gray-200 flex items-center gap-3">
                       <div className="w-3 h-3 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full"></div>
                       Reports Over Time
-                      <div className="ml-auto text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
+                      <div className="ml-auto text-xs bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 px-2 py-1 rounded-full">
                         {reportsOverTime.length} days tracked
                       </div>
                     </CardTitle>
@@ -446,7 +446,7 @@ export default function HomePage() {
                   <CardContent className="pt-6">
                     <ResponsiveContainer width="100%" height={320}>
                       <LineChart data={reportsOverTime}>
-                        <CartesianGrid stroke="#e5e7eb" strokeDasharray="3 3" />
+                        <CartesianGrid stroke="#e5e7eb" strokeDasharray="3 3" className="dark:opacity-30" />
                         <XAxis dataKey="date" tick={{ fontSize: 12 }} />
                         <YAxis allowDecimals={false} />
                         <Tooltip />

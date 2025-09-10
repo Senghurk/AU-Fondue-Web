@@ -734,7 +734,7 @@ export default function AssignedReportsPage() {
                     placeholder="Search reports..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
                   />
                   <svg className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -747,7 +747,7 @@ export default function AssignedReportsPage() {
                 <select
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-700"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200"
                 >
                   <option value="">All Status</option>
                   <option value="PENDING">Pending</option>
@@ -809,11 +809,11 @@ export default function AssignedReportsPage() {
           {recentReports.length > 0 && (
             <div className="mb-10">
               <div 
-                className="flex items-center justify-between bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg px-4 py-3 mb-4 cursor-pointer hover:from-purple-100 hover:to-pink-100 transition-all duration-200 border border-purple-200 hover:border-purple-300 shadow-sm hover:shadow-md"
+                className="flex items-center justify-between bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-lg px-4 py-3 mb-4 cursor-pointer hover:from-purple-100 hover:to-pink-100 dark:hover:from-purple-900/30 dark:hover:to-pink-900/30 transition-all duration-200 border border-purple-200 dark:border-purple-700 hover:border-purple-300 dark:hover:border-purple-600 shadow-sm hover:shadow-md"
                 onClick={() => toggleCategory('Recent')}
               >
                 <div className="flex items-center gap-3">
-                  <h2 className="text-xl font-bold text-gray-800">Recent Reports</h2>
+                  <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200">Recent Reports</h2>
                   <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-purple-100 text-purple-700 border border-purple-200">
                     {recentReports.length} {recentReports.length === 1 ? 'report' : 'reports'}
                   </span>
@@ -846,13 +846,13 @@ export default function AssignedReportsPage() {
                   {recentReports.map((report) => (
                     <div
                       key={report.id}
-                      className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl hover:border-purple-200 transition-all duration-300 transform hover:-translate-y-1"
+                      className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 overflow-hidden hover:shadow-xl hover:border-purple-200 dark:hover:border-purple-600 transition-all duration-300 transform hover:-translate-y-1"
                     >
                       {/* Header with gradient background */}
-                      <div className="bg-gradient-to-r from-purple-50 to-pink-50 px-4 py-3 border-b border-gray-100">
+                      <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 px-4 py-3 border-b border-gray-100 dark:border-gray-700">
                         <div className="flex justify-between items-start">
                           <div className="flex-1 min-w-0 pr-10">
-                            <h3 className="text-base font-bold text-gray-900 truncate mb-1">
+                            <h3 className="text-base font-bold text-gray-900 dark:text-gray-100 truncate mb-1">
                               {report.description?.substring(0, 45)}...
                             </h3>
                             <p className="text-xs text-gray-500 font-medium">
@@ -877,7 +877,7 @@ export default function AssignedReportsPage() {
                               </svg>
                             </div>
                             <div>
-                              <p className="font-medium text-gray-900 text-sm">{report.customLocation}</p>
+                              <p className="font-medium text-gray-900 dark:text-gray-100 text-sm">{report.customLocation}</p>
                               <p className="text-gray-500 text-xs">Location</p>
                             </div>
                           </div>
@@ -888,7 +888,7 @@ export default function AssignedReportsPage() {
                               </svg>
                             </div>
                             <div>
-                              <p className="font-medium text-gray-900 text-sm">{report.reportedBy?.username}</p>
+                              <p className="font-medium text-gray-900 dark:text-gray-100 text-sm">{report.reportedBy?.username}</p>
                               <p className="text-gray-500 text-xs">Reported by</p>
                             </div>
                           </div>
@@ -899,7 +899,7 @@ export default function AssignedReportsPage() {
                               </svg>
                             </div>
                             <div>
-                              <p className="font-medium text-gray-900 text-sm">{report.assignedTo?.name}</p>
+                              <p className="font-medium text-gray-900 dark:text-gray-100 text-sm">{report.assignedTo?.name}</p>
                               <p className="text-gray-500 text-xs">Assigned to</p>
                             </div>
                           </div>
@@ -910,7 +910,7 @@ export default function AssignedReportsPage() {
                               </svg>
                             </div>
                             <div>
-                              <p className="font-medium text-gray-900 text-sm">{formatDate(report.createdAt)}</p>
+                              <p className="font-medium text-gray-900 dark:text-gray-100 text-sm">{formatDate(report.createdAt)}</p>
                               <p className="text-gray-500 text-xs">Date reported</p>
                             </div>
                           </div>
@@ -932,7 +932,7 @@ export default function AssignedReportsPage() {
                                   <img
                                     src={toInlineUrl(photo)}
                                     alt={`Photo ${i + 1}`}
-                                    className="w-16 h-16 object-cover rounded-lg border-2 border-gray-200 flex-shrink-0 cursor-pointer transition-all duration-200 group-hover:border-purple-300 group-hover:shadow-md"
+                                    className="w-16 h-16 object-cover rounded-lg border-2 border-gray-200 dark:border-gray-600 flex-shrink-0 cursor-pointer transition-all duration-200 group-hover:border-purple-300 dark:group-hover:border-purple-500 group-hover:shadow-md"
                                     onClick={() => openMediaViewer(photo, "image")}
                                   />
                                   <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 rounded-lg transition-all duration-200 flex items-center justify-center pointer-events-none">
@@ -947,7 +947,7 @@ export default function AssignedReportsPage() {
                                 <div key={`video-${i}`} className="relative group">
                                   <video
                                     src={toInlineUrl(video, "video")}
-                                    className="w-16 h-16 object-cover rounded-lg border-2 border-gray-200 flex-shrink-0 cursor-pointer transition-all duration-200 group-hover:border-purple-300 group-hover:shadow-md"
+                                    className="w-16 h-16 object-cover rounded-lg border-2 border-gray-200 dark:border-gray-600 flex-shrink-0 cursor-pointer transition-all duration-200 group-hover:border-purple-300 dark:group-hover:border-purple-500 group-hover:shadow-md"
                                     onClick={() => openMediaViewer(video, "video")}
                                     onMouseEnter={(e) => e.target.play()}
                                     onMouseLeave={(e) => {e.target.pause(); e.target.currentTime = 0;}}
@@ -965,7 +965,7 @@ export default function AssignedReportsPage() {
                               ))}
                               {/* More items indicator */}
                               {(report.photoUrls?.length > 3 || report.videoUrls?.length > 3) && (
-                                <div className="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center flex-shrink-0">
+                                <div className="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 flex items-center justify-center flex-shrink-0">
                                   <div className="text-center">
                                     <p className="text-xs font-bold text-gray-600">+{(report.photoUrls?.length || 0) + (report.videoUrls?.length || 0) - 3}</p>
                                     <p className="text-xs text-gray-500">more</p>
@@ -1039,11 +1039,11 @@ export default function AssignedReportsPage() {
               .map(([category, reports]) => (
                 <div key={category} className="mb-10">
                   <div 
-                    className="flex items-center justify-between bg-gradient-to-r from-gray-50 to-green-50 rounded-lg px-4 py-3 mb-4 cursor-pointer hover:from-gray-100 hover:to-green-100 transition-all duration-200 border border-gray-200 hover:border-green-300 shadow-sm hover:shadow-md"
+                    className="flex items-center justify-between bg-gradient-to-r from-gray-50 to-green-50 dark:from-gray-900/20 dark:to-green-900/20 rounded-lg px-4 py-3 mb-4 cursor-pointer hover:from-gray-100 hover:to-green-100 dark:hover:from-gray-900/30 dark:hover:to-green-900/30 transition-all duration-200 border border-gray-200 dark:border-gray-700 hover:border-green-300 dark:hover:border-green-600 shadow-sm hover:shadow-md"
                     onClick={() => toggleCategory(category)}
                   >
                     <div className="flex items-center gap-3">
-                      <h2 className="text-xl font-bold text-gray-800">{category}</h2>
+                      <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200">{category}</h2>
                       <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-green-100 text-green-700 border border-green-200">
                         {reports.length} {reports.length === 1 ? 'report' : 'reports'}
                       </span>
@@ -1070,13 +1070,13 @@ export default function AssignedReportsPage() {
                       {reports.map((report) => (
                         <div
                           key={report.id}
-                          className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl hover:border-blue-200 transition-all duration-300 transform hover:-translate-y-1"
+                          className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 overflow-hidden hover:shadow-xl hover:border-blue-200 dark:hover:border-blue-600 transition-all duration-300 transform hover:-translate-y-1"
                         >
                           {/* Header with gradient background */}
-                          <div className="bg-gradient-to-r from-green-50 to-emerald-50 px-4 py-3 border-b border-gray-100">
+                          <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 px-4 py-3 border-b border-gray-100 dark:border-gray-700">
                             <div className="flex justify-between items-start">
                               <div className="flex-1 min-w-0 pr-10">
-                                <h3 className="text-base font-bold text-gray-900 truncate mb-1">
+                                <h3 className="text-base font-bold text-gray-900 dark:text-gray-100 truncate mb-1">
                                   {report.description?.substring(0, 45)}...
                                 </h3>
                                 <p className="text-xs text-gray-500 font-medium">
@@ -1101,7 +1101,7 @@ export default function AssignedReportsPage() {
                                   </svg>
                                 </div>
                                 <div>
-                                  <p className="font-medium text-gray-900 text-sm">{report.customLocation}</p>
+                                  <p className="font-medium text-gray-900 dark:text-gray-100 text-sm">{report.customLocation}</p>
                                   <p className="text-gray-500 text-xs">Location</p>
                                 </div>
                               </div>
@@ -1112,7 +1112,7 @@ export default function AssignedReportsPage() {
                                   </svg>
                                 </div>
                                 <div>
-                                  <p className="font-medium text-gray-900 text-sm">{report.reportedBy?.username}</p>
+                                  <p className="font-medium text-gray-900 dark:text-gray-100 text-sm">{report.reportedBy?.username}</p>
                                   <p className="text-gray-500 text-xs">Reported by</p>
                                 </div>
                               </div>
@@ -1123,7 +1123,7 @@ export default function AssignedReportsPage() {
                                   </svg>
                                 </div>
                                 <div>
-                                  <p className="font-medium text-gray-900 text-sm">{report.assignedTo?.name}</p>
+                                  <p className="font-medium text-gray-900 dark:text-gray-100 text-sm">{report.assignedTo?.name}</p>
                                   <p className="text-gray-500 text-xs">Assigned to</p>
                                 </div>
                               </div>
@@ -1134,7 +1134,7 @@ export default function AssignedReportsPage() {
                                   </svg>
                                 </div>
                                 <div>
-                                  <p className="font-medium text-gray-900 text-sm">{formatDate(report.createdAt)}</p>
+                                  <p className="font-medium text-gray-900 dark:text-gray-100 text-sm">{formatDate(report.createdAt)}</p>
                                   <p className="text-gray-500 text-xs">Date reported</p>
                                 </div>
                               </div>
@@ -1156,7 +1156,7 @@ export default function AssignedReportsPage() {
                                       <img
                                         src={toInlineUrl(photo)}
                                         alt={`Photo ${i + 1}`}
-                                        className="w-16 h-16 object-cover rounded-lg border-2 border-gray-200 flex-shrink-0 cursor-pointer transition-all duration-200 group-hover:border-blue-300 group-hover:shadow-md"
+                                        className="w-16 h-16 object-cover rounded-lg border-2 border-gray-200 dark:border-gray-600 flex-shrink-0 cursor-pointer transition-all duration-200 group-hover:border-blue-300 dark:group-hover:border-blue-500 group-hover:shadow-md"
                                         onClick={() => openMediaViewer(photo, "image")}
                                       />
                                       <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 rounded-lg transition-all duration-200 flex items-center justify-center pointer-events-none">
@@ -1171,7 +1171,7 @@ export default function AssignedReportsPage() {
                                     <div key={`video-${i}`} className="relative group">
                                       <video
                                         src={toInlineUrl(video, "video")}
-                                        className="w-16 h-16 object-cover rounded-lg border-2 border-gray-200 flex-shrink-0 cursor-pointer transition-all duration-200 group-hover:border-blue-300 group-hover:shadow-md"
+                                        className="w-16 h-16 object-cover rounded-lg border-2 border-gray-200 dark:border-gray-600 flex-shrink-0 cursor-pointer transition-all duration-200 group-hover:border-blue-300 dark:group-hover:border-blue-500 group-hover:shadow-md"
                                         onClick={() => openMediaViewer(video, "video")}
                                         onMouseEnter={(e) => e.target.play()}
                                         onMouseLeave={(e) => {e.target.pause(); e.target.currentTime = 0;}}
@@ -1189,7 +1189,7 @@ export default function AssignedReportsPage() {
                                   ))}
                                   {/* More items indicator */}
                                   {(report.photoUrls?.length > 3 || report.videoUrls?.length > 3) && (
-                                    <div className="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center flex-shrink-0">
+                                    <div className="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 flex items-center justify-center flex-shrink-0">
                                       <div className="text-center">
                                         <p className="text-xs font-bold text-gray-600">+{(report.photoUrls?.length || 0) + (report.videoUrls?.length || 0) - 3}</p>
                                         <p className="text-xs text-gray-500">more</p>
@@ -1258,13 +1258,13 @@ export default function AssignedReportsPage() {
       {/* Modal - Hide when using new details modal */}
       {isModalOpen && selectedReport && modalType !== "details" && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden">
             <div className="max-h-[90vh] overflow-y-auto">
               {/* Header */}
-              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-8 py-6 border-b border-gray-100">
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 px-8 py-6 border-b border-gray-100 dark:border-gray-700">
                 <div className="flex justify-between items-center">
                   <div>
-                    <h2 className="text-2xl font-bold text-gray-900">
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                       {modalType === "update" ? "Update Report" : "Report Details"}
                     </h2>
                     <p className="text-sm text-gray-600 mt-1">
@@ -1273,7 +1273,7 @@ export default function AssignedReportsPage() {
                   </div>
                   <button
                     onClick={() => setIsModalOpen(false)}
-                    className="w-10 h-10 bg-white/80 hover:bg-white text-gray-500 hover:text-gray-700 rounded-full shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center group backdrop-blur-sm"
+                    className="w-10 h-10 bg-white/80 dark:bg-gray-700/80 hover:bg-white dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 rounded-full shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center group backdrop-blur-sm"
                   >
                     <svg className="w-5 h-5 transition-transform duration-200 group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -1297,8 +1297,8 @@ export default function AssignedReportsPage() {
                     {/* UPDATE FORM */}
                     <div className="space-y-6">
                       {/* Status */}
-                      <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
-                        <label className="block text-base font-semibold text-gray-800 mb-4 flex items-center gap-3">
+                      <div className="bg-gray-50 dark:bg-gray-700/30 rounded-xl p-6 border border-gray-200 dark:border-gray-600">
+                        <label className="block text-base font-semibold text-gray-800 dark:text-gray-200 mb-4 flex items-center gap-3">
                           <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
                             <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -1310,7 +1310,7 @@ export default function AssignedReportsPage() {
                           <select
                             value={status}
                             onChange={(e) => setStatus(e.target.value)}
-                            className="w-full px-5 py-4 text-base bg-white border-2 border-gray-300 rounded-xl shadow-sm appearance-none cursor-pointer transition-all duration-200 hover:border-blue-400 hover:shadow-md focus:outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-500 font-medium"
+                            className="w-full px-5 py-4 text-base bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 rounded-xl shadow-sm appearance-none cursor-pointer transition-all duration-200 hover:border-blue-400 dark:hover:border-blue-500 hover:shadow-md focus:outline-none focus:ring-4 focus:ring-blue-100 dark:focus:ring-blue-900/20 focus:border-blue-500 dark:focus:border-blue-400 font-medium text-gray-900 dark:text-gray-100"
                           >
                             <option value="PENDING" className="py-2">Pending</option>
                             <option value="IN PROGRESS" className="py-2">In Progress</option>
@@ -1325,8 +1325,8 @@ export default function AssignedReportsPage() {
                       </div>
 
                       {/* Remark */}
-                      <div className="bg-orange-50 rounded-xl p-6 border border-orange-200">
-                        <label className="block text-base font-semibold text-gray-800 mb-4 flex items-center gap-3">
+                      <div className="bg-orange-50 dark:bg-orange-900/10 rounded-xl p-6 border border-orange-200 dark:border-orange-800">
+                        <label className="block text-base font-semibold text-gray-800 dark:text-gray-200 mb-4 flex items-center gap-3">
                           <div className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center">
                             <svg className="w-4 h-4 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
@@ -1337,8 +1337,8 @@ export default function AssignedReportsPage() {
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
                           <label className={`flex items-center gap-3 border-2 rounded-xl px-4 py-3 cursor-pointer transition-all duration-200 ${
                             resolutionType === "OK" 
-                              ? "border-green-300 bg-green-50 shadow-md" 
-                              : "border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm"
+                              ? "border-green-300 dark:border-green-600 bg-green-50 dark:bg-green-900/20 shadow-md" 
+                              : "border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-500 hover:shadow-sm"
                           }`}>
                             <input
                               type="radio"
@@ -1348,12 +1348,12 @@ export default function AssignedReportsPage() {
                               onChange={(e) => setResolutionType(e.target.value)}
                               className="w-4 h-4 text-green-600"
                             />
-                            <span className="font-medium text-gray-900">OK</span>
+                            <span className="font-medium text-gray-900 dark:text-gray-100">OK</span>
                           </label>
                           <label className={`flex items-center gap-3 border-2 rounded-xl px-4 py-3 cursor-pointer transition-all duration-200 ${
                             resolutionType === "RF" 
-                              ? "border-blue-300 bg-blue-50 shadow-md" 
-                              : "border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm"
+                              ? "border-blue-300 dark:border-blue-600 bg-blue-50 dark:bg-blue-900/20 shadow-md" 
+                              : "border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-500 hover:shadow-sm"
                           }`}>
                             <input
                               type="radio"
@@ -1363,12 +1363,12 @@ export default function AssignedReportsPage() {
                               onChange={(e) => setResolutionType(e.target.value)}
                               className="w-4 h-4 text-blue-600"
                             />
-                            <span className="font-medium text-gray-900">RF</span>
+                            <span className="font-medium text-gray-900 dark:text-gray-100">RF</span>
                           </label>
                           <label className={`flex items-center gap-3 border-2 rounded-xl px-4 py-3 cursor-pointer transition-all duration-200 ${
                             resolutionType === "PR" 
-                              ? "border-purple-300 bg-purple-50 shadow-md" 
-                              : "border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm"
+                              ? "border-purple-300 dark:border-purple-600 bg-purple-50 dark:bg-purple-900/20 shadow-md" 
+                              : "border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-500 hover:shadow-sm"
                           }`}>
                             <input
                               type="radio"
@@ -1378,10 +1378,10 @@ export default function AssignedReportsPage() {
                               onChange={(e) => setResolutionType(e.target.value)}
                               className="w-4 h-4 text-purple-600"
                             />
-                            <span className="font-medium text-gray-900">PR</span>
+                            <span className="font-medium text-gray-900 dark:text-gray-100">PR</span>
                           </label>
                         </div>
-                        <div className="bg-white/70 rounded-lg p-4 text-sm text-gray-700 space-y-2">
+                        <div className="bg-white/70 dark:bg-gray-800/70 rounded-lg p-4 text-sm text-gray-700 dark:text-gray-300 space-y-2">
                           <div className="flex items-start gap-2">
                             <span className="font-semibold text-blue-600 min-w-[24px]">RF:</span>
                             <span>Materials or supplies need to be procured through proper channels</span>
@@ -1394,8 +1394,8 @@ export default function AssignedReportsPage() {
                       </div>
 
                       {/* Comments */}
-                      <div className="bg-green-50 rounded-xl p-6 border border-green-200">
-                        <label className="block text-base font-semibold text-gray-800 mb-4 flex items-center gap-3">
+                      <div className="bg-green-50 dark:bg-green-900/10 rounded-xl p-6 border border-green-200 dark:border-green-800">
+                        <label className="block text-base font-semibold text-gray-800 dark:text-gray-200 mb-4 flex items-center gap-3">
                           <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
                             <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
@@ -1407,14 +1407,14 @@ export default function AssignedReportsPage() {
                           value={comments}
                           onChange={(e) => setComments(e.target.value)}
                           rows={4}
-                          className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-green-100 focus:border-green-500 resize-none bg-white shadow-sm transition-all duration-200"
+                          className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-4 focus:ring-green-100 dark:focus:ring-green-900/20 focus:border-green-500 dark:focus:border-green-400 resize-none bg-white dark:bg-gray-800 shadow-sm transition-all duration-200 text-gray-900 dark:text-gray-100"
                           placeholder="Add detailed comments about the report update..."
                         />
                       </div>
 
                       {/* Upload Photos */}
-                      <div className="bg-purple-50 rounded-xl p-6 border border-purple-200">
-                        <label className="block text-base font-semibold text-gray-800 mb-4 flex items-center gap-3">
+                      <div className="bg-purple-50 dark:bg-purple-900/10 rounded-xl p-6 border border-purple-200 dark:border-purple-800">
+                        <label className="block text-base font-semibold text-gray-800 dark:text-gray-200 mb-4 flex items-center gap-3">
                           <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
                             <svg className="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -1422,13 +1422,13 @@ export default function AssignedReportsPage() {
                           </div>
                           Upload Photos <span className="text-gray-500 text-sm font-normal">(Optional)</span>
                         </label>
-                        <div className="border-2 border-dashed border-purple-300 rounded-xl p-6 bg-white/50 hover:bg-white/70 transition-colors duration-200">
+                        <div className="border-2 border-dashed border-purple-300 dark:border-purple-600 rounded-xl p-6 bg-white/50 dark:bg-gray-800/50 hover:bg-white/70 dark:hover:bg-gray-800/70 transition-colors duration-200">
                           <input
                             type="file"
                             multiple
                             accept="image/*"
                             onChange={handlePhotoUpload}
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100"
+                            className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400 bg-white dark:bg-gray-800 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-50 dark:file:bg-purple-900 file:text-purple-700 dark:file:text-purple-300 hover:file:bg-purple-100 dark:hover:file:bg-purple-800 text-gray-900 dark:text-gray-100"
                           />
                           {photos.length > 0 && (
                             <div className="flex flex-wrap gap-2 mt-2">
@@ -1461,10 +1461,10 @@ export default function AssignedReportsPage() {
                     </div>
 
                     {/* Footer Actions */}
-                    <div className="bg-gray-50 px-8 py-6 border-t border-gray-200 flex gap-4 mt-6">
+                    <div className="bg-gray-50 dark:bg-gray-700/30 px-8 py-6 border-t border-gray-200 dark:border-gray-600 flex gap-4 mt-6">
                       <button
                         onClick={() => setIsModalOpen(false)}
-                        className="flex-1 bg-white border-2 border-gray-300 text-gray-700 px-6 py-3 rounded-xl font-semibold hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 shadow-sm hover:shadow-md"
+                        className="flex-1 bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 px-6 py-3 rounded-xl font-semibold hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500 transition-all duration-200 shadow-sm hover:shadow-md"
                       >
                         Cancel
                       </button>
@@ -1639,7 +1639,7 @@ export default function AssignedReportsPage() {
         >
           <div className="relative max-w-[90vw] max-h-[90vh]">
             <button
-              className="absolute -top-12 right-0 w-10 h-10 bg-white/95 backdrop-blur-sm text-gray-700 rounded-full shadow-lg hover:bg-white hover:text-gray-900 hover:shadow-xl transition-all duration-200 flex items-center justify-center group"
+              className="absolute -top-12 right-0 w-10 h-10 bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm text-gray-700 dark:text-gray-300 rounded-full shadow-lg hover:bg-white dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100 hover:shadow-xl transition-all duration-200 flex items-center justify-center group"
               onClick={closeMediaViewer}
             >
               <svg className="w-5 h-5 transition-transform duration-200 group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1672,7 +1672,7 @@ export default function AssignedReportsPage() {
       {/* Delete Confirmation Dialog */}
       {deleteConfirmOpen && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full overflow-hidden">
             <div className="bg-gradient-to-r from-red-500 to-red-600 px-6 py-4">
               <h3 className="text-xl font-bold text-white">Confirm Delete</h3>
             </div>
@@ -1684,7 +1684,7 @@ export default function AssignedReportsPage() {
                   </svg>
                 </div>
                 <div className="flex-1">
-                  <p className="text-gray-900 font-medium mb-2">
+                  <p className="text-gray-900 dark:text-gray-100 font-medium mb-2">
                     Are you sure you want to delete this report?
                   </p>
                   <p className="text-sm text-gray-600">
@@ -1699,7 +1699,7 @@ export default function AssignedReportsPage() {
                 <button
                   onClick={handleDeleteCancel}
                   disabled={isDeleting}
-                  className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-800 font-semibold py-2.5 px-4 rounded-xl transition-all duration-200"
+                  className="flex-1 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-semibold py-2.5 px-4 rounded-xl transition-all duration-200"
                 >
                   Cancel
                 </button>

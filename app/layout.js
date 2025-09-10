@@ -66,7 +66,7 @@ export default function RootLayout({ children }) {
               />
 
               {/* Page layout */}
-              <div className="flex-1 flex relative print:block print:w-full">
+              <div className="flex-1 flex relative print:block print:w-full bg-gray-100 dark:bg-gray-950">
                 {/* Desktop Sidebar */}
                 {!isMobile && (
                   <div className="w-80 p-6 pr-3 print:hidden">
@@ -103,7 +103,7 @@ export default function RootLayout({ children }) {
                 )}
 
                 {/* Page content */}
-                <main className={`flex-1 bg-card rounded-lg overflow-auto print:bg-white print:rounded-none print:p-0 print:overflow-visible ${
+                <main className={`flex-1 bg-gray-50 dark:bg-gray-900 rounded-lg overflow-auto print:bg-white print:rounded-none print:p-0 print:overflow-visible ${
                   isMobile ? 'p-4' : 'p-6 pl-3'
                 }`}>
                   {children}

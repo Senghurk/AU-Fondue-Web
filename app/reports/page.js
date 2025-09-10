@@ -521,7 +521,7 @@ export default function ReportsPage() {
               placeholder="Search reports..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full px-4 py-3 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3 text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
             />
           </div>
 
@@ -529,11 +529,11 @@ export default function ReportsPage() {
           {recentReports.length > 0 && (
             <div className="mb-10">
               <div 
-                className="flex items-center justify-between bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg px-4 py-3 mb-4 cursor-pointer hover:from-purple-100 hover:to-pink-100 transition-all duration-200 border border-purple-200 hover:border-purple-300 shadow-sm hover:shadow-md"
+                className="flex items-center justify-between bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-lg px-4 py-3 mb-4 cursor-pointer hover:from-purple-100 hover:to-pink-100 dark:hover:from-purple-900/30 dark:hover:to-pink-900/30 transition-all duration-200 border border-purple-200 dark:border-purple-700 hover:border-purple-300 dark:hover:border-purple-600 shadow-sm hover:shadow-md"
                 onClick={() => toggleCategory('Recent')}
               >
                 <div className="flex items-center gap-3">
-                  <h2 className="text-xl font-bold text-gray-800">Recent Reports</h2>
+                  <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200">Recent Reports</h2>
                   <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-purple-100 text-purple-700 border border-purple-200">
                     {recentReports.length} {recentReports.length === 1 ? 'report' : 'reports'}
                   </span>
@@ -566,13 +566,13 @@ export default function ReportsPage() {
                   {recentReports.map((report) => (
                     <div
                       key={report.id}
-                      className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl hover:border-purple-200 transition-all duration-300 transform hover:-translate-y-1"
+                      className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 overflow-hidden hover:shadow-xl hover:border-purple-200 dark:hover:border-purple-600 transition-all duration-300 transform hover:-translate-y-1"
                     >
                       {/* Header with gradient background */}
-                      <div className="bg-gradient-to-r from-purple-50 to-pink-50 px-4 py-3 border-b border-gray-100">
+                      <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 px-4 py-3 border-b border-gray-100 dark:border-gray-700">
                         <div className="flex justify-between items-start">
                           <div className="flex-1 min-w-0 pr-10">
-                            <h3 className="text-base font-bold text-gray-900 truncate mb-1">
+                            <h3 className="text-base font-bold text-gray-900 dark:text-gray-100 truncate mb-1">
                               {report.description?.substring(0, 40)}...
                             </h3>
                             <p className="text-xs text-gray-500 font-medium">
@@ -596,7 +596,7 @@ export default function ReportsPage() {
                               </svg>
                             </div>
                             <div>
-                              <p className="font-medium text-gray-900 text-sm">{report.customLocation}</p>
+                              <p className="font-medium text-gray-900 dark:text-gray-100 text-sm">{report.customLocation}</p>
                               <p className="text-gray-500 text-xs">Location</p>
                             </div>
                           </div>
@@ -607,7 +607,7 @@ export default function ReportsPage() {
                               </svg>
                             </div>
                             <div>
-                              <p className="font-medium text-gray-900 text-sm">{report.reportedBy?.username}</p>
+                              <p className="font-medium text-gray-900 dark:text-gray-100 text-sm">{report.reportedBy?.username}</p>
                               <p className="text-gray-500 text-xs">Reported by</p>
                             </div>
                           </div>
@@ -618,7 +618,7 @@ export default function ReportsPage() {
                               </svg>
                             </div>
                             <div>
-                              <p className="font-medium text-gray-900 text-sm">{formatDate(report.createdAt)}</p>
+                              <p className="font-medium text-gray-900 dark:text-gray-100 text-sm">{formatDate(report.createdAt)}</p>
                               <p className="text-gray-500 text-xs">Date reported</p>
                             </div>
                           </div>
@@ -644,7 +644,7 @@ export default function ReportsPage() {
                                     <img
                                       src={inlineUrl}
                                       alt={`Photo ${i + 1}`}
-                                      className="w-16 h-16 object-cover rounded-lg border-2 border-gray-200 flex-shrink-0 cursor-pointer transition-all duration-200 group-hover:border-purple-300 group-hover:shadow-md"
+                                      className="w-16 h-16 object-cover rounded-lg border-2 border-gray-200 dark:border-gray-600 flex-shrink-0 cursor-pointer transition-all duration-200 group-hover:border-purple-300 dark:group-hover:border-purple-500 group-hover:shadow-md"
                                       onClick={() => openMediaViewer(base, "image")}
                                     />
                                     <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 rounded-lg transition-all duration-200 flex items-center justify-center pointer-events-none">
@@ -664,7 +664,7 @@ export default function ReportsPage() {
                                   <div key={`video-${i}`} className="relative group">
                                     <video
                                       src={inlineUrl}
-                                      className="w-16 h-16 object-cover rounded-lg border-2 border-gray-200 flex-shrink-0 cursor-pointer transition-all duration-200 group-hover:border-purple-300 group-hover:shadow-md"
+                                      className="w-16 h-16 object-cover rounded-lg border-2 border-gray-200 dark:border-gray-600 flex-shrink-0 cursor-pointer transition-all duration-200 group-hover:border-purple-300 dark:group-hover:border-purple-500 group-hover:shadow-md"
                                       onClick={() => openMediaViewer(base, "video")}
                                       onMouseEnter={(e) => e.target.play()}
                                       onMouseLeave={(e) => {e.target.pause(); e.target.currentTime = 0;}}
@@ -683,7 +683,7 @@ export default function ReportsPage() {
                               })}
                               {/* More items indicator */}
                               {(report.photoUrls?.length > 3 || report.videoUrls?.length > 3) && (
-                                <div className="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center flex-shrink-0">
+                                <div className="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 flex items-center justify-center flex-shrink-0">
                                   <div className="text-center">
                                     <p className="text-xs font-bold text-gray-600">+{(report.photoUrls?.length || 0) + (report.videoUrls?.length || 0) - 3}</p>
                                     <p className="text-xs text-gray-500">more</p>
@@ -698,7 +698,7 @@ export default function ReportsPage() {
                         <div className="border-t border-gray-100 pt-3">
                           <div className="space-y-3">
                             <div>
-                              <label className="block text-sm font-semibold text-gray-800 mb-2">
+                              <label className="block text-sm font-semibold text-gray-800 dark:text-gray-200 mb-2">
                                 Assign Staff Member
                               </label>
                               <div className="relative">
@@ -707,7 +707,7 @@ export default function ReportsPage() {
                                   onChange={(e) =>
                                     handleAssignStaff(report.id, e.target.value)
                                   }
-                                  className="w-full px-3 py-2 text-sm bg-gradient-to-br from-white to-gray-50 border-2 border-gray-200 rounded-xl shadow-sm appearance-none cursor-pointer transition-all duration-200 hover:border-purple-300 hover:shadow-md focus:outline-none focus:ring-4 focus:ring-purple-100 focus:border-purple-500 focus:bg-white"
+                                  className="w-full px-3 py-2 text-sm bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-700 border-2 border-gray-200 dark:border-gray-600 rounded-xl shadow-sm appearance-none cursor-pointer transition-all duration-200 hover:border-purple-300 dark:hover:border-purple-500 hover:shadow-md focus:outline-none focus:ring-4 focus:ring-purple-100 dark:focus:ring-purple-900/20 focus:border-purple-500 dark:focus:border-purple-400 focus:bg-white dark:focus:bg-gray-800 text-gray-900 dark:text-gray-100"
                                 >
                                   <option value="" className="text-gray-500">Choose a staff member...</option>
                                   {staffMembers.map((staff) => (
@@ -783,11 +783,11 @@ export default function ReportsPage() {
           .map(([category, reports]) => (
           <div key={category} className="mb-10">
             <div 
-              className="flex items-center justify-between bg-gradient-to-r from-gray-50 to-blue-50 rounded-lg px-4 py-3 mb-4 cursor-pointer hover:from-gray-100 hover:to-blue-100 transition-all duration-200 border border-gray-200 hover:border-blue-300 shadow-sm hover:shadow-md"
+              className="flex items-center justify-between bg-gradient-to-r from-gray-50 to-blue-50 dark:from-gray-900/20 dark:to-blue-900/20 rounded-lg px-4 py-3 mb-4 cursor-pointer hover:from-gray-100 hover:to-blue-100 dark:hover:from-gray-900/30 dark:hover:to-blue-900/30 transition-all duration-200 border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 shadow-sm hover:shadow-md"
               onClick={() => toggleCategory(category)}
             >
               <div className="flex items-center gap-3">
-                <h2 className="text-xl font-bold text-gray-800">{category}</h2>
+                <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200">{category}</h2>
                 <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-700 border border-blue-200">
                   {reports.length} {reports.length === 1 ? 'report' : 'reports'}
                 </span>
@@ -814,13 +814,13 @@ export default function ReportsPage() {
                 {reports.map((report) => (
                 <div
                   key={report.id}
-                  className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl hover:border-blue-200 transition-all duration-300 transform hover:-translate-y-1 relative"
+                  className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 overflow-hidden hover:shadow-xl hover:border-blue-200 dark:hover:border-blue-600 transition-all duration-300 transform hover:-translate-y-1 relative"
                 >
                   {/* Header with gradient background */}
-                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-4 py-3 border-b border-gray-100">
+                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 px-4 py-3 border-b border-gray-100 dark:border-gray-700">
                     <div className="flex justify-between items-start">
                       <div className="flex-1 min-w-0 pr-10">
-                        <h3 className="text-base font-bold text-gray-900 truncate mb-1">
+                        <h3 className="text-base font-bold text-gray-900 dark:text-gray-100 truncate mb-1">
                           {report.description?.substring(0, 45)}...
                         </h3>
                         <p className="text-xs text-gray-500 font-medium">
@@ -843,7 +843,7 @@ export default function ReportsPage() {
                           </svg>
                         </div>
                         <div>
-                          <p className="font-medium text-gray-900 text-sm">{report.customLocation}</p>
+                          <p className="font-medium text-gray-900 dark:text-gray-100 text-sm">{report.customLocation}</p>
                           <p className="text-gray-500 text-xs">Location</p>
                         </div>
                       </div>
@@ -854,7 +854,7 @@ export default function ReportsPage() {
                           </svg>
                         </div>
                         <div>
-                          <p className="font-medium text-gray-900 text-sm">{report.reportedBy?.username}</p>
+                          <p className="font-medium text-gray-900 dark:text-gray-100 text-sm">{report.reportedBy?.username}</p>
                           <p className="text-gray-500 text-xs">Reported by</p>
                         </div>
                       </div>
@@ -865,7 +865,7 @@ export default function ReportsPage() {
                           </svg>
                         </div>
                         <div>
-                          <p className="font-medium text-gray-900 text-sm">{formatDate(report.createdAt)}</p>
+                          <p className="font-medium text-gray-900 dark:text-gray-100 text-sm">{formatDate(report.createdAt)}</p>
                           <p className="text-gray-500 text-xs">Date reported</p>
                         </div>
                       </div>
@@ -891,7 +891,7 @@ export default function ReportsPage() {
                                 <img
                                   src={inlineUrl}
                                   alt={`Photo ${i + 1}`}
-                                  className="w-16 h-16 object-cover rounded-lg border-2 border-gray-200 flex-shrink-0 cursor-pointer transition-all duration-200 group-hover:border-blue-300 group-hover:shadow-md"
+                                  className="w-16 h-16 object-cover rounded-lg border-2 border-gray-200 dark:border-gray-600 flex-shrink-0 cursor-pointer transition-all duration-200 group-hover:border-blue-300 dark:group-hover:border-blue-500 group-hover:shadow-md"
                                   onClick={() => openMediaViewer(base, "image")}
                                 />
                                 <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 rounded-lg transition-all duration-200 flex items-center justify-center pointer-events-none">
@@ -911,7 +911,7 @@ export default function ReportsPage() {
                               <div key={`video-${i}`} className="relative group">
                                 <video
                                   src={inlineUrl}
-                                  className="w-16 h-16 object-cover rounded-lg border-2 border-gray-200 flex-shrink-0 cursor-pointer transition-all duration-200 group-hover:border-blue-300 group-hover:shadow-md"
+                                  className="w-16 h-16 object-cover rounded-lg border-2 border-gray-200 dark:border-gray-600 flex-shrink-0 cursor-pointer transition-all duration-200 group-hover:border-blue-300 dark:group-hover:border-blue-500 group-hover:shadow-md"
                                   onClick={() => openMediaViewer(base, "video")}
                                   onMouseEnter={(e) => e.target.play()}
                                   onMouseLeave={(e) => {e.target.pause(); e.target.currentTime = 0;}}
@@ -930,7 +930,7 @@ export default function ReportsPage() {
                           })}
                           {/* More items indicator */}
                           {(report.photoUrls?.length > 3 || report.videoUrls?.length > 3) && (
-                            <div className="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center flex-shrink-0">
+                            <div className="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 flex items-center justify-center flex-shrink-0">
                               <div className="text-center">
                                 <p className="text-xs font-bold text-gray-600">+{(report.photoUrls?.length || 0) + (report.videoUrls?.length || 0) - 3}</p>
                                 <p className="text-xs text-gray-500">more</p>
@@ -945,7 +945,7 @@ export default function ReportsPage() {
                     <div className="border-t border-gray-100 pt-3">
                       <div className="space-y-3">
                         <div>
-                          <label className="block text-sm font-semibold text-gray-800 mb-2">
+                          <label className="block text-sm font-semibold text-gray-800 dark:text-gray-200 mb-2">
                             Assign Staff Member
                           </label>
                           <div className="relative">
@@ -954,7 +954,7 @@ export default function ReportsPage() {
                               onChange={(e) =>
                                 handleAssignStaff(report.id, e.target.value)
                               }
-                              className="w-full pl-4 pr-12 py-2.5 text-sm bg-gradient-to-br from-white to-gray-50 border-2 border-gray-200 rounded-xl shadow-sm appearance-none cursor-pointer transition-all duration-200 hover:border-blue-300 hover:shadow-md focus:outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-500 focus:bg-white"
+                              className="w-full pl-4 pr-12 py-2.5 text-sm bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-700 border-2 border-gray-200 dark:border-gray-600 rounded-xl shadow-sm appearance-none cursor-pointer transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-500 hover:shadow-md focus:outline-none focus:ring-4 focus:ring-blue-100 dark:focus:ring-blue-900/20 focus:border-blue-500 dark:focus:border-blue-400 focus:bg-white dark:focus:bg-gray-800 text-gray-900 dark:text-gray-100"
                             >
                               <option value="" className="text-gray-500">Choose a staff member...</option>
                           {staffMembers.map((staff) => (
@@ -1054,7 +1054,7 @@ export default function ReportsPage() {
         >
           <div className="relative max-w-[90vw] max-h-[90vh]">
             <button
-              className="absolute -top-12 right-0 w-10 h-10 bg-white/95 backdrop-blur-sm text-gray-700 rounded-full shadow-lg hover:bg-white hover:text-gray-900 hover:shadow-xl transition-all duration-200 flex items-center justify-center group"
+              className="absolute -top-12 right-0 w-10 h-10 bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm text-gray-700 dark:text-gray-300 rounded-full shadow-lg hover:bg-white dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100 hover:shadow-xl transition-all duration-200 flex items-center justify-center group"
               onClick={closeMediaViewer}
             >
               <svg className="w-5 h-5 transition-transform duration-200 group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1087,7 +1087,7 @@ export default function ReportsPage() {
       {/* Delete Confirmation Dialog */}
       {deleteConfirmOpen && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full overflow-hidden">
             <div className="bg-gradient-to-r from-red-500 to-red-600 px-6 py-4">
               <h3 className="text-xl font-bold text-white">Confirm Delete</h3>
             </div>
@@ -1099,7 +1099,7 @@ export default function ReportsPage() {
                   </svg>
                 </div>
                 <div className="flex-1">
-                  <p className="text-gray-900 font-medium mb-2">
+                  <p className="text-gray-900 dark:text-gray-100 font-medium mb-2">
                     Are you sure you want to delete this report?
                   </p>
                   <p className="text-sm text-gray-600">
@@ -1114,7 +1114,7 @@ export default function ReportsPage() {
                 <button
                   onClick={handleDeleteCancel}
                   disabled={isDeleting}
-                  className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-800 font-semibold py-2.5 px-4 rounded-xl transition-all duration-200"
+                  className="flex-1 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-semibold py-2.5 px-4 rounded-xl transition-all duration-200"
                 >
                   Cancel
                 </button>

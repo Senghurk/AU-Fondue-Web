@@ -552,8 +552,8 @@ export default function StaffManagementPage() {
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Staff Management</h1>
-          <p className="text-gray-600 mt-2">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Staff Management</h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-2">
             Manage staff accounts and reset passwords
           </p>
         </div>
@@ -588,7 +588,7 @@ export default function StaffManagementPage() {
               </div>
               <Button 
                 onClick={() => setIsAddingStaff(true)}
-                className="bg-black hover:bg-gray-800"
+                className="bg-black dark:bg-gray-700 hover:bg-gray-800 dark:hover:bg-gray-600 text-white"
               >
                 <UserPlus className="mr-2 h-4 w-4" />
                 Add Staff
@@ -879,7 +879,7 @@ export default function StaffManagementPage() {
               </Button>
               <Button 
                 onClick={handleAddStaff} 
-                className="bg-black hover:bg-gray-800"
+                className="bg-black dark:bg-gray-700 hover:bg-gray-800 dark:hover:bg-gray-600 text-white"
                 disabled={isCheckingDuplicate || !!validationErrors.staffId || !!validationErrors.email}
               >
                 Add Staff Member

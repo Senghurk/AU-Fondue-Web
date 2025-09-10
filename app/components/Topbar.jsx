@@ -43,7 +43,7 @@ export default function Topbar({ activeTopLink, setActiveTopLink, setActiveLink,
   };
 
   return (
-    <header className="bg-gradient-to-r from-slate-50 to-gray-100 border-b border-gray-200 shadow-sm print:hidden">
+    <header className="bg-gradient-to-r from-slate-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 border-b border-gray-200 dark:border-gray-700 shadow-sm print:hidden">
       <div className="flex items-center justify-between px-4 sm:px-6 py-4">
         {/* Mobile Menu Button & App Title */}
         <div className="flex items-center gap-3">
@@ -61,8 +61,8 @@ export default function Topbar({ activeTopLink, setActiveTopLink, setActiveLink,
             <h1 className={`font-semibold transition-colors duration-200 ${
               isMobile ? 'text-lg' : 'text-2xl'
             }`}>
-              <span className="text-gray-900 group-hover:text-blue-600">AU Fondue </span>
-              <span className={isOMStaff() ? "text-green-600 group-hover:text-green-700" : "text-blue-600 group-hover:text-blue-700"}>
+              <span className="text-gray-900 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400">AU Fondue </span>
+              <span className={isOMStaff() ? "text-green-600 dark:text-green-400 group-hover:text-green-700 dark:group-hover:text-green-300" : "text-blue-600 dark:text-blue-400 group-hover:text-blue-700 dark:group-hover:text-blue-300"}>
                 {isOMStaff() ? "Staff" : "Admin"}
               </span>
             </h1>
@@ -78,8 +78,8 @@ export default function Topbar({ activeTopLink, setActiveTopLink, setActiveLink,
                 href="/dashboard"
                 className={`px-2 lg:px-3 py-1.5 sm:py-2 rounded-md text-xs sm:text-sm font-medium transition-all duration-200 ${
                   activeTopLink === "/dashboard" || activeTopLink === "/"
-                    ? "bg-blue-100 text-blue-700 shadow-sm"
-                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                    ? "bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 shadow-sm"
+                    : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800"
                 }`}
                 onClick={() => {
                   handleLinkClick("/dashboard");
@@ -93,8 +93,8 @@ export default function Topbar({ activeTopLink, setActiveTopLink, setActiveLink,
                 href="/admins"
                 className={`px-2 lg:px-3 py-1.5 sm:py-2 rounded-md text-xs sm:text-sm font-medium transition-all duration-200 ${
                   activeTopLink === "/admins"
-                    ? "bg-blue-100 text-blue-700 shadow-sm"
-                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                    ? "bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 shadow-sm"
+                    : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800"
                 }`}
                 onClick={() => {
                   handleLinkClick("/admins");
@@ -106,19 +106,19 @@ export default function Topbar({ activeTopLink, setActiveTopLink, setActiveLink,
             </div>
           )}
 
-          <div className="flex items-center space-x-1 sm:space-x-2 lg:space-x-3 pl-2 sm:pl-4 lg:pl-6 border-l border-gray-300">
+          <div className="flex items-center space-x-1 sm:space-x-2 lg:space-x-3 pl-2 sm:pl-4 lg:pl-6 border-l border-gray-300 dark:border-gray-600">
             {/* Username Dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button 
                   variant="ghost" 
-                  className="flex items-center gap-1 lg:gap-2 px-1 sm:px-2 lg:px-3 py-1.5 sm:py-2 rounded-lg hover:bg-gray-200 transition-colors"
+                  className="flex items-center gap-1 lg:gap-2 px-1 sm:px-2 lg:px-3 py-1.5 sm:py-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
                   size="sm"
                 >
-                  <div className="w-6 sm:w-7 h-6 sm:h-7 bg-gradient-to-br from-gray-600 to-gray-800 rounded-full flex items-center justify-center">
+                  <div className="w-6 sm:w-7 h-6 sm:h-7 bg-gradient-to-br from-gray-600 to-gray-800 dark:from-gray-400 dark:to-gray-600 rounded-full flex items-center justify-center">
                     <User className="h-3 sm:h-4 w-3 sm:w-4 text-white" />
                   </div>
-                  <span className="text-gray-700 font-medium hidden md:block text-xs sm:text-sm">
+                  <span className="text-gray-700 dark:text-gray-300 font-medium hidden md:block text-xs sm:text-sm">
                     {user ? user.name : 'User'}
                   </span>
                 </Button>
@@ -135,7 +135,7 @@ export default function Topbar({ activeTopLink, setActiveTopLink, setActiveLink,
               variant="ghost"
               size="icon"
               onClick={toggleTheme}
-              className="h-8 w-8 sm:h-9 sm:w-9 rounded-lg hover:bg-gray-200 transition-colors"
+              className="h-8 w-8 sm:h-9 sm:w-9 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
             >
               {isDark ? (
                 <Sun className="h-3.5 sm:h-4 w-3.5 sm:w-4 text-amber-500" />

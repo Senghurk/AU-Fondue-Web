@@ -274,8 +274,8 @@ export default function AdminManagementPage() {
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Admin Management</h1>
-          <p className="text-gray-600 mt-2">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Admin Management</h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-2">
             Manage system administrators with AU accounts (@au.edu)
           </p>
         </div>
@@ -310,7 +310,7 @@ export default function AdminManagementPage() {
               </div>
               <Button 
                 onClick={() => setIsAddingAdmin(true)}
-                className="bg-black hover:bg-gray-800"
+                className="bg-black dark:bg-gray-700 hover:bg-gray-800 dark:hover:bg-gray-600 text-white"
               >
                 <UserPlus className="mr-2 h-4 w-4" />
                 Add Admin
@@ -547,7 +547,7 @@ export default function AdminManagementPage() {
             </Button>
             <Button 
               onClick={handleAddAdmin}
-              className="bg-black hover:bg-gray-800"
+              className="bg-black dark:bg-gray-700 hover:bg-gray-800 dark:hover:bg-gray-600 text-white"
               disabled={!newAdmin.email || !newAdmin.email.toLowerCase().endsWith("@au.edu")}
             >
               Add Admin
