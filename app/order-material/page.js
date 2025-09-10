@@ -551,39 +551,51 @@ export default function OrderMaterialPage() {
               </div>
             )}
 
-            {/* Image Grid */}
+            {/* Image Grid - Consistent 2x2 Layout */}
             {images.length > 0 && (
-              <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-4">
-                {images.map((image) => (
-                  <div key={image.id} className="relative group">
-                    <div 
-                      className="aspect-square border rounded-lg overflow-hidden bg-gray-50 cursor-pointer hover:shadow-lg transition-shadow"
-                      onClick={() => openImageViewer(image)}
-                    >
-                      <img
-                        src={image.url}
-                        alt={image.name}
-                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-200"
-                      />
-                      {/* Expand icon overlay */}
-                      <div className="absolute inset-0 bg-black/0 hover:bg-black/20 transition-colors flex items-center justify-center opacity-0 hover:opacity-100">
-                        <div className="bg-white/90 rounded-full p-2">
-                          <Expand className="h-5 w-5 text-gray-700" />
+              <div className="mt-4 grid grid-cols-2 gap-4 max-w-sm mx-auto">
+                {/* Ensure exactly 4 slots are displayed */}
+                {[0, 1, 2, 3].map((index) => (
+                  <div key={index} className="relative group">
+                    {images[index] ? (
+                      <>
+                        <div 
+                          className="aspect-square border rounded-lg overflow-hidden bg-gray-50 cursor-pointer hover:shadow-lg transition-shadow"
+                          onClick={() => openImageViewer(images[index])}
+                        >
+                          <img
+                            src={images[index].url}
+                            alt={images[index].name}
+                            className="w-full h-full object-cover hover:scale-105 transition-transform duration-200"
+                          />
+                          {/* Expand icon overlay */}
+                          <div className="absolute inset-0 bg-black/0 hover:bg-black/20 transition-colors flex items-center justify-center opacity-0 hover:opacity-100">
+                            <div className="bg-white/90 rounded-full p-2">
+                              <Expand className="h-5 w-5 text-gray-700" />
+                            </div>
+                          </div>
+                        </div>
+                        {/* Remove button */}
+                        <button
+                          type="button"
+                          onClick={() => removeImage(images[index].id)}
+                          className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-lg hover:bg-red-600 transition-colors opacity-0 group-hover:opacity-100 print:hidden z-10"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                        {/* Image name */}
+                        <p className="text-xs text-gray-600 mt-1 truncate" title={images[index].name}>
+                          {images[index].name}
+                        </p>
+                      </>
+                    ) : (
+                      <div className="aspect-square border-2 border-dashed border-gray-300 rounded-lg bg-gray-50 flex items-center justify-center">
+                        <div className="text-center text-gray-400">
+                          <div className="text-sm font-medium">Slot {index + 1}</div>
+                          <div className="text-xs">Empty</div>
                         </div>
                       </div>
-                    </div>
-                    {/* Remove button */}
-                    <button
-                      type="button"
-                      onClick={() => removeImage(image.id)}
-                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-lg hover:bg-red-600 transition-colors opacity-0 group-hover:opacity-100 print:hidden z-10"
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
-                    {/* Image name */}
-                    <p className="text-xs text-gray-600 mt-1 truncate" title={image.name}>
-                      {image.name}
-                    </p>
+                    )}
                   </div>
                 ))}
               </div>
@@ -618,7 +630,7 @@ export default function OrderMaterialPage() {
           @media print {
             @page {
               size: A4;
-              margin: 20mm 15mm;
+              margin: 10mm 12mm;
             }
             
             html, body {
@@ -652,7 +664,7 @@ export default function OrderMaterialPage() {
               top: 0 !important;
               width: 100% !important;
               height: 100vh !important;
-              max-height: 297mm !important;
+              max-height: 277mm !important;
               background: white !important;
               overflow: hidden !important;
               page-break-after: avoid !important;
@@ -661,15 +673,17 @@ export default function OrderMaterialPage() {
           }
         `}</style>
         
-        <div style={{width: '100%', height: '257mm', display: 'flex', flexDirection: 'column', overflow: 'hidden', padding: '0'}}>
+        <div style={{width: '100%', height: '277mm', display: 'flex', flexDirection: 'column', overflow: 'hidden', padding: '0', margin: '0'}}>
           {/* Title */}
           <h1 style={{
             textAlign: 'center',
-            fontSize: '18pt',
+            fontSize: '14pt',
             fontWeight: 'bold',
             borderBottom: '2px solid #000',
-            paddingBottom: '8px',
-            marginBottom: '10px'
+            paddingBottom: '2px',
+            marginBottom: '3px',
+            marginTop: '0',
+            lineHeight: '1.1'
           }}>
             Equipment Repair Request Form
           </h1>
@@ -678,80 +692,79 @@ export default function OrderMaterialPage() {
           <table style={{
             width: '100%',
             borderCollapse: 'collapse',
-            fontSize: '10pt',
-            marginBottom: '12px'
+            fontSize: '8pt',
+            marginBottom: '4px',
+            marginTop: '35px'
           }}>
             <tbody>
               <tr>
-                <td style={{border: '1px solid #000', padding: '6px 8px', fontWeight: 'bold', width: '15%', backgroundColor: '#f5f5f5', fontSize: '10pt'}}>No.</td>
-                <td style={{border: '1px solid #000', padding: '6px 8px', width: '35%', fontSize: '10pt'}}>{formData.no}</td>
-                <td style={{border: '1px solid #000', padding: '6px 8px', fontWeight: 'bold', width: '15%', backgroundColor: '#f5f5f5', fontSize: '10pt'}}>Date:</td>
-                <td style={{border: '1px solid #000', padding: '6px 8px', width: '35%', fontSize: '10pt'}}>{getFormattedDateTime()}</td>
+                <td style={{border: '1px solid #000', padding: '2px 4px', fontWeight: 'bold', width: '15%', backgroundColor: '#f5f5f5', fontSize: '8pt', lineHeight: '1.2'}}>No.</td>
+                <td style={{border: '1px solid #000', padding: '2px 4px', width: '35%', fontSize: '8pt', lineHeight: '1.2'}}>{formData.no}</td>
+                <td style={{border: '1px solid #000', padding: '2px 4px', fontWeight: 'bold', width: '15%', backgroundColor: '#f5f5f5', fontSize: '8pt', lineHeight: '1.2'}}>Date:</td>
+                <td style={{border: '1px solid #000', padding: '2px 4px', width: '35%', fontSize: '8pt', lineHeight: '1.2'}}>{getFormattedDateTime()}</td>
               </tr>
               <tr>
-                <td style={{border: '1px solid #000', padding: '6px 8px', fontWeight: 'bold', backgroundColor: '#f5f5f5', fontSize: '10pt'}}>Equipment Code:</td>
-                <td style={{border: '1px solid #000', padding: '6px 8px', fontSize: '10pt'}}>{formData.equipmentCode || ' '}</td>
-                <td style={{border: '1px solid #000', padding: '6px 8px', fontWeight: 'bold', backgroundColor: '#f5f5f5', fontSize: '10pt'}}>System:</td>
-                <td style={{border: '1px solid #000', padding: '6px 8px', fontSize: '10pt'}}>{formData.system || ' '}</td>
+                <td style={{border: '1px solid #000', padding: '2px 4px', fontWeight: 'bold', backgroundColor: '#f5f5f5', fontSize: '8pt', lineHeight: '1.2'}}>Equipment Code:</td>
+                <td style={{border: '1px solid #000', padding: '2px 4px', fontSize: '8pt', lineHeight: '1.2'}}>{formData.equipmentCode || ' '}</td>
+                <td style={{border: '1px solid #000', padding: '2px 4px', fontWeight: 'bold', backgroundColor: '#f5f5f5', fontSize: '8pt', lineHeight: '1.2'}}>System:</td>
+                <td style={{border: '1px solid #000', padding: '2px 4px', fontSize: '8pt', lineHeight: '1.2'}}>{formData.system || ' '}</td>
               </tr>
               <tr>
-                <td style={{border: '1px solid #000', padding: '6px 8px', fontWeight: 'bold', backgroundColor: '#f5f5f5', fontSize: '10pt'}}>Department:</td>
-                <td style={{border: '1px solid #000', padding: '6px 8px', fontSize: '10pt'}}>{formData.department}</td>
-                <td style={{border: '1px solid #000', padding: '6px 8px', fontWeight: 'bold', backgroundColor: '#f5f5f5', fontSize: '10pt'}}>Printed by:</td>
-                <td style={{border: '1px solid #000', padding: '6px 8px', fontSize: '10pt'}}>{formData.printedBy}</td>
+                <td style={{border: '1px solid #000', padding: '2px 4px', fontWeight: 'bold', backgroundColor: '#f5f5f5', fontSize: '8pt', lineHeight: '1.2'}}>Department:</td>
+                <td style={{border: '1px solid #000', padding: '2px 4px', fontSize: '8pt', lineHeight: '1.2'}}>{formData.department}</td>
+                <td style={{border: '1px solid #000', padding: '2px 4px', fontWeight: 'bold', backgroundColor: '#f5f5f5', fontSize: '8pt', lineHeight: '1.2'}}>Printed by:</td>
+                <td style={{border: '1px solid #000', padding: '2px 4px', fontSize: '8pt', lineHeight: '1.2'}}>{formData.printedBy}</td>
               </tr>
               <tr>
-                <td style={{border: '1px solid #000', padding: '6px 8px', fontWeight: 'bold', backgroundColor: '#f5f5f5', fontSize: '10pt'}}>Equipment Name:</td>
-                <td style={{border: '1px solid #000', padding: '6px 8px', minHeight: '30px', fontSize: '10pt'}} colSpan={3}>{formData.equipmentName || ' '}</td>
+                <td style={{border: '1px solid #000', padding: '2px 4px', fontWeight: 'bold', backgroundColor: '#f5f5f5', fontSize: '8pt', lineHeight: '1.2'}}>Equipment Name:</td>
+                <td style={{border: '1px solid #000', padding: '2px 4px', minHeight: '18px', fontSize: '8pt', lineHeight: '1.2'}} colSpan={3}>{formData.equipmentName || ' '}</td>
               </tr>
               <tr>
-                <td style={{border: '1px solid #000', padding: '6px 8px', fontWeight: 'bold', backgroundColor: '#f5f5f5', fontSize: '10pt'}}>Location:</td>
-                <td style={{border: '1px solid #000', padding: '6px 8px', minHeight: '30px', fontSize: '10pt'}} colSpan={3}>{formData.location || ' '}</td>
+                <td style={{border: '1px solid #000', padding: '2px 4px', fontWeight: 'bold', backgroundColor: '#f5f5f5', fontSize: '8pt', lineHeight: '1.2'}}>Location:</td>
+                <td style={{border: '1px solid #000', padding: '2px 4px', minHeight: '18px', fontSize: '8pt', lineHeight: '1.2'}} colSpan={3}>{formData.location || ' '}</td>
               </tr>
               <tr>
-                <td style={{border: '1px solid #000', padding: '8px', fontWeight: 'bold', backgroundColor: '#f5f5f5', fontSize: '10pt', verticalAlign: 'top'}}>Details/Problem:</td>
-                <td style={{border: '1px solid #000', padding: '8px', minHeight: '45px', verticalAlign: 'top', fontSize: '10pt'}} colSpan={3}>{formData.detailsProblem || ' '}</td>
+                <td style={{border: '1px solid #000', padding: '3px 4px', fontWeight: 'bold', backgroundColor: '#f5f5f5', fontSize: '8pt', verticalAlign: 'top', lineHeight: '1.2'}}>Details/Problem:</td>
+                <td style={{border: '1px solid #000', padding: '3px 4px', minHeight: '24px', verticalAlign: 'top', fontSize: '8pt', lineHeight: '1.2'}} colSpan={3}>{formData.detailsProblem || ' '}</td>
               </tr>
               <tr>
-                <td style={{border: '1px solid #000', padding: '8px', fontWeight: 'bold', backgroundColor: '#f5f5f5', fontSize: '10pt', verticalAlign: 'top'}}>Cause:</td>
-                <td style={{border: '1px solid #000', padding: '8px', minHeight: '35px', verticalAlign: 'top', fontSize: '10pt'}} colSpan={3}>{formData.cause || ' '}</td>
+                <td style={{border: '1px solid #000', padding: '3px 4px', fontWeight: 'bold', backgroundColor: '#f5f5f5', fontSize: '8pt', verticalAlign: 'top', lineHeight: '1.2'}}>Cause:</td>
+                <td style={{border: '1px solid #000', padding: '3px 4px', minHeight: '20px', verticalAlign: 'top', fontSize: '8pt', lineHeight: '1.2'}} colSpan={3}>{formData.cause || ' '}</td>
               </tr>
               <tr>
-                <td style={{border: '1px solid #000', padding: '6px 8px', fontWeight: 'bold', backgroundColor: '#f5f5f5', fontSize: '10pt'}}>Remarks:</td>
-                <td style={{border: '1px solid #000', padding: '6px 8px', fontSize: '10pt'}}>{formData.remarks || ' '}</td>
-                <td style={{border: '1px solid #000', padding: '6px 8px', fontWeight: 'bold', backgroundColor: '#f5f5f5', fontSize: '10pt'}}>Asset Code:</td>
-                <td style={{border: '1px solid #000', padding: '6px 8px', fontSize: '10pt'}}>{formData.assetCode || ' '}</td>
+                <td style={{border: '1px solid #000', padding: '2px 4px', fontWeight: 'bold', backgroundColor: '#f5f5f5', fontSize: '8pt', lineHeight: '1.2'}}>Remarks:</td>
+                <td style={{border: '1px solid #000', padding: '2px 4px', fontSize: '8pt', lineHeight: '1.2'}}>{formData.remarks || ' '}</td>
+                <td style={{border: '1px solid #000', padding: '2px 4px', fontWeight: 'bold', backgroundColor: '#f5f5f5', fontSize: '8pt', lineHeight: '1.2'}}>Asset Code:</td>
+                <td style={{border: '1px solid #000', padding: '2px 4px', fontSize: '8pt', lineHeight: '1.2'}}>{formData.assetCode || ' '}</td>
               </tr>
               <tr>
-                <td style={{border: '1px solid #000', padding: '6px 8px', fontWeight: 'bold', backgroundColor: '#f5f5f5', fontSize: '10pt'}}>Reported by:</td>
-                <td style={{border: '1px solid #000', padding: '6px 8px', fontSize: '10pt'}}>{formData.reportedBy || ' '}</td>
-                <td style={{border: '1px solid #000', padding: '6px 8px', fontWeight: 'bold', backgroundColor: '#f5f5f5', fontSize: '10pt'}}>Recorded by:</td>
-                <td style={{border: '1px solid #000', padding: '6px 8px', fontSize: '10pt'}}>{formData.recordedBy || ' '}</td>
+                <td style={{border: '1px solid #000', padding: '2px 4px', fontWeight: 'bold', backgroundColor: '#f5f5f5', fontSize: '8pt', lineHeight: '1.2'}}>Reported by:</td>
+                <td style={{border: '1px solid #000', padding: '2px 4px', fontSize: '8pt', lineHeight: '1.2'}}>{formData.reportedBy || ' '}</td>
+                <td style={{border: '1px solid #000', padding: '2px 4px', fontWeight: 'bold', backgroundColor: '#f5f5f5', fontSize: '8pt', lineHeight: '1.2'}}>Recorded by:</td>
+                <td style={{border: '1px solid #000', padding: '2px 4px', fontSize: '8pt', lineHeight: '1.2'}}>{formData.recordedBy || ' '}</td>
               </tr>
             </tbody>
           </table>
           
-          {/* Images Section - LARGER 2x2 GRID */}
-          <div style={{display: 'flex', flexDirection: 'column', marginTop: '12px', flex: 1}}>
-            <div style={{fontWeight: 'bold', fontSize: '11pt', marginBottom: '8px'}}>
+          {/* Images Section - FULLY MAXIMIZED 2x2 GRID */}
+          <div style={{display: 'flex', flexDirection: 'column', marginTop: '95px', flex: 1}}>
+            <div style={{fontWeight: 'bold', fontSize: '9pt', marginBottom: '4px'}}>
               Attach Images (Maximum 4 images)
             </div>
             <div style={{
               border: '2px dashed #666',
-              padding: '12px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              height: '280px'
+              padding: '8px',
+              height: '480px',
+              width: '100%'
             }}>
               {images.length > 0 ? (
                 <div style={{
                   display: 'grid',
-                  gridTemplateColumns: 'repeat(2, 1fr)',
-                  gap: '12px',
-                  width: '100%',
+                  gridTemplateColumns: '1fr 1fr',
+                  gridTemplateRows: '1fr 1fr',
+                  gap: '8px',
                   height: '100%',
-                  maxWidth: '270px'
+                  width: '100%'
                 }}>
                   {[0, 1, 2, 3].map((index) => (
                     <div key={index} style={{
@@ -760,8 +773,9 @@ export default function OrderMaterialPage() {
                       alignItems: 'center',
                       justifyContent: 'center',
                       backgroundColor: '#f9f9f9',
-                      width: '125px',
-                      height: '125px'
+                      overflow: 'hidden',
+                      width: '100%',
+                      height: '100%'
                     }}>
                       {images[index] ? (
                         <img 
@@ -770,14 +784,15 @@ export default function OrderMaterialPage() {
                           style={{
                             width: '100%',
                             height: '100%',
-                            objectFit: 'contain'
+                            objectFit: 'cover'
                           }}
                         />
                       ) : (
                         <div style={{
                           color: '#ccc',
-                          fontSize: '9pt',
-                          textAlign: 'center'
+                          fontSize: '8pt',
+                          textAlign: 'center',
+                          padding: '4px'
                         }}>
                           No Image
                         </div>
@@ -788,22 +803,23 @@ export default function OrderMaterialPage() {
               ) : (
                 <div style={{
                   display: 'grid',
-                  gridTemplateColumns: 'repeat(2, 1fr)',
-                  gap: '12px',
-                  width: '270px',
-                  height: '270px'
+                  gridTemplateColumns: '1fr 1fr',
+                  gridTemplateRows: '1fr 1fr',
+                  gap: '8px',
+                  height: '100%',
+                  width: '100%'
                 }}>
                   {[1, 2, 3, 4].map((num) => (
                     <div key={num} style={{
-                      width: '125px',
-                      height: '125px',
                       border: '1px solid #ccc',
                       backgroundColor: '#f9f9f9',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       color: '#999',
-                      fontSize: '9pt'
+                      fontSize: '8pt',
+                      width: '100%',
+                      height: '100%'
                     }}>
                       Image {num}
                     </div>
@@ -813,27 +829,28 @@ export default function OrderMaterialPage() {
             </div>
           </div>
           
-          {/* Footer */}
+          {/* Footer - COMPRESSED */}
           <div style={{
             borderTop: '2px solid #000',
-            paddingTop: '8px',
+            paddingTop: '2px',
             marginTop: 'auto',
-            fontSize: '9pt'
+            fontSize: '7pt',
+            lineHeight: '1.1'
           }}>
-            <div style={{fontWeight: 'bold', fontSize: '10pt'}}>Operations and Maintenance Division</div>
-            <div style={{marginTop: '6px', fontSize: '8pt'}}>
+            <div style={{fontWeight: 'bold', fontSize: '8pt'}}>Operations and Maintenance Division</div>
+            <div style={{marginTop: '1px', fontSize: '6pt'}}>
               <div style={{display: 'flex', justifyContent: 'space-between'}}>
                 <span>Prepared on: {getFormattedDate()}</span>
                 <span style={{visibility: 'hidden'}}>Spacer</span>
                 <span>Effective Date: {getFormattedDate()}</span>
               </div>
-              <div style={{textAlign: 'center', marginTop: '4px'}}>
+              <div style={{textAlign: 'center', marginTop: '1px'}}>
                 <span>Revision: 1</span>
               </div>
             </div>
-            <div style={{marginTop: '8px'}}>
-              <div style={{fontWeight: 'bold', fontSize: '10pt'}}>Head of Operations and Maintenance Division</div>
-              <div style={{marginTop: '6px', fontFamily: 'monospace', fontSize: '8pt'}}>Form Code: FM-OM-AS-12</div>
+            <div style={{marginTop: '2px'}}>
+              <div style={{fontWeight: 'bold', fontSize: '8pt'}}>Head of Operations and Maintenance Division</div>
+              <div style={{marginTop: '1px', fontFamily: 'monospace', fontSize: '6pt'}}>Form Code: FM-OM-AS-12</div>
             </div>
           </div>
         </div>
