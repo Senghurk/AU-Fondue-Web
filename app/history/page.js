@@ -140,7 +140,7 @@ export default function HistoryPage() {
           Export to Excel
         </button>
       </div>
-      <p className="text-gray-600 mb-4">
+      <p className="text-gray-600 dark:text-gray-400 mb-4">
         View the history of all completed reports.
       </p>
 
@@ -148,13 +148,13 @@ export default function HistoryPage() {
       {loading && (
         <div className="flex justify-center items-center py-12">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-          <span className="ml-3 text-gray-600">Loading completed reports...</span>
+          <span className="ml-3 text-gray-600 dark:text-gray-400">Loading completed reports...</span>
         </div>
       )}
 
       {/* Error State */}
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
+        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 text-red-700 dark:text-red-300 px-4 py-3 rounded mb-4">
           <div className="flex items-center">
             <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
@@ -172,19 +172,19 @@ export default function HistoryPage() {
 
       {/* Table */}
       {!loading && !error && (
-        <div className="bg-white rounded-lg shadow-md p-3.5 overflow-x-auto max-w-full">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-3.5 overflow-x-auto max-w-full">
           {completedReports.length === 0 ? (
             <div className="text-center py-12">
-              <svg className="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
-              <p className="text-gray-500 text-lg">No completed reports found.</p>
-              <p className="text-gray-400 text-sm mt-1">Completed reports will appear here once tasks are finished.</p>
+              <p className="text-gray-500 dark:text-gray-400 text-lg">No completed reports found.</p>
+              <p className="text-gray-400 dark:text-gray-500 text-sm mt-1">Completed reports will appear here once tasks are finished.</p>
             </div>
           ) : (
             <table className="w-full table-auto border-collapse">
               <thead>
-                <tr className="bg-gray-200 text-left">
+                <tr className="bg-gray-200 dark:bg-gray-700 text-left">
                   <th className="p-3 text-sm font-semibold">#</th>
                   <th className="p-3 text-sm font-semibold">Description</th>
                   <th className="p-3 text-sm font-semibold">Category</th>
@@ -200,7 +200,7 @@ export default function HistoryPage() {
                   <tr
                     key={report.id}
                     className={`border-t ${
-                      index % 2 === 0 ? "bg-gray-50" : "bg-white"
+                      index % 2 === 0 ? "bg-gray-50 dark:bg-gray-700/50" : "bg-white dark:bg-gray-800"
                     }`}
                   >
                     <td className="p-3 text-sm">{index + 1}</td>
