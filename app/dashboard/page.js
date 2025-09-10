@@ -252,13 +252,13 @@ export default function HomePage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
       {/* Modern Header Section */}
       <div className="bg-white/80 backdrop-blur-sm border-b border-gray-200/50 sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 lg:px-6 py-6">
+        <div className="max-w-7xl mx-auto px-4 lg:px-6 py-4 sm:py-6">
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl lg:text-4xl font-bold bg-gradient-to-r from-gray-800 to-blue-800 bg-clip-text text-transparent">
+            <div className="min-w-0 flex-1">
+              <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-gray-800 to-blue-800 bg-clip-text text-transparent truncate pr-2">
                 Welcome{userName ? `, ${userName}` : ", Admin"}
               </h1>
-              <p className="text-gray-600 mt-2 text-sm lg:text-base">
+              <p className="text-gray-600 mt-1 sm:mt-2 text-xs sm:text-sm lg:text-base">
                 Your comprehensive maintenance management dashboard
               </p>
             </div>
@@ -301,24 +301,24 @@ export default function HomePage() {
         {!loading && !error && (
           <>
             {/* Redesigned Stats Overview */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
               {stats.map((stat, index) => (
                 <div key={index} className="group relative">
                   <div className={`absolute inset-0 ${stat.color} rounded-2xl blur-xl opacity-20 group-hover:opacity-30 transition-opacity duration-300`}></div>
                   <Card className="relative bg-white/90 backdrop-blur-sm border-0 shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden">
-                    <CardContent className="p-6">
+                    <CardContent className="p-4 sm:p-6">
                       <div className="flex items-center justify-between">
-                        <div className="space-y-2">
-                          <p className="text-sm font-medium text-gray-600 uppercase tracking-wide">{stat.label}</p>
-                          <p className="text-4xl font-bold text-gray-800">{stat.value}</p>
+                        <div className="space-y-1 sm:space-y-2 min-w-0 flex-1">
+                          <p className="text-xs sm:text-sm font-medium text-gray-600 uppercase tracking-wide truncate">{stat.label}</p>
+                          <p className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800">{stat.value}</p>
                         </div>
-                        <div className={`p-4 rounded-2xl ${stat.color} shadow-lg`}>
+                        <div className={`p-3 sm:p-4 rounded-2xl ${stat.color} shadow-lg flex-shrink-0`}>
                           <div className="text-white">
                             {stat.icon}
                           </div>
                         </div>
                       </div>
-                      <div className="mt-4 h-1 w-full bg-gray-100 rounded-full overflow-hidden">
+                      <div className="mt-3 sm:mt-4 h-1 w-full bg-gray-100 rounded-full overflow-hidden">
                         <div className={`h-full ${stat.color} rounded-full transition-all duration-1000 ease-out`} style={{ width: `${Math.min(100, (stat.value / Math.max(...stats.map(s => s.value))) * 100)}%` }}></div>
                       </div>
                     </CardContent>

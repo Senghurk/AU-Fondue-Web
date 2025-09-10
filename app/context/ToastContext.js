@@ -32,7 +32,7 @@ export function ToastProvider({ children }) {
       {children}
       
       {/* Toast Container */}
-      <div className="fixed top-4 right-4 z-[100] flex max-h-screen w-full flex-col space-y-2 sm:max-w-[420px]">
+      <div className="fixed top-16 sm:top-4 right-2 sm:right-4 z-[100] flex max-h-screen w-[calc(100%-1rem)] sm:w-full flex-col space-y-2 max-w-[calc(100vw-1rem)] sm:max-w-[420px]">
         {toasts.map(toast => (
           <SimpleToast
             key={toast.id}
