@@ -3,8 +3,11 @@
 import React, { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { Button } from "../app/components/Button";
+import { useTranslation } from "./hooks/useTranslation";
+import LanguageSwitcher from "./components/LanguageSwitcher";
 
 export default function Home() {
+  const { t } = useTranslation();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [userCurrentSlide, setUserCurrentSlide] = useState(0);
   const [isClient, setIsClient] = useState(false);
@@ -68,8 +71,8 @@ export default function Home() {
       <header className="w-full px-4 sm:px-8 py-4 sm:py-5 flex justify-between items-center bg-white shadow-sm sticky top-0 z-50">
         <div className="flex items-center">
           <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 tracking-tight">
-            AU Fondue
-            <span className="text-red-600 font-normal"> Admin</span>
+            {t('landing.title')}
+            <span className="text-red-600 font-normal"> {t('landing.subtitle')}</span>
           </h1>
         </div>
         <nav className="flex items-center gap-3 sm:gap-8">
@@ -77,19 +80,20 @@ export default function Home() {
             href="#features"
             className="hidden sm:block text-gray-600 hover:text-gray-900 font-medium transition-colors"
           >
-            Features
+            {t('landing.nav.features')}
           </a>
           <a
             href="#about"
             className="hidden sm:block text-gray-600 hover:text-gray-900 font-medium transition-colors"
           >
-            About
+            {t('landing.nav.about')}
           </a>
+          <LanguageSwitcher />
           <Button
             className="px-4 sm:px-6 py-2 sm:py-2.5 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-md shadow-sm transition-all duration-200 text-sm sm:text-base"
             onClick={() => (window.location.href = "/Log-in")}
           >
-            Login
+            {t('landing.nav.login')}
           </Button>
         </nav>
       </header>
@@ -98,17 +102,13 @@ export default function Home() {
       <div className="max-w-6xl mx-auto px-6 sm:px-10 py-12 sm:py-20 text-center">
         <div className="mb-8">
           <div className="inline-flex items-center px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-red-50 text-red-700 text-xs sm:text-sm font-medium mb-4 sm:mb-6">
-            Campus Management Made Simple
+            {t('landing.hero.badge')}
           </div>
           <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-tight mb-4 sm:mb-6 text-gray-900 tracking-tight">
-            Streamline Your
-            <span className="text-red-600 block mt-1 sm:mt-2">Campus Operations</span>
+            {t('landing.hero.title')}
           </h1>
           <p className="text-base sm:text-lg md:text-xl text-gray-600 max-w-3xl mx-auto mb-6 sm:mb-8 leading-relaxed px-4 sm:px-0">
-            Transform how your university handles maintenance reports. From
-            instant issue tracking to advanced analytics, AU Fondue Admin
-            empowers your staff to resolve campus issues faster than ever
-            before.
+            {t('landing.hero.subtitle')}
           </p>
         </div>
 
@@ -125,7 +125,7 @@ export default function Home() {
             <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
               <path d="M3,20.5V3.5C3,2.91 3.34,2.39 3.84,2.15L13.69,12L3.84,21.85C3.34,21.61 3,21.09 3,20.5M16.81,15.12L6.05,21.34L14.54,12.85L16.81,15.12M20.16,10.81C20.5,11.08 20.75,11.5 20.75,12C20.75,12.5 20.53,12.9 20.18,13.18L17.89,14.5L15.39,12L17.89,9.5L20.16,10.81M6.05,2.66L16.81,8.88L14.54,11.15L6.05,2.66Z" />
             </svg>
-            Download
+            {t('landing.hero.downloadApp')}
           </Button>
 
           <Button
@@ -151,7 +151,7 @@ export default function Home() {
                 d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
               />
             </svg>
-            View Demo
+            {t('landing.hero.viewDemo')}
           </Button>
         </div>
 
@@ -159,15 +159,15 @@ export default function Home() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-8 max-w-4xl mx-auto px-4 sm:px-0">
           <div className="text-center p-4 sm:p-6">
             <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-red-600 mb-1 sm:mb-2">50%</div>
-            <div className="text-sm sm:text-base text-gray-600">Faster Resolution Time</div>
+            <div className="text-sm sm:text-base text-gray-600">{t('landing.stats.fasterResolution').replace('50% ', '')}</div>
           </div>
           <div className="text-center p-4 sm:p-6">
             <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-red-600 mb-1 sm:mb-2">Next-Gen</div>
-            <div className="text-sm sm:text-base text-gray-600">Campus Management</div>
+            <div className="text-sm sm:text-base text-gray-600">{t('landing.stats.nextGen').replace('Next-Gen ', '')}</div>
           </div>
           <div className="text-center p-4 sm:p-6">
             <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-red-600 mb-1 sm:mb-2">24/7</div>
-            <div className="text-sm sm:text-base text-gray-600">Real-time Monitoring</div>
+            <div className="text-sm sm:text-base text-gray-600">{t('landing.stats.realTimeMonitoring').replace('24/7 ', '')}</div>
           </div>
         </div>
       </div>
@@ -176,19 +176,13 @@ export default function Home() {
       <section className="bg-gradient-to-b from-gray-50 to-white py-12 sm:py-20 px-4 sm:px-6">
         <div className="max-w-5xl mx-auto text-center">
           <div className="inline-flex items-center px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-blue-50 text-blue-700 text-xs sm:text-sm font-medium mb-4 sm:mb-6">
-            Powerful Campus Management
+            {t('landing.whatIs.subtitle')}
           </div>
           <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6 text-gray-900">
-            What is AU Fondue Admin?
+            {t('landing.whatIs.title')}
           </h2>
           <p className="text-base sm:text-lg md:text-xl text-gray-600 leading-relaxed max-w-4xl mx-auto px-2 sm:px-0">
-            AU Fondue Admin is the comprehensive backend platform designed
-            specifically for university's Operation & Maintenance's  Admin and staff
-            to efficiently manage maintenance issue reports. From intelligent
-            task assignment and real-time tracking to advanced analytics and
-            seamless data export, our platform provides everything you need to
-            revolutionize your campus operations and deliver exceptional service
-            to your community.
+            {t('landing.whatIs.description')}
           </p>
         </div>
       </section>
@@ -201,14 +195,13 @@ export default function Home() {
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <div className="inline-flex items-center px-4 py-2 rounded-full bg-red-50 text-red-700 text-sm font-medium mb-6">
-              For Administrators
+              {t('landing.adminFeatures.title')}
             </div>
             <h2 className="text-4xl md:text-5xl font-bold mb-6 text-gray-900">
-              Powerful Admin Features
+              {t('landing.adminFeatures.subtitle')}
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Everything you need to manage campus operations efficiently and
-              effectively
+              {t('landing.adminFeatures.description')}
             </p>
           </div>
 
@@ -221,30 +214,30 @@ export default function Home() {
               {[
                 [
                   {
-                    title: "Report Overview",
-                    desc: "View all maintenance reports with real-time status updates and comprehensive filtering options.",
+                    title: t('landing.adminFeatures.reportOverview.title'),
+                    desc: t('landing.adminFeatures.reportOverview.description'),
                   },
                   {
-                    title: "Smart Task Assignment",
-                    desc: "Intelligently assign issues to the most suitable maintenance staff based on expertise and availability.",
+                    title: t('landing.adminFeatures.smartAssignment.title'),
+                    desc: t('landing.adminFeatures.smartAssignment.description'),
                   },
                   {
-                    title: "Excel Report Export",
-                    desc: "Download detailed reports and logs in Excel format for comprehensive record keeping and analysis.",
+                    title: t('landing.adminFeatures.excelExport.title'),
+                    desc: t('landing.adminFeatures.excelExport.description'),
                   },
                 ],
                 [
                   {
-                    title: "Visual Stats & Charts",
-                    desc: "Monitor trends and performance data through beautiful, interactive charts and dashboards.",
+                    title: t('landing.adminFeatures.visualStats.title'),
+                    desc: t('landing.adminFeatures.visualStats.description'),
                   },
                   {
-                    title: "Performance Analytics",
-                    desc: "Track staff performance, repair times, and efficiency metrics with detailed analytics and insights.",
+                    title: t('landing.adminFeatures.analytics.title'),
+                    desc: t('landing.adminFeatures.analytics.description'),
                   },
                   {
-                    title: "Smart Notifications",
-                    desc: "Receive instant alerts and notifications when reports are submitted, updated, or completed.",
+                    title: t('landing.adminFeatures.notifications.title'),
+                    desc: t('landing.adminFeatures.notifications.description'),
                   },
                 ],
               ].map((slide, slideIndex) => (
@@ -257,32 +250,32 @@ export default function Home() {
                       >
                         <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mb-6">
                           {/* Dynamic icon based on feature title */}
-                          {feature.title === "Report Overview" && (
+                          {feature.title === t('landing.adminFeatures.reportOverview.title') && (
                             <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                             </svg>
                           )}
-                          {feature.title === "Smart Task Assignment" && (
+                          {feature.title === t('landing.adminFeatures.smartAssignment.title') && (
                             <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                             </svg>
                           )}
-                          {feature.title === "Excel Report Export" && (
+                          {feature.title === t('landing.adminFeatures.excelExport.title') && (
                             <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                             </svg>
                           )}
-                          {feature.title === "Visual Stats & Charts" && (
+                          {feature.title === t('landing.adminFeatures.visualStats.title') && (
                             <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                             </svg>
                           )}
-                          {feature.title === "Performance Analytics" && (
+                          {feature.title === t('landing.adminFeatures.analytics.title') && (
                             <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                             </svg>
                           )}
-                          {feature.title === "Smart Notifications" && (
+                          {feature.title === t('landing.adminFeatures.notifications.title') && (
                             <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-5 5v-5zM10.07 2.82l3.46 3.46M12 10c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9 9 4.03 9 9zM10 8.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" />
                             </svg>
@@ -327,14 +320,13 @@ export default function Home() {
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <div className="inline-flex items-center px-4 py-2 rounded-full bg-blue-100 text-blue-700 text-sm font-medium mb-6">
-              For Students & Staff
+              {t('landing.userFeatures.title')}
             </div>
             <h2 className="text-4xl md:text-5xl font-bold mb-6 text-gray-900">
-              Effortless User Experience
+              {t('landing.userFeatures.subtitle')}
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Simple, intuitive tools that make reporting and tracking campus
-              issues a breeze
+              {t('landing.userFeatures.description')}
             </p>
           </div>
 
@@ -347,22 +339,22 @@ export default function Home() {
               {[
                 [
                   {
-                    title: "Lightning-Fast Reporting",
-                    desc: "Submit maintenance issues from your phone in under 30 seconds with our streamlined interface.",
+                    title: t('landing.userFeatures.fastReporting.title'),
+                    desc: t('landing.userFeatures.fastReporting.description'),
                   },
                   {
-                    title: "Live Progress Tracking",
-                    desc: "Get real-time updates on your report status and know exactly when issues are being resolved.",
+                    title: t('landing.userFeatures.liveTracking.title'),
+                    desc: t('landing.userFeatures.liveTracking.description'),
                   },
                 ],
                 [
                   {
-                    title: "Comprehensive History",
-                    desc: "Access your complete report history and download detailed records whenever you need them.",
+                    title: t('landing.userFeatures.history.title'),
+                    desc: t('landing.userFeatures.history.description'),
                   },
                   {
-                    title: "Intuitive Design",
-                    desc: "Beautifully crafted interface that's so simple, anyone can use it without training or tutorials.",
+                    title: t('landing.userFeatures.intuitiveDesign.title'),
+                    desc: t('landing.userFeatures.intuitiveDesign.description'),
                   },
                 ],
               ].map((slide, slideIndex) => (
@@ -375,22 +367,22 @@ export default function Home() {
                       >
                         <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-6">
                           {/* Dynamic icon based on feature title */}
-                          {feature.title === "Lightning-Fast Reporting" && (
+                          {feature.title === t('landing.userFeatures.fastReporting.title') && (
                             <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                             </svg>
                           )}
-                          {feature.title === "Live Progress Tracking" && (
+                          {feature.title === t('landing.userFeatures.liveTracking.title') && (
                             <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                             </svg>
                           )}
-                          {feature.title === "Comprehensive History" && (
+                          {feature.title === t('landing.userFeatures.history.title') && (
                             <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                           )}
-                          {feature.title === "Intuitive Design" && (
+                          {feature.title === t('landing.userFeatures.intuitiveDesign.title') && (
                             <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                             </svg>
@@ -435,31 +427,26 @@ export default function Home() {
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <div className="inline-flex items-center px-4 py-2 rounded-full bg-gray-100 text-gray-700 text-sm font-medium mb-6">
-              About AU Fondue
+              {t('landing.about.title')}
             </div>
             <h2 className="text-4xl md:text-5xl font-bold mb-6 text-gray-900">
-              Our Story & Mission
+              {t('landing.about.subtitle')}
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Empowering Assumption University with next-generation campus management solutions
+              {t('landing.about.tagline')}
             </p>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-16">
             <div>
               <h3 className="text-2xl font-bold text-gray-900 mb-6">
-                Built for Assumption University
+                {t('landing.about.description1')}
               </h3>
               <p className="text-gray-600 leading-relaxed mb-6">
-                AU Fondue was created specifically to address the unique challenges faced by 
-                Assumption University's Operations & Maintenance department. Our comprehensive 
-                platform streamlines the entire maintenance workflow, from initial issue reporting 
-                to final resolution tracking.
+                {t('landing.about.description2')}
               </p>
               <p className="text-gray-600 leading-relaxed mb-6">
-                By combining cutting-edge technology with deep understanding of campus operations, 
-                we've built a solution that not only improves efficiency but also enhances the 
-                overall campus experience for students, faculty, and staff.
+                {t('landing.about.description3')}
               </p>
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
@@ -468,8 +455,8 @@ export default function Home() {
                   </svg>
                 </div>
                 <div>
-                  <h4 className="font-semibold text-gray-900">Innovation First</h4>
-                  <p className="text-sm text-gray-600">Leveraging modern technology for campus excellence</p>
+                  <h4 className="font-semibold text-gray-900">{t('landing.about.innovationTitle')}</h4>
+                  <p className="text-sm text-gray-600">{t('landing.about.innovationSubtitle')}</p>
                 </div>
               </div>
             </div>
@@ -477,19 +464,19 @@ export default function Home() {
               <div className="grid grid-cols-2 gap-6">
                 <div className="text-center">
                   <div className="text-3xl font-bold text-red-600 mb-2">2024</div>
-                  <div className="text-gray-600 text-sm">Year Developed</div>
+                  <div className="text-gray-600 text-sm">{t('landing.about.stats.yearDeveloped').replace('2024 ', '')}</div>
                 </div>
                 <div className="text-center">
                   <div className="text-3xl font-bold text-blue-600 mb-2">100%</div>
-                  <div className="text-gray-600 text-sm">AU Focused</div>
+                  <div className="text-gray-600 text-sm">{t('landing.about.stats.auFocused').replace('100% ', '')}</div>
                 </div>
                 <div className="text-center">
                   <div className="text-3xl font-bold text-green-600 mb-2">24/7</div>
-                  <div className="text-gray-600 text-sm">Support</div>
+                  <div className="text-gray-600 text-sm">{t('landing.about.stats.support').replace('24/7 ', '')}</div>
                 </div>
                 <div className="text-center">
                   <div className="text-3xl font-bold text-purple-600 mb-2">∞</div>
-                  <div className="text-gray-600 text-sm">Possibilities</div>
+                  <div className="text-gray-600 text-sm">{t('landing.about.stats.possibilities').replace('∞ ', '')}</div>
                 </div>
               </div>
             </div>
@@ -498,10 +485,10 @@ export default function Home() {
           <div className="bg-gradient-to-r from-gray-50 to-blue-50 rounded-2xl p-8 md:p-12">
             <div className="text-center mb-8">
               <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                Our Technology Stack
+                {t('landing.about.techStack.title')}
               </h3>
               <p className="text-gray-600 max-w-2xl mx-auto">
-                Built with modern, reliable technologies to ensure scalability, security, and performance
+                {t('landing.about.techStack.subtitle')}
               </p>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
@@ -514,8 +501,8 @@ export default function Home() {
                     <ellipse cx="128" cy="128" rx="95" ry="35" stroke="#61DAFB" strokeWidth="8" fill="none" transform="rotate(120 128 128)"/>
                   </svg>
                 </div>
-                <h4 className="font-medium text-gray-900">Frontend</h4>
-                <p className="text-sm text-gray-600">Next.js & React</p>
+                <h4 className="font-medium text-gray-900">{t('landing.about.techStack.frontend').split(' - ')[0]}</h4>
+                <p className="text-sm text-gray-600">{t('landing.about.techStack.frontend').split(' - ')[1]}</p>
               </div>
               <div className="text-center">
                 <div className="w-16 h-16 bg-white rounded-lg shadow-md flex items-center justify-center mx-auto mb-4">
@@ -526,8 +513,8 @@ export default function Home() {
                     <path d="M128 96c-17.67 0-32 14.33-32 32s14.33 32 32 32 32-14.33 32-32-14.33-32-32-32z" fill="#68bd45"/>
                   </svg>
                 </div>
-                <h4 className="font-medium text-gray-900">Backend</h4>
-                <p className="text-sm text-gray-600">Spring Boot</p>
+                <h4 className="font-medium text-gray-900">{t('landing.about.techStack.backend').split(' - ')[0]}</h4>
+                <p className="text-sm text-gray-600">{t('landing.about.techStack.backend').split(' - ')[1]}</p>
               </div>
               <div className="text-center">
                 <div className="w-16 h-16 bg-white rounded-lg shadow-md flex items-center justify-center mx-auto mb-4">
@@ -539,8 +526,8 @@ export default function Home() {
                     <circle cx="128" cy="180" r="6" fill="#336791"/>
                   </svg>
                 </div>
-                <h4 className="font-medium text-gray-900">Database</h4>
-                <p className="text-sm text-gray-600">PostgreSQL</p>
+                <h4 className="font-medium text-gray-900">{t('landing.about.techStack.database').split(' - ')[0]}</h4>
+                <p className="text-sm text-gray-600">{t('landing.about.techStack.database').split(' - ')[1]}</p>
               </div>
               <div className="text-center">
                 <div className="w-16 h-16 bg-white rounded-lg shadow-md flex items-center justify-center mx-auto mb-4">
@@ -551,8 +538,8 @@ export default function Home() {
                     <path d="M144 144h64l16 32-16 32h-64l-16-32z" fill="#40e0d0"/>
                   </svg>
                 </div>
-                <h4 className="font-medium text-gray-900">Cloud</h4>
-                <p className="text-sm text-gray-600">Microsoft Azure</p>
+                <h4 className="font-medium text-gray-900">{t('landing.about.techStack.cloud').split(' - ')[0]}</h4>
+                <p className="text-sm text-gray-600">{t('landing.about.techStack.cloud').split(' - ')[1]}</p>
               </div>
             </div>
           </div>
@@ -563,17 +550,17 @@ export default function Home() {
       <section className="bg-gradient-to-r from-red-600 to-red-700 py-20 px-6 text-white">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-4xl md:text-5xl font-bold mb-6">
-            Ready to Transform Your Campus?
+            {t('landing.about.cta.title')}
           </h2>
           <p className="text-xl mb-8 opacity-90">
-            Join us and try using AU Fondue today!
+            {t('landing.about.cta.subtitle')}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button
               className="bg-white hover:bg-gray-100 text-red-600 px-8 py-4 text-lg rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 font-semibold"
               onClick={() => (window.location.href = "/Log-in")}
             >
-              Get Started Today
+              {t('landing.about.cta.getStarted')}
             </Button>
             <Button
               className="bg-transparent border-2 border-white hover:bg-white hover:text-red-600 text-white px-8 py-4 text-lg rounded-lg transition-all duration-300 font-semibold"
@@ -584,7 +571,7 @@ export default function Home() {
                 )
               }
             >
-              Download App
+              {t('landing.about.cta.downloadApp')}
             </Button>
           </div>
         </div>

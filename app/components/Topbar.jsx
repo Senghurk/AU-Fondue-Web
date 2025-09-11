@@ -5,7 +5,9 @@ import { useRouter } from "next/navigation";
 import { signOut, onAuthStateChanged } from "firebase/auth";
 import { auth } from "../firebaseClient";
 import { getBackendUrl } from "../config/api";
+import { useTranslation } from "../hooks/useTranslation";
 import { Button } from "../../components/ui/button";
+import LanguageSwitcher from "./LanguageSwitcher";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,6 +23,7 @@ export default function Topbar({ activeTopLink, setActiveTopLink, setActiveLink,
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const { theme, toggleTheme, isDark } = useTheme();
   const { user, logout, isAdmin, isOMStaff } = useAuth();
+  const { t } = useTranslation();
 
   const backendUrl = getBackendUrl();
 
@@ -63,7 +66,7 @@ export default function Topbar({ activeTopLink, setActiveTopLink, setActiveLink,
             }`}>
               <span className="text-gray-900 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400">AU Fondue </span>
               <span className={isOMStaff() ? "text-green-600 dark:text-green-400 group-hover:text-green-700 dark:group-hover:text-green-300" : "text-blue-600 dark:text-blue-400 group-hover:text-blue-700 dark:group-hover:text-blue-300"}>
-                {isOMStaff() ? "Staff" : "Admin"}
+                {isOMStaff() ? t('topbar.auFondueStaff') : t('topbar.auFondueAdmin')}
               </span>
             </h1>
           </Link>
@@ -86,8 +89,8 @@ export default function Topbar({ activeTopLink, setActiveTopLink, setActiveLink,
                   handleDefaultLink("/dashboard");
                 }}
               >
-                <span className="hidden sm:inline">Dashboard</span>
-                <span className="sm:hidden">Home</span>
+                <span className="hidden sm:inline">{t('topbar.dashboard')}</span>
+                <span className="sm:hidden">{t('topbar.home')}</span>
               </Link>
               <Link
                 href="/admins"
@@ -101,7 +104,7 @@ export default function Topbar({ activeTopLink, setActiveTopLink, setActiveLink,
                   handleDefaultLink("/admins");
                 }}
               >
-                Users
+                {t('topbar.users')}
               </Link>
             </div>
           )}
@@ -119,17 +122,20 @@ export default function Topbar({ activeTopLink, setActiveTopLink, setActiveLink,
                     <User className="h-3 sm:h-4 w-3 sm:w-4 text-white" />
                   </div>
                   <span className="text-gray-700 dark:text-gray-300 font-medium hidden md:block text-xs sm:text-sm">
-                    {user ? user.name : 'User'}
+                    {user ? user.name : t('topbar.user')}
                   </span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
                 <DropdownMenuItem onClick={handleLogout} className="text-red-600 hover:text-red-700">
-                  Logout
+                  {t('topbar.logout')}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
 
+            {/* Language Switcher */}
+            <LanguageSwitcher />
+            
             {/* Theme Toggle */}
             <Button
               variant="ghost"

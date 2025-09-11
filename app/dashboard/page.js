@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import React from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../context/AuthContext";
+import { useTranslation } from "../hooks/useTranslation";
 import { getBackendUrl } from "../config/api";
 import { formatDate } from "../utils/dateFormatter";
 
@@ -32,6 +33,7 @@ export default function HomePage() {
   const router = useRouter();
   const backendUrl = getBackendUrl();
   const { user } = useAuth();
+  const { t, tWithParams } = useTranslation();
 
   const [userName, setUserName] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -40,19 +42,19 @@ export default function HomePage() {
   // State
   const [stats, setStats] = useState([
     {
-      label: "Total Reports",
+      label: t('dashboard.stats.totalReports'),
       value: 0,
       color: "bg-blue-500",
       icon: <FileText size={32} />,
     },
     {
-      label: "Pending Assignments",
+      label: t('dashboard.stats.pendingAssignments'),
       value: 0,
       color: "bg-yellow-500",
       icon: <Clock size={32} />,
     },
     {
-      label: "Completed Tasks",
+      label: t('dashboard.stats.completedTasks'),
       value: 0,
       color: "bg-green-500",
       icon: <CheckCircle size={32} />,
@@ -82,7 +84,7 @@ export default function HomePage() {
         await Promise.all([fetchStats(), fetchCategoryCounts(), fetchReportsOverTime()]);
       } catch (error) {
         console.error("Error fetching dashboard data:", error);
-        setError("Failed to load dashboard data. Please try refreshing the page.");
+        setError(t('dashboard.errorDesc'));
       } finally {
         setLoading(false);
       }
@@ -98,19 +100,19 @@ export default function HomePage() {
 
         setStats([
           {
-            label: "Total Reports",
+            label: t('dashboard.stats.totalReports'),
             value: data.totalIssues,
             color: "bg-blue-500",
             icon: <FileText size={32} />,
           },
           {
-            label: "Incomplete Tasks",
+            label: t('dashboard.stats.incompleteTasks'),
             value: data.incompleteIssues,
             color: "bg-yellow-500",
             icon: <Clock size={32} />,
           },
           {
-            label: "Completed Tasks",
+            label: t('dashboard.stats.completedTasks'),
             value: data.completedIssues,
             color: "bg-green-500",
             icon: <CheckCircle size={32} />,
@@ -121,19 +123,19 @@ export default function HomePage() {
         // Set default stats on error
         setStats([
           {
-            label: "Total Reports",
+            label: t('dashboard.stats.totalReports'),
             value: 0,
             color: "bg-blue-500",
             icon: <FileText size={32} />,
           },
           {
-            label: "Incomplete Tasks", 
+            label: t('dashboard.stats.incompleteTasks'), 
             value: 0,
             color: "bg-yellow-500",
             icon: <Clock size={32} />,
           },
           {
-            label: "Completed Tasks",
+            label: t('dashboard.stats.completedTasks'),
             value: 0,
             color: "bg-green-500",
             icon: <CheckCircle size={32} />,
@@ -206,22 +208,22 @@ export default function HomePage() {
   // Quick links
   const quickLinks = [
     {
-      label: "View All Reports",
-      description: "Explore and manage all submitted reports.",
+      label: t('dashboard.quickActions.viewReports'),
+      description: t('dashboard.quickActions.viewReportsDesc'),
       color: "bg-blue-100 text-blue-800 hover:bg-blue-200",
       path: "/reports",
       icon: <FileText size={28} />,
     },
     {
-      label: "Assigned Reports",
-      description: "Monitor tasks assigned to team members.",
+      label: t('dashboard.quickActions.assignedReports'),
+      description: t('dashboard.quickActions.assignedReportsDesc'),
       color: "bg-green-100 text-green-800 hover:bg-green-200",
       path: "/assignedReports",
       icon: <Clock size={28} />,
     },
     {
-      label: "View History",
-      description: "Access the history of completed reports.",
+      label: t('dashboard.quickActions.viewHistory'),
+      description: t('dashboard.quickActions.viewHistoryDesc'),
       color: "bg-yellow-100 text-yellow-800 hover:bg-yellow-200",
       path: "/history",
       icon: <CheckCircle size={28} />,
@@ -256,15 +258,15 @@ export default function HomePage() {
           <div className="flex items-center justify-between">
             <div className="min-w-0 flex-1">
               <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-gray-800 to-blue-800 dark:from-gray-100 dark:to-blue-400 bg-clip-text text-transparent truncate pr-2">
-                Welcome{userName ? `, ${userName}` : ", Admin"}
+                {userName ? tWithParams('dashboard.welcome', { name: userName }) : t('dashboard.welcomeAdmin')}
               </h1>
               <p className="text-gray-600 dark:text-gray-400 mt-1 sm:mt-2 text-xs sm:text-sm lg:text-base">
-                Your comprehensive maintenance management dashboard
+                {t('dashboard.subtitle')}
               </p>
             </div>
             <div className="hidden lg:flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
               <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-              <span>System Online</span>
+              <span>{t('dashboard.systemOnline')}</span>
             </div>
           </div>
         </div>
@@ -279,7 +281,7 @@ export default function HomePage() {
                 <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-200"></div>
                 <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-600 border-t-transparent absolute top-0"></div>
               </div>
-              <span className="text-gray-600 dark:text-gray-400 text-lg">Loading dashboard...</span>
+              <span className="text-gray-600 dark:text-gray-400 text-lg">{t('dashboard.loading')}</span>
             </div>
           </div>
         )}
@@ -291,7 +293,7 @@ export default function HomePage() {
               <svg className="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
               </svg>
-              <span className="font-medium">Error loading dashboard data</span>
+              <span className="font-medium">{t('dashboard.error')}</span>
             </div>
             <p className="mt-1 text-sm">{error}</p>
           </div>
@@ -332,13 +334,13 @@ export default function HomePage() {
               <div className="flex items-center justify-between">
                 <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-200 flex items-center gap-2">
                   <div className="w-1 h-8 bg-gradient-to-b from-blue-500 to-indigo-500 rounded-full"></div>
-                  Quick Actions
+                  {t('dashboard.quickActions.title')}
                 </h2>
                 <div className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-2">
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
                   </svg>
-                  Click any card to navigate
+                  {t('dashboard.quickActions.subtitle')}
                 </div>
               </div>
               
@@ -382,7 +384,7 @@ export default function HomePage() {
                             <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                             </svg>
-                            Ready to access
+                            {t('dashboard.quickActions.readyToAccess')}
                           </span>
                           <div className="w-6 h-1 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-right"></div>
                         </div>
@@ -401,9 +403,9 @@ export default function HomePage() {
                   <CardHeader className="border-b border-gray-100 dark:border-gray-700">
                     <CardTitle className="text-xl font-semibold text-gray-800 dark:text-gray-200 flex items-center gap-3">
                       <div className="w-3 h-3 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full"></div>
-                      Reports by Category
+                      {t('dashboard.charts.reportsByCategory')}
                       <div className="ml-auto text-xs bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 px-2 py-1 rounded-full">
-                        {pieData.length} categories
+                        {tWithParams('dashboard.charts.categoriesCount', { count: pieData.length })}
                       </div>
                     </CardTitle>
                   </CardHeader>
@@ -437,9 +439,9 @@ export default function HomePage() {
                   <CardHeader className="border-b border-gray-100 dark:border-gray-700">
                     <CardTitle className="text-xl font-semibold text-gray-800 dark:text-gray-200 flex items-center gap-3">
                       <div className="w-3 h-3 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full"></div>
-                      Reports Over Time
+                      {t('dashboard.charts.reportsOverTime')}
                       <div className="ml-auto text-xs bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 px-2 py-1 rounded-full">
-                        {reportsOverTime.length} days tracked
+                        {tWithParams('dashboard.charts.daysTracked', { count: reportsOverTime.length })}
                       </div>
                     </CardTitle>
                   </CardHeader>

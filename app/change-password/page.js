@@ -10,8 +10,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../..
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
 import { Lock, Eye, EyeOff, AlertCircle, CheckCircle, ShieldAlert } from "lucide-react";
+import { useTranslation } from "../hooks/useTranslation";
 
 export default function ChangePasswordPage() {
+  const { t, tWithParams } = useTranslation();
   const router = useRouter();
   const { user, login } = useAuth();
   const { toast } = useToast();
@@ -47,16 +49,16 @@ export default function ChangePasswordPage() {
   const validatePassword = (password) => {
     const errors = [];
     if (password.length < 8) {
-      errors.push("At least 8 characters");
+      errors.push(t("changePassword.requirements.length"));
     }
     if (!/[A-Z]/.test(password)) {
-      errors.push("One uppercase letter");
+      errors.push(t("changePassword.requirements.uppercase"));
     }
     if (!/[a-z]/.test(password)) {
-      errors.push("One lowercase letter");
+      errors.push(t("changePassword.requirements.lowercase"));
     }
     if (!/[0-9]/.test(password)) {
-      errors.push("One number");
+      errors.push(t("changePassword.requirements.number"));
     }
     return errors;
   };
@@ -68,11 +70,11 @@ export default function ChangePasswordPage() {
     const newErrors = {};
     
     if (!passwords.currentPassword) {
-      newErrors.currentPassword = "Current password is required";
+      newErrors.currentPassword = t("changePassword.validation.currentRequired");
     }
     
     if (!passwords.newPassword) {
-      newErrors.newPassword = "New password is required";
+      newErrors.newPassword = t("changePassword.validation.newRequired");
     } else {
       const passwordErrors = validatePassword(passwords.newPassword);
       if (passwordErrors.length > 0) {
@@ -81,14 +83,14 @@ export default function ChangePasswordPage() {
     }
     
     if (!passwords.confirmPassword) {
-      newErrors.confirmPassword = "Please confirm your password";
+      newErrors.confirmPassword = t("changePassword.validation.confirmRequired");
     } else if (passwords.newPassword !== passwords.confirmPassword) {
-      newErrors.confirmPassword = "Passwords do not match";
+      newErrors.confirmPassword = t("changePassword.validation.passwordsMismatch");
     }
     
     // Check if new password is same as current
     if (passwords.currentPassword === passwords.newPassword) {
-      newErrors.newPassword = "New password must be different from current password";
+      newErrors.newPassword = t("changePassword.validation.sameasCurrent");
     }
     
     if (Object.keys(newErrors).length > 0) {
@@ -125,10 +127,10 @@ export default function ChangePasswordPage() {
           title: (
             <div className="flex items-center gap-2">
               <CheckCircle className="h-4 w-4" />
-              Password Changed Successfully
+              {t("changePassword.messages.successTitle")}
             </div>
           ),
-          description: "Your password has been updated. Redirecting to your dashboard...",
+          description: t("changePassword.messages.successMessage"),
           duration: 3000,
         });
         
@@ -148,17 +150,17 @@ export default function ChangePasswordPage() {
       
       // Check if it's wrong current password
       if (error.message.includes("incorrect") || error.message.includes("wrong")) {
-        setErrors({ currentPassword: "Current password is incorrect" });
+        setErrors({ currentPassword: t("changePassword.messages.incorrectCurrent") });
       } else {
         toast({
           variant: "error",
           title: (
             <div className="flex items-center gap-2">
               <AlertCircle className="h-4 w-4" />
-              Password Change Failed
+              {t("changePassword.messages.failedTitle")}
             </div>
           ),
-          description: error.message || "Failed to change password. Please try again.",
+          description: error.message || t("changePassword.messages.failed"),
         });
       }
     } finally {
@@ -170,7 +172,7 @@ export default function ChangePasswordPage() {
   if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">Loading...</div>
+        <div className="text-center">{t("common.loading")}</div>
       </div>
     );
   }
@@ -184,9 +186,9 @@ export default function ChangePasswordPage() {
               <ShieldAlert className="h-8 w-8 text-amber-600" />
             </div>
           </div>
-          <CardTitle className="text-2xl text-center">Password Change Required</CardTitle>
+          <CardTitle className="text-2xl text-center">{t("changePassword.title")}</CardTitle>
           <CardDescription className="text-center">
-            For security reasons, you must change your password before continuing
+            {t("changePassword.subtitle")}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -195,8 +197,8 @@ export default function ChangePasswordPage() {
             <div className="flex items-start gap-2">
               <AlertCircle className="h-5 w-5 text-amber-600 mt-0.5" />
               <div className="text-sm text-amber-800">
-                <p className="font-semibold">First Time Login Detected</p>
-                <p className="mt-1">You are using the default password. Please create a new secure password to protect your account.</p>
+                <p className="font-semibold">{t("changePassword.alert.title")}</p>
+                <p className="mt-1">{t("changePassword.alert.message")}</p>
               </div>
             </div>
           </div>
@@ -204,12 +206,12 @@ export default function ChangePasswordPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Current Password */}
             <div className="space-y-2">
-              <Label htmlFor="currentPassword">Current Password</Label>
+              <Label htmlFor="currentPassword">{t("changePassword.form.currentPassword")}</Label>
               <div className="relative">
                 <Input
                   id="currentPassword"
                   type={showPasswords.current ? "text" : "password"}
-                  placeholder="Enter current password"
+                  placeholder={t("changePassword.form.currentPasswordPlaceholder")}
                   value={passwords.currentPassword}
                   onChange={(e) => {
                     setPasswords({ ...passwords, currentPassword: e.target.value });
@@ -230,17 +232,17 @@ export default function ChangePasswordPage() {
               {errors.currentPassword && (
                 <p className="text-sm text-red-500">{errors.currentPassword}</p>
               )}
-              <p className="text-xs text-gray-500">Default: OMstaff123</p>
+              <p className="text-xs text-gray-500">{t("changePassword.form.currentPasswordHint")}</p>
             </div>
             
             {/* New Password */}
             <div className="space-y-2">
-              <Label htmlFor="newPassword">New Password</Label>
+              <Label htmlFor="newPassword">{t("changePassword.form.newPassword")}</Label>
               <div className="relative">
                 <Input
                   id="newPassword"
                   type={showPasswords.new ? "text" : "password"}
-                  placeholder="Enter new password"
+                  placeholder={t("changePassword.form.newPasswordPlaceholder")}
                   value={passwords.newPassword}
                   onChange={(e) => {
                     setPasswords({ ...passwords, newPassword: e.target.value });
@@ -265,12 +267,12 @@ export default function ChangePasswordPage() {
             
             {/* Confirm Password */}
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm New Password</Label>
+              <Label htmlFor="confirmPassword">{t("changePassword.form.confirmPassword")}</Label>
               <div className="relative">
                 <Input
                   id="confirmPassword"
                   type={showPasswords.confirm ? "text" : "password"}
-                  placeholder="Confirm new password"
+                  placeholder={t("changePassword.form.confirmPasswordPlaceholder")}
                   value={passwords.confirmPassword}
                   onChange={(e) => {
                     setPasswords({ ...passwords, confirmPassword: e.target.value });
@@ -295,19 +297,19 @@ export default function ChangePasswordPage() {
             
             {/* Password Requirements */}
             <div className="bg-gray-50 p-3 rounded-md">
-              <p className="text-sm font-medium text-gray-700 mb-2">Password Requirements:</p>
+              <p className="text-sm font-medium text-gray-700 mb-2">{t("changePassword.requirements.title")}</p>
               <ul className="text-xs text-gray-600 space-y-1">
                 <li className={passwords.newPassword.length >= 8 ? "text-green-600" : ""}>
-                  • At least 8 characters
+                  {t("changePassword.requirements.length")}
                 </li>
                 <li className={/[A-Z]/.test(passwords.newPassword) ? "text-green-600" : ""}>
-                  • One uppercase letter
+                  {t("changePassword.requirements.uppercase")}
                 </li>
                 <li className={/[a-z]/.test(passwords.newPassword) ? "text-green-600" : ""}>
-                  • One lowercase letter
+                  {t("changePassword.requirements.lowercase")}
                 </li>
                 <li className={/[0-9]/.test(passwords.newPassword) ? "text-green-600" : ""}>
-                  • One number
+                  {t("changePassword.requirements.number")}
                 </li>
               </ul>
             </div>
@@ -321,19 +323,19 @@ export default function ChangePasswordPage() {
               {isChanging ? (
                 <>
                   <Lock className="h-4 w-4 mr-2 animate-pulse" />
-                  Changing Password...
+                  {t("changePassword.buttons.changing")}
                 </>
               ) : (
                 <>
                   <Lock className="h-4 w-4 mr-2" />
-                  Change Password
+                  {t("changePassword.buttons.changePassword")}
                 </>
               )}
             </Button>
             
             {/* Note about logging out */}
             <p className="text-xs text-center text-gray-500 mt-4">
-              You cannot skip this step. You must change your password to continue.
+              {t("changePassword.messages.cannotSkip")}
             </p>
           </form>
         </CardContent>
