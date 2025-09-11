@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../firebaseClient";
+import { useTranslation } from "../hooks/useTranslation";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
 import { Input } from "../../components/ui/input";
@@ -14,6 +15,7 @@ import { format } from "date-fns";
 
 export default function OrderMaterialPage() {
   const router = useRouter();
+  const { t, tWithParams } = useTranslation();
   const [userName, setUserName] = useState("");
   const [images, setImages] = useState([]);
   const [showMaxImagesAlert, setShowMaxImagesAlert] = useState(false);
@@ -215,16 +217,16 @@ export default function OrderMaterialPage() {
             <AlertCircle className="h-5 w-5 text-orange-600" />
           </div>
           <div className="flex-1">
-            <h3 className="font-semibold text-gray-900 mb-1">Upload Rejected - Maximum Images Exceeded</h3>
+            <h3 className="font-semibold text-gray-900 mb-1">{t('orderMaterial.uploadMessages.rejectedTitle')}</h3>
             <p className="text-sm text-gray-600">
               {rejectedFilesCount > 0 ? 
                 `Cannot upload ${rejectedFilesCount} image${rejectedFilesCount > 1 ? 's' : ''}. ` : 
                 ''
               }
-              You can only attach up to 4 images total. {images.length > 0 ? `You currently have ${images.length} image${images.length > 1 ? 's' : ''} attached.` : ''} 
+              {tWithParams('orderMaterial.uploadMessages.rejectedMessage1', { count: rejectedFilesCount })} {images.length > 0 ? tWithParams('orderMaterial.uploadMessages.rejectedMessage2', { count: images.length }) : ''} 
               {4 - images.length > 0 ? 
-                ` You can only add ${4 - images.length} more image${4 - images.length > 1 ? 's' : ''}.` : 
-                ' Please remove existing images before adding new ones.'
+                tWithParams('orderMaterial.uploadMessages.rejectedMessage3', { count: 4 - images.length }) : 
+                t('orderMaterial.uploadMessages.rejectedMessage4')
               }
             </p>
           </div>
@@ -249,7 +251,7 @@ export default function OrderMaterialPage() {
             <h3 className="font-semibold text-gray-900 mb-1">Images Attached Successfully</h3>
             <p className="text-sm text-gray-600">
               {uploadedCount} image{uploadedCount > 1 ? 's have' : ' has'} been attached successfully. 
-              {4 - images.length > 0 ? ` You can still add ${4 - images.length} more image${4 - images.length > 1 ? 's' : ''}.` : ' You have reached the maximum limit.'}
+              {4 - images.length > 0 ? tWithParams('orderMaterial.uploadMessages.successMessage2', { count: 4 - images.length }) : t('orderMaterial.uploadMessages.successMessage3')}
             </p>
           </div>
           <button
@@ -330,21 +332,21 @@ export default function OrderMaterialPage() {
 
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 lg:mb-6 print:hidden">
-        <h1 className="text-2xl lg:text-3xl font-bold mb-3 sm:mb-0">Order Material</h1>
+        <h1 className="text-2xl lg:text-3xl font-bold mb-3 sm:mb-0">{t('orderMaterial.title')}</h1>
         <Button 
           onClick={handlePrint}
           className="flex items-center gap-2 min-h-[44px] px-4"
           size="lg"
         >
           <Printer className="h-4 w-4" />
-          Print Form
+          {t('orderMaterial.printForm')}
         </Button>
       </div>
 
       {/* Form Card */}
       <Card className="max-w-4xl mx-auto screen-only">
         <CardHeader className="text-center border-b">
-          <CardTitle className="text-2xl font-bold">Equipment Repair Request Form</CardTitle>
+          <CardTitle className="text-2xl font-bold">{t('orderMaterial.formTitle')}</CardTitle>
         </CardHeader>
         
         <CardContent className="p-4 sm:p-6 space-y-4 sm:space-y-6">
@@ -360,7 +362,7 @@ export default function OrderMaterialPage() {
               />
             </div>
             <div className="w-full sm:w-auto">
-              <Label className="text-sm font-semibold">Date & Time:</Label>
+              <Label className="text-sm font-semibold">{t('orderMaterial.form.dateTime')}</Label>
               <div className="mt-1 p-3 bg-gray-50 rounded-md border min-h-[44px] flex items-center">
                 <CalendarIcon className="mr-2 h-4 w-4 text-gray-500" />
                 <span className="text-gray-700 font-mono">{getFormattedDateTime()}</span>
@@ -372,21 +374,21 @@ export default function OrderMaterialPage() {
           {/* Equipment Code and System */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <Label className="text-sm font-semibold">Equipment Code:</Label>
+              <Label className="text-sm font-semibold">{t('orderMaterial.form.equipmentCode')}</Label>
               <Input 
                 value={formData.equipmentCode}
                 onChange={(e) => handleInputChange('equipmentCode', e.target.value)}
                 className="mt-1 min-h-[44px]"
-                placeholder="Eg. Z99GOWT010103"
+                placeholder={t('orderMaterial.form.equipmentCodePlaceholder')}
               />
             </div>
             <div>
-              <Label className="text-sm font-semibold">System:</Label>
+              <Label className="text-sm font-semibold">{t('orderMaterial.form.system')}</Label>
               <Input 
                 value={formData.system}
                 onChange={(e) => handleInputChange('system', e.target.value)}
                 className="mt-1 min-h-[44px]"
-                placeholder="Eg. Sanitary"
+                placeholder={t('orderMaterial.form.systemPlaceholder')}
               />
             </div>
           </div>
@@ -394,7 +396,7 @@ export default function OrderMaterialPage() {
           {/* Department and Printed By */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <Label className="text-sm font-semibold">Department:</Label>
+              <Label className="text-sm font-semibold">{t('orderMaterial.form.department')}</Label>
               <Input 
                 value={formData.department}
                 onChange={(e) => handleInputChange('department', e.target.value)}
@@ -413,52 +415,52 @@ export default function OrderMaterialPage() {
 
           {/* Equipment Name */}
           <div>
-            <Label className="text-sm font-semibold">Equipment Name:</Label>
+            <Label className="text-sm font-semibold">{t('orderMaterial.form.equipmentName')}</Label>
             <Textarea 
               value={formData.equipmentName}
               onChange={(e) => handleInputChange('equipmentName', e.target.value)}
               className="mt-1 min-h-[80px] sm:min-h-[60px]"
-              placeholder="Eg. Submersible sewage pump, outside the building at Thaweep Bridge, outbound side (front guardhouse)"
+              placeholder={t('orderMaterial.form.equipmentNamePlaceholder')}
             />
           </div>
 
           {/* Location */}
           <div>
-            <Label className="text-sm font-semibold">Location:</Label>
+            <Label className="text-sm font-semibold">{t('orderMaterial.form.location')}</Label>
             <Textarea 
               value={formData.location}
               onChange={(e) => handleInputChange('location', e.target.value)}
               className="mt-1 min-h-[80px] sm:min-h-[60px]"
-              placeholder="Eg. Level G0, outside the building, Thaweep Wittaya Bridge, outbound side"
+              placeholder={t('orderMaterial.form.locationPlaceholder')}
             />
           </div>
 
           {/* Details/Problem */}
           <div>
-            <Label className="text-sm font-semibold">Details/Problem:</Label>
+            <Label className="text-sm font-semibold">{t('orderMaterial.form.detailsProblem')}</Label>
             <Textarea 
               value={formData.detailsProblem}
               onChange={(e) => handleInputChange('detailsProblem', e.target.value)}
               className="mt-1 min-h-[100px] sm:min-h-[80px]"
-              placeholder="Eg. Pump not operating"
+              placeholder={t('orderMaterial.form.detailsProblemPlaceholder')}
             />
           </div>
 
           {/* Cause */}
           <div>
-            <Label className="text-sm font-semibold">Cause:</Label>
+            <Label className="text-sm font-semibold">{t('orderMaterial.form.cause')}</Label>
             <Textarea 
               value={formData.cause}
               onChange={(e) => handleInputChange('cause', e.target.value)}
               className="mt-1 min-h-[80px] sm:min-h-[60px]"
-              placeholder="Eg. Pump grounded"
+              placeholder={t('orderMaterial.form.causePlaceholder')}
             />
           </div>
 
           {/* Remarks and Asset Code */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <Label className="text-sm font-semibold">Remarks:</Label>
+              <Label className="text-sm font-semibold">{t('orderMaterial.form.remarks')}</Label>
               <Input 
                 value={formData.remarks}
                 onChange={(e) => handleInputChange('remarks', e.target.value)}
@@ -467,7 +469,7 @@ export default function OrderMaterialPage() {
               />
             </div>
             <div>
-              <Label className="text-sm font-semibold">Asset Code:</Label>
+              <Label className="text-sm font-semibold">{t('orderMaterial.form.assetCode')}</Label>
               <Input 
                 value={formData.assetCode}
                 onChange={(e) => handleInputChange('assetCode', e.target.value)}
@@ -479,16 +481,16 @@ export default function OrderMaterialPage() {
           {/* Reported By and Recorded By */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <Label className="text-sm font-semibold">Reported by:</Label>
+              <Label className="text-sm font-semibold">{t('orderMaterial.form.reportedBy')}</Label>
               <Input 
                 value={formData.reportedBy}
                 onChange={(e) => handleInputChange('reportedBy', e.target.value)}
                 className="mt-1 min-h-[44px]"
-                placeholder="Eg. Mr. Thanatip"
+                placeholder={t('orderMaterial.form.reportedByPlaceholder')}
               />
             </div>
             <div>
-              <Label className="text-sm font-semibold">Recorded by:</Label>
+              <Label className="text-sm font-semibold">{t('orderMaterial.form.recordedBy')}</Label>
               <Input 
                 value={formData.recordedBy}
                 onChange={(e) => handleInputChange('recordedBy', e.target.value)}
@@ -501,7 +503,7 @@ export default function OrderMaterialPage() {
           <div>
             <div className="flex items-center justify-between mb-2">
               <Label className="text-sm font-semibold">
-                Attach Images
+                {t('orderMaterial.imageUpload.title')}
               </Label>
               <span className={`text-xs px-2 py-1 rounded-full ${
                 images.length === 4 
@@ -510,7 +512,7 @@ export default function OrderMaterialPage() {
                   ? 'bg-blue-100 text-blue-700' 
                   : 'bg-gray-100 text-gray-700'
               }`}>
-                {images.length}/4 images
+                {tWithParams('orderMaterial.imageUpload.count', { current: images.length, max: 4 })}
               </span>
             </div>
             
@@ -525,10 +527,10 @@ export default function OrderMaterialPage() {
                   }`}>
                     <Upload className="h-10 w-10 sm:h-8 sm:w-8 mx-auto text-gray-400 mb-2" />
                     <p className="text-base sm:text-sm font-medium text-gray-700">
-                      Click to upload images
+                      {t('orderMaterial.imageUpload.clickToUpload')}
                     </p>
                     <p className="text-sm sm:text-xs text-gray-500 mt-1">
-                      {4 - images.length} slot{4 - images.length !== 1 ? 's' : ''} remaining • PNG, JPG, JPEG (max 10MB)
+                      {tWithParams('orderMaterial.imageUpload.slotsRemaining', { count: 4 - images.length })}
                     </p>
                   </div>
                   <input
@@ -544,7 +546,7 @@ export default function OrderMaterialPage() {
               <div className="mt-2 border-2 border-dashed border-orange-200 rounded-lg p-6 sm:p-4 text-center bg-orange-50/50">
                 <AlertCircle className="h-10 w-10 sm:h-8 sm:w-8 mx-auto text-orange-400 mb-2" />
                 <p className="text-base sm:text-sm font-medium text-orange-700">
-                  Maximum images reached
+                  {t('orderMaterial.imageUpload.maxReached')}
                 </p>
                 <p className="text-sm sm:text-xs text-orange-600 mt-1">
                 </p>
@@ -591,8 +593,8 @@ export default function OrderMaterialPage() {
                     ) : (
                       <div className="aspect-square border-2 border-dashed border-gray-300 rounded-lg bg-gray-50 flex items-center justify-center">
                         <div className="text-center text-gray-400">
-                          <div className="text-sm font-medium">Slot {index + 1}</div>
-                          <div className="text-xs">Empty</div>
+                          <div className="text-sm font-medium">{tWithParams('orderMaterial.imageUpload.slot', { number: index + 1 })}</div>
+                          <div className="text-xs">{t('orderMaterial.imageUpload.empty')}</div>
                         </div>
                       </div>
                     )}

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useTranslation } from "../hooks/useTranslation";
 import { Button } from "../../components/ui/button";
 import { Card } from "../../components/ui/card";
 import {
@@ -26,6 +27,7 @@ import { useAuth } from "../context/AuthContext";
 export default function Sidebar({ activeTopLink, activeLink, setActiveLink, isMobile, onNavigate }) {
   const [isReportsMenuOpen, setIsReportsMenuOpen] = useState(false);
   const { user, isAdmin, isOMStaff } = useAuth();
+  const { t } = useTranslation();
 
   // Automatically expand Reports menu when on reports pages
   useEffect(() => {
@@ -58,7 +60,7 @@ export default function Sidebar({ activeTopLink, activeLink, setActiveLink, isMo
                 className="w-full justify-start"
               >
                 <FileText className="mr-2 h-4 w-4" />
-                <span className="ml-0.4">Reports</span>
+                <span className="ml-0.4">{t('sidebar.reports')}</span>
                 {isReportsMenuOpen ? (
                   <ChevronDown className="ml-auto h-4 w-4" />
                 ) : (
@@ -76,7 +78,7 @@ export default function Sidebar({ activeTopLink, activeLink, setActiveLink, isMo
                   href="/reports"
                   onClick={() => handleLinkClick("/reports")}
                 >
-                  Unassigned Reports
+                  {t('sidebar.unassignedReports')}
                 </Link>
               </Button>
               <Button
@@ -88,7 +90,7 @@ export default function Sidebar({ activeTopLink, activeLink, setActiveLink, isMo
                   href="/assignedReports"
                   onClick={() => handleLinkClick("/assignedReports")}
                 >
-                  Assigned Reports
+                  {t('sidebar.assignedReports')}
                 </Link>
               </Button>
             </CollapsibleContent>
@@ -113,7 +115,7 @@ export default function Sidebar({ activeTopLink, activeLink, setActiveLink, isMo
                   onClick={() => handleLinkClick("/admins")}
                 >
                   <Shield className="mr-2 h-4 w-4" />
-                  Admin Management
+                  {t('sidebar.adminManagement')}
                 </Link>
               </Button>
               <Button
@@ -126,7 +128,7 @@ export default function Sidebar({ activeTopLink, activeLink, setActiveLink, isMo
                   onClick={() => handleLinkClick("/staff-management")}
                 >
                   <Users className="mr-2 h-4 w-4" />
-                  Staff Management
+                  {t('sidebar.staffManagement')}
                 </Link>
               </Button>
             </div>
@@ -146,7 +148,7 @@ export default function Sidebar({ activeTopLink, activeLink, setActiveLink, isMo
                   onClick={() => handleLinkClick("/dashboard")}
                 >
                   <Home className="mr-2 h-4 w-4" />
-                  Home
+                  {t('sidebar.home')}
                 </Link>
               </Button>
 
@@ -161,7 +163,7 @@ export default function Sidebar({ activeTopLink, activeLink, setActiveLink, isMo
                     className="w-full justify-start"
                   >
                     <FileText className="mr-2 h-4 w-4" />
-                    <span className="ml-0.4">Reports</span>
+                    <span className="ml-0.4">{t('sidebar.reports')}</span>
                     {isReportsMenuOpen ? (
                       <ChevronDown className="ml-auto h-4 w-4" />
                     ) : (
@@ -179,7 +181,7 @@ export default function Sidebar({ activeTopLink, activeLink, setActiveLink, isMo
                       href="/reports"
                       onClick={() => handleLinkClick("/reports")}
                     >
-                      All Reports
+                      {t('sidebar.allReports')}
                     </Link>
                   </Button>
                   <Button
@@ -191,7 +193,7 @@ export default function Sidebar({ activeTopLink, activeLink, setActiveLink, isMo
                       href="/assignedReports"
                       onClick={() => handleLinkClick("/assignedReports")}
                     >
-                      Assigned Reports
+                      {t('sidebar.assignedReports')}
                     </Link>
                   </Button>
                 </CollapsibleContent>
@@ -207,7 +209,7 @@ export default function Sidebar({ activeTopLink, activeLink, setActiveLink, isMo
                   onClick={() => handleLinkClick("/daily-report")}
                 >
                   <Calendar className="mr-2 h-4 w-4" />
-                  Daily Reports
+                  {t('sidebar.dailyReports')}
                 </Link>
               </Button>
 
@@ -222,7 +224,7 @@ export default function Sidebar({ activeTopLink, activeLink, setActiveLink, isMo
                   onClick={() => handleLinkClick("/order-material")}
                 >
                   <Package className="mr-2 h-4 w-4" />
-                  Order Material
+                  {t('sidebar.orderMaterial')}
                 </Link>
               </Button>
 
@@ -237,7 +239,7 @@ export default function Sidebar({ activeTopLink, activeLink, setActiveLink, isMo
                   onClick={() => handleLinkClick("/history")}
                 >
                   <History className="mr-2 h-4 w-4" />
-                  History
+                  {t('sidebar.history')}
                 </Link>
               </Button>
             </div>

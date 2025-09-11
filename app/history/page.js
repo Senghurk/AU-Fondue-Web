@@ -5,8 +5,10 @@ import { getBackendUrl } from "../config/api";
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import { formatDate, formatDateTime } from "../utils/dateFormatter";
+import { useTranslation } from "../hooks/useTranslation";
 
 export default function HistoryPage() {
+  const { t, tWithParams } = useTranslation();
   const [completedReports, setCompletedReports] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -35,7 +37,7 @@ export default function HistoryPage() {
       }
     } catch (error) {
       console.error("Error fetching completed reports:", error);
-      setError(`Failed to fetch completed reports: ${error.message}`);
+      setError(t("history.error"));
       setCompletedReports([]);
     } finally {
       setLoading(false);
@@ -59,17 +61,17 @@ export default function HistoryPage() {
   // ✅ NEW: Export to Excel using exceljs
   const exportToExcel = async () => {
     const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet("Completed Reports");
+    const worksheet = workbook.addWorksheet(t("history.title"));
 
     // Define header
     const header = [
-      "Description",
-      "Category",
-      "Assigned To",
-      "Status",
-      "Reported Date",
-      "Completion Date",
-      "Duration",
+      t("history.table.description"),
+      t("history.table.category"),
+      t("history.table.assignedTo"),
+      t("history.table.status"),
+      t("history.table.reportedDate"),
+      t("history.table.completionDate"),
+      t("history.table.duration"),
     ];
     worksheet.addRow(header);
 
@@ -97,7 +99,7 @@ export default function HistoryPage() {
         report.description,
         report.category,
         report.assignedTo?.name || "Unassigned",
-        "Completed",
+        t("history.status.completed"),
         formatDateTime(report.createdAt),
         formatDateTime(report.updatedAt),
         getDuration(report.createdAt, report.updatedAt),
@@ -132,23 +134,23 @@ export default function HistoryPage() {
     <div className="flex-1 p-6">
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Completed Report History</h1>
+        <h1 className="text-3xl font-bold">{t("history.title")}</h1>
         <button
           onClick={exportToExcel}
           className="px-4 py-2 bg-green-500 text-white text-sm font-medium rounded hover:bg-green-600"
         >
-          Export to Excel
+          {t("history.exportExcel")}
         </button>
       </div>
       <p className="text-gray-600 dark:text-gray-400 mb-4">
-        View the history of all completed reports.
+        {t("history.subtitle")}
       </p>
 
       {/* Loading State */}
       {loading && (
         <div className="flex justify-center items-center py-12">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-          <span className="ml-3 text-gray-600 dark:text-gray-400">Loading completed reports...</span>
+          <span className="ml-3 text-gray-600 dark:text-gray-400">{t("history.loading")}</span>
         </div>
       )}
 
@@ -165,7 +167,7 @@ export default function HistoryPage() {
             onClick={fetchCompletedReports}
             className="mt-2 px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700"
           >
-            Retry
+            {t("history.retry")}
           </button>
         </div>
       )}
@@ -178,21 +180,21 @@ export default function HistoryPage() {
               <svg className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
-              <p className="text-gray-500 dark:text-gray-400 text-lg">No completed reports found.</p>
-              <p className="text-gray-400 dark:text-gray-500 text-sm mt-1">Completed reports will appear here once tasks are finished.</p>
+              <p className="text-gray-500 dark:text-gray-400 text-lg">{t("history.noReports")}</p>
+              <p className="text-gray-400 dark:text-gray-500 text-sm mt-1">{t("history.noReportsDesc")}</p>
             </div>
           ) : (
             <table className="w-full table-auto border-collapse">
               <thead>
                 <tr className="bg-gray-200 dark:bg-gray-700 text-left">
-                  <th className="p-3 text-sm font-semibold">#</th>
-                  <th className="p-3 text-sm font-semibold">Description</th>
-                  <th className="p-3 text-sm font-semibold">Category</th>
-                  <th className="p-3 text-sm font-semibold">Assigned To</th>
-                  <th className="p-3 text-sm font-semibold">Status</th>
-                  <th className="p-3 text-sm font-semibold">Reported Date</th>
-                  <th className="p-3 text-sm font-semibold">Completion Date</th>
-                  <th className="p-3 text-sm font-semibold">Duration</th>
+                  <th className="p-3 text-sm font-semibold">{t("history.table.no")}</th>
+                  <th className="p-3 text-sm font-semibold">{t("history.table.description")}</th>
+                  <th className="p-3 text-sm font-semibold">{t("history.table.category")}</th>
+                  <th className="p-3 text-sm font-semibold">{t("history.table.assignedTo")}</th>
+                  <th className="p-3 text-sm font-semibold">{t("history.table.status")}</th>
+                  <th className="p-3 text-sm font-semibold">{t("history.table.reportedDate")}</th>
+                  <th className="p-3 text-sm font-semibold">{t("history.table.completionDate")}</th>
+                  <th className="p-3 text-sm font-semibold">{t("history.table.duration")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -208,7 +210,7 @@ export default function HistoryPage() {
                     <td className="p-3 text-sm">{report.category}</td>
                     <td className="p-3 text-sm">{report.assignedTo?.name}</td>
                     <td className="p-3 text-sm font-semibold text-green-600">
-                      Completed
+                      {t("history.status.completed")}
                     </td>
                     <td className="p-3 text-sm">
                       {formatDateTime(report.createdAt)}

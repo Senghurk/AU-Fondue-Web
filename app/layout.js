@@ -8,6 +8,7 @@ import SideBar from "./components/Sidebar";
 import { AuthProvider } from "./context/AuthContext";
 import { ThemeProvider } from "./context/ThemeContext";
 import { ToastProvider } from "./context/ToastContext";
+import { LanguageProvider } from "./context/LanguageContext";
 import { GeistSans } from 'geist/font/sans';
 
 export default function RootLayout({ children }) {
@@ -48,13 +49,14 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" className={GeistSans.variable}>
       <body className={GeistSans.className}>
-        <ThemeProvider>
-          <ToastProvider>
-            <AuthProvider>
-          {isPublicPage ? (
-            <div className="w-full min-h-screen">{children}</div>
-          ) : (
-            <div className="min-h-screen flex flex-col print:min-h-0 print:block">
+        <LanguageProvider>
+          <ThemeProvider>
+            <ToastProvider>
+              <AuthProvider>
+            {isPublicPage ? (
+              <div className="w-full min-h-screen">{children}</div>
+            ) : (
+              <div className="min-h-screen flex flex-col print:min-h-0 print:block">
               {/* Top bar */}
               <TopBar
                 activeTopLink={activeTopLink}
@@ -109,11 +111,12 @@ export default function RootLayout({ children }) {
                   {children}
                 </main>
               </div>
-            </div>
-          )}
-            </AuthProvider>
-          </ToastProvider>
-        </ThemeProvider>
+              </div>
+            )}
+              </AuthProvider>
+            </ToastProvider>
+          </ThemeProvider>
+        </LanguageProvider>
       </body>
     </html>
   );

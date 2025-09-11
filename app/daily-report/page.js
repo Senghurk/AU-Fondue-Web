@@ -15,6 +15,7 @@ import { Button } from "../../components/ui/button";
 import { CalendarIcon } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { generateThaiReportId } from "../utils/thaiReportId";
+import { useTranslation } from "../hooks/useTranslation";
 
 function diffHM(startISO, endISO) {
   const s = new Date(startISO);
@@ -28,6 +29,7 @@ function diffHM(startISO, endISO) {
 
 
 export default function DailyReportsPage() {
+  const { t, tWithParams } = useTranslation();
   const backendUrl = getBackendUrl();
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [date, setDate] = useState(() => format(new Date(), "yyyy-MM-dd"));
@@ -109,7 +111,7 @@ export default function DailyReportsPage() {
         setRows(mapped);
       } catch (e) {
         console.error(e);
-        setError("Failed to load assigned reports. Please try again later.");
+        setError(t("dailyReport.error"));
         setRows([]);
       } finally {
         setLoading(false);
@@ -121,14 +123,14 @@ export default function DailyReportsPage() {
 
   const columns = useMemo(
     () => [
-      { key: "no", label: "No.", width: "w-10" },
-      { key: "id", label: "Report ID", width: "w-16" },
+      { key: "no", label: t("dailyReport.table.no"), width: "w-10" },
+      { key: "id", label: t("dailyReport.table.reportId"), width: "w-16" },
       { key: "reportedTime", label: "Assigned Date/Time", width: "w-32" },
-      { key: "problem", label: "Description", width: "w-64" },
-      { key: "location", label: "Location", width: "w-40" },
-      { key: "requester", label: "Reported By", width: "w-24" },
-      { key: "supervisor", label: "Assigned To", width: "w-24" },
-      { key: "resolution", label: "Result Status", width: "w-32" },
+      { key: "problem", label: t("dailyReport.table.description"), width: "w-64" },
+      { key: "location", label: t("dailyReport.table.location"), width: "w-40" },
+      { key: "requester", label: t("dailyReport.table.reportedBy"), width: "w-24" },
+      { key: "supervisor", label: t("dailyReport.table.assignedTo"), width: "w-24" },
+      { key: "resolution", label: t("dailyReport.table.resultStatus"), width: "w-32" },
     ],
     []
   );
@@ -144,11 +146,11 @@ export default function DailyReportsPage() {
     // Compact Header
     doc.setFont("helvetica", "bold");
     doc.setFontSize(14);
-    doc.text("DAILY MAINTENANCE REPORTS", margin, 35);
+    doc.text(t("dailyReport.printHeader.title"), margin, 35);
     
     doc.setFontSize(10);
     doc.setFont("helvetica", "normal");
-    doc.text("Assumption University", margin + 200, 35);
+    doc.text(t("dailyReport.printHeader.university"), margin + 200, 35);
     
     // Department, date and zone on same line
     doc.setFontSize(9);
@@ -162,7 +164,7 @@ export default function DailyReportsPage() {
 
     // Table headers
     const tableHeaders = [
-      ["No.", "Report ID", "Assigned Date/Time", "Description", "Location", "Reported By", "Assigned To", "OK", "PR", "RF"]
+      [t("dailyReport.table.no"), t("dailyReport.table.reportId"), t("dailyReport.table.assignedDateTime"), t("dailyReport.table.description"), t("dailyReport.table.location"), t("dailyReport.table.reportedBy"), t("dailyReport.table.assignedTo"), t("dailyReport.table.ok"), t("dailyReport.table.pr"), t("dailyReport.table.rf")]
     ];
 
     // Table body
@@ -221,7 +223,7 @@ export default function DailyReportsPage() {
         if (pageNumber > 1) {
           doc.setFontSize(10);
           doc.setFont("helvetica", "bold");
-          doc.text("DAILY MAINTENANCE REPORTS (Continued)", margin, 25);
+          doc.text(`${t("dailyReport.printHeader.title")} (Continued)`, margin, 25);
           doc.setFont("helvetica", "normal");
           doc.setFontSize(9);
           doc.text(`Date: ${format(new Date(date), "dd/MM/yyyy")}`, margin, 38);
@@ -233,13 +235,13 @@ export default function DailyReportsPage() {
         doc.setFont("helvetica", "normal");
         
         // Signature line
-        doc.text("Prepared by: __________", margin, pageHeight - 20);
-        doc.text("Reviewed by: __________", margin + 180, pageHeight - 20);
-        doc.text("Approved by: __________", margin + 360, pageHeight - 20);
+        doc.text(`${t("dailyReport.footer.preparedBy")}: __________`, margin, pageHeight - 20);
+        doc.text(`${t("dailyReport.footer.reviewedBy")}: __________`, margin + 180, pageHeight - 20);
+        doc.text(`${t("dailyReport.footer.approvedBy")}: __________`, margin + 360, pageHeight - 20);
         
         // Page number
         doc.text(
-          `Page ${pageNumber} of ${pageCount}`,
+          tWithParams("dailyReport.footer.page", { current: pageNumber, total: pageCount }),
           pageWidth - margin - 40,
           pageHeight - 20
         );
@@ -253,7 +255,7 @@ export default function DailyReportsPage() {
     <div className="flex-1 p-6 print:p-4">
       {/* Controls - Hidden when printing */}
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between print:hidden">
-        <h1 className="text-2xl sm:text-3xl font-bold">Daily Maintenance Reports</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold">{t("dailyReport.title")}</h1>
         <div className="flex flex-wrap gap-3 items-center">
           <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
             <PopoverTrigger asChild>
@@ -265,7 +267,7 @@ export default function DailyReportsPage() {
                 )}
               >
                 <CalendarIcon className="mr-2 h-4 w-4" />
-                {selectedDate ? format(selectedDate, "dd MMM yyyy") : <span>Pick a date</span>}
+                {selectedDate ? format(selectedDate, "dd MMM yyyy") : <span>{t("dailyReport.pickDate")}</span>}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="start">
@@ -286,13 +288,13 @@ export default function DailyReportsPage() {
             onClick={handlePrint}
             className="rounded bg-gray-700 text-white px-4 py-2 h-10 text-sm hover:bg-gray-800 transition-colors"
           >
-            Print Report
+            {t("dailyReport.print")}
           </button>
           <button
             onClick={handlePdf}
             className="rounded bg-blue-600 text-white px-4 py-2 h-10 text-sm hover:bg-blue-700 transition-colors"
           >
-            Download PDF
+            {t("dailyReport.downloadPdf")}
           </button>
         </div>
       </div>
@@ -302,8 +304,8 @@ export default function DailyReportsPage() {
         <div className="border-b-2 border-black px-4 py-2">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-4">
-              <h1 className="text-base font-bold">DAILY MAINTENANCE REPORTS</h1>
-              <span className="text-sm">Assumption University</span>
+              <h1 className="text-base font-bold">{t("dailyReport.printHeader.title")}</h1>
+              <span className="text-sm">{t("dailyReport.printHeader.university")}</span>
             </div>
             <div className="flex items-center gap-4 text-sm">
               <span><strong>Dept:</strong> {department}</span>
@@ -321,7 +323,7 @@ export default function DailyReportsPage() {
       {loading && (
         <div className="flex justify-center items-center py-12">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-          <span className="ml-3 text-gray-600">Loading daily reports...</span>
+          <span className="ml-3 text-gray-600">{t("dailyReport.loading")}</span>
         </div>
       )}
 
@@ -345,7 +347,7 @@ export default function DailyReportsPage() {
               <svg className="w-20 h-20 text-gray-300 mx-auto mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
               </svg>
-              <h3 className="text-gray-600 text-xl font-semibold mb-2">No Maintenance Reports</h3>
+              <h3 className="text-gray-600 text-xl font-semibold mb-2">{t("dailyReport.noReports")}</h3>
               <p className="text-gray-500 text-base mb-1">There are no maintenance reports for {format(new Date(date), "MMMM d, yyyy")}.</p>
               <p className="text-gray-400 text-sm">Reports will appear here once maintenance tasks are assigned to staff members.</p>
             </div>

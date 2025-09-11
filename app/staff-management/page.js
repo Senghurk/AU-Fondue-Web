@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { getBackendUrl } from "../config/api";
 import { useToast } from "../context/ToastContext";
 import { formatDate } from "../utils/dateFormatter";
+import { useTranslation } from "../hooks/useTranslation";
 import { 
   Users, 
   UserPlus, 
@@ -47,6 +48,7 @@ import {
 } from "../../components/ui/table";
 
 export default function StaffManagementPage() {
+  const { t, tWithParams } = useTranslation();
   const backendUrl = getBackendUrl();
   const { toast } = useToast();
   
@@ -90,8 +92,8 @@ export default function StaffManagementPage() {
       console.error("Failed to fetch staff:", error);
       toast({
         variant: "error",
-        title: "Error",
-        description: "Failed to fetch staff list",
+        title: t("common.error"),
+        description: t("staff.messages.fetchError"),
       });
     } finally {
       setIsLoading(false);
@@ -149,7 +151,7 @@ export default function StaffManagementPage() {
       if (exists) {
         setValidationErrors(prev => ({
           ...prev,
-          staffId: `OM ID '${omId}' is already exist in the system`
+          staffId: tWithParams("staff.messages.omIdExists", { id: omId })
         }));
       } else {
         setValidationErrors(prev => ({ ...prev, staffId: "" }));
@@ -169,10 +171,10 @@ export default function StaffManagementPage() {
         title: (
           <div className="flex items-center gap-2">
             <AlertCircle className="h-4 w-4" />
-            Missing Information
+            {t("staff.messages.missingInfo")}
           </div>
         ),
-        description: "Please fill in all required fields",
+        description: t("staff.messages.fillRequired"),
       });
       return;
     }
@@ -184,10 +186,10 @@ export default function StaffManagementPage() {
         title: (
           <div className="flex items-center gap-2">
             <AlertCircle className="h-4 w-4" />
-            Validation Error
+            {t("staff.messages.validationError")}
           </div>
         ),
-        description: "Please fix the validation errors before submitting",
+        description: t("staff.messages.fixErrors"),
       });
       return;
     }
@@ -210,7 +212,7 @@ export default function StaffManagementPage() {
             title: (
               <div className="flex items-center gap-2">
                 <AlertCircle className="h-4 w-4" />
-                Duplicate OM ID
+                {t("staff.messages.duplicateOmId")}
               </div>
             ),
             description: data.message,
@@ -222,7 +224,7 @@ export default function StaffManagementPage() {
             title: (
               <div className="flex items-center gap-2">
                 <AlertCircle className="h-4 w-4" />
-                Duplicate Email
+                {t("staff.messages.duplicateEmail")}
               </div>
             ),
             description: data.message,
@@ -233,10 +235,10 @@ export default function StaffManagementPage() {
             title: (
               <div className="flex items-center gap-2">
                 <AlertCircle className="h-4 w-4" />
-                Failed to Add Staff
+                {t("staff.messages.addFailed")}
               </div>
             ),
-            description: data.message || "Could not add staff member",
+            description: data.message || t("staff.messages.addFailedDesc"),
           });
         }
         return;
@@ -247,10 +249,10 @@ export default function StaffManagementPage() {
         title: (
           <div className="flex items-center gap-2">
             <CheckCircle className="h-4 w-4" />
-            Staff Member Added
+            {t("staff.messages.addSuccess")}
           </div>
         ),
-        description: `${newStaff.name} has been added successfully`,
+        description: tWithParams("staff.messages.addSuccessDesc", { name: newStaff.name }),
       });
 
       fetchStaff();
@@ -264,10 +266,10 @@ export default function StaffManagementPage() {
         title: (
           <div className="flex items-center gap-2">
             <AlertCircle className="h-4 w-4" />
-            Failed to Add Staff
+            {t("staff.messages.addFailed")}
           </div>
         ),
-        description: error.message || "Could not add staff member",
+        description: error.message || t("staff.messages.addFailedDesc"),
       });
     }
   };
@@ -309,13 +311,13 @@ export default function StaffManagementPage() {
         title: (
           <div className="flex items-center gap-2">
             <CheckCircle className="h-4 w-4" />
-            Password Reset Email Sent
+            {t("staff.resetPassword.successTitle")}
           </div>
         ),
         description: (
           <div className="space-y-1">
-            <p>Reset link sent to <strong>{staff.email}</strong></p>
-            <p className="text-sm text-gray-500">The link will expire in 1 hour</p>
+            <p>{tWithParams("staff.resetPassword.successMessage", { email: staff.email })}</p>
+            <p className="text-sm text-gray-500">{t("staff.resetPassword.successNote")}</p>
           </div>
         ),
         duration: 5000,
@@ -343,7 +345,7 @@ export default function StaffManagementPage() {
         title: (
           <div className="flex items-center gap-2">
             <AlertCircle className="h-4 w-4" />
-            Password Reset Failed
+            {t("staff.resetPassword.failedTitle")}
           </div>
         ),
         description: errorMessage,
@@ -383,7 +385,7 @@ export default function StaffManagementPage() {
         title: (
           <div className="flex items-center gap-2">
             <AlertCircle className="h-4 w-4" />
-            Firebase Sync Error
+            {t("common.error")}
           </div>
         ),
         description: "Failed to sync with Firebase. Some features may be limited.",
@@ -411,10 +413,10 @@ export default function StaffManagementPage() {
           title: (
             <div className="flex items-center gap-2">
               <AlertCircle className="h-4 w-4" />
-              Cannot Delete Staff Member
+              {t("staff.deleteDialog.cannotDeleteTitle")}
             </div>
           ),
-          description: `${staff.name} has ${data.incompleteReports} incomplete assigned report(s). All reports must be marked as 'Completed' before deletion.`,
+          description: tWithParams("staff.deleteDialog.cannotDeleteMessage", { name: staff.name, count: data.incompleteReports }),
           duration: 7000,
         });
       }
@@ -434,10 +436,10 @@ export default function StaffManagementPage() {
         title: (
           <div className="flex items-center gap-2">
             <AlertCircle className="h-4 w-4" />
-            Invalid Name
+            {t("common.error")}
           </div>
         ),
-        description: "Staff name cannot be empty",
+        description: t("validation.required"),
       });
       return;
     }
@@ -470,10 +472,10 @@ export default function StaffManagementPage() {
         title: (
           <div className="flex items-center gap-2">
             <CheckCircle className="h-4 w-4" />
-            Name Updated
+            {t("staff.rename.successTitle")}
           </div>
         ),
-        description: `Staff name changed from "${staffToRename.name}" to "${newStaffName.trim()}"`,
+        description: tWithParams("staff.rename.successMessage", { oldName: staffToRename.name, newName: newStaffName.trim() }),
         duration: 5000,
       });
 
@@ -489,10 +491,10 @@ export default function StaffManagementPage() {
         title: (
           <div className="flex items-center gap-2">
             <AlertCircle className="h-4 w-4" />
-            Update Failed
+            {t("common.error")}
           </div>
         ),
-        description: error.message || "Failed to update staff name",
+        description: error.message || t("common.error"),
       });
     } finally {
       setIsUpdating(false);
@@ -520,10 +522,10 @@ export default function StaffManagementPage() {
             title: (
               <div className="flex items-center gap-2">
                 <AlertCircle className="h-4 w-4" />
-                Cannot Delete Staff Member
+                {t("staff.deleteDialog.cannotDeleteTitle")}
               </div>
             ),
-            description: data.message,
+            description: tWithParams("staff.deleteDialog.cannotDeleteMessage", { name: staffToDelete.name, count: data.message.match(/\d+/)?.[0] || 1 }),
             duration: 7000,
           });
         } else {
@@ -537,10 +539,10 @@ export default function StaffManagementPage() {
         title: (
           <div className="flex items-center gap-2">
             <CheckCircle className="h-4 w-4" />
-            Staff Member Deleted
+            {t("staff.messages.deleteSuccess")}
           </div>
         ),
-        description: `${staffToDelete.name} has been removed from the system`,
+        description: tWithParams("staff.messages.deleteSuccessDesc", { name: staffToDelete.name }),
       });
 
       fetchStaff();
@@ -553,10 +555,10 @@ export default function StaffManagementPage() {
         title: (
           <div className="flex items-center gap-2">
             <AlertCircle className="h-4 w-4" />
-            Deletion Failed
+            {t("staff.messages.deleteFailed")}
           </div>
         ),
-        description: error.message || "Failed to delete staff member. Please try again.",
+        description: error.message || t("staff.messages.deleteFailedDesc"),
       });
     } finally {
       setIsDeleting(false);
@@ -568,9 +570,9 @@ export default function StaffManagementPage() {
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Staff Management</h1>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">{t("staff.title")}</h1>
           <p className="text-gray-600 dark:text-gray-400 mt-2">
-            Manage staff accounts and reset passwords
+            {t("staff.subtitle")}
           </p>
         </div>
 
@@ -579,14 +581,14 @@ export default function StaffManagementPage() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
-                Total Staff
+                {t("staff.stats.totalStaff")}
               </CardTitle>
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{staffList.length}</div>
               <p className="text-xs text-muted-foreground">
-                Active staff members
+                {t("staff.stats.activeStaff")}
               </p>
             </CardContent>
           </Card>
@@ -597,9 +599,9 @@ export default function StaffManagementPage() {
           <CardHeader>
             <div className="flex items-center justify-between">
               <div className="space-y-1">
-                <CardTitle>Staff Members</CardTitle>
+                <CardTitle>{t("staff.list.title")}</CardTitle>
                 <CardDescription>
-                  Manage staff members who handle maintenance reports
+                  {t("staff.list.subtitle")}
                 </CardDescription>
               </div>
               <Button 
@@ -607,7 +609,7 @@ export default function StaffManagementPage() {
                 className="bg-black dark:bg-gray-700 hover:bg-gray-800 dark:hover:bg-gray-600 text-white"
               >
                 <UserPlus className="mr-2 h-4 w-4" />
-                Add Staff
+                {t("staff.list.addStaff")}
               </Button>
             </div>
           </CardHeader>
@@ -618,7 +620,7 @@ export default function StaffManagementPage() {
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
                 <Input
                   type="text"
-                  placeholder="Search staff by name, email, or OM ID..."
+                  placeholder={t("staff.list.searchPlaceholder")}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-10"
@@ -631,12 +633,12 @@ export default function StaffManagementPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="w-[50px]">#</TableHead>
-                    <TableHead>OM ID</TableHead>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Date Added</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    <TableHead className="w-[50px]">{t("staff.list.table.no")}</TableHead>
+                    <TableHead>{t("staff.list.table.omId")}</TableHead>
+                    <TableHead>{t("staff.list.table.name")}</TableHead>
+                    <TableHead>{t("staff.list.table.email")}</TableHead>
+                    <TableHead>{t("staff.list.table.dateAdded")}</TableHead>
+                    <TableHead className="text-right">{t("staff.list.table.actions")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -651,7 +653,7 @@ export default function StaffManagementPage() {
                   ) : paginatedStaff.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={6} className="text-center py-8 text-gray-500">
-                        No staff members found
+                        {t("common.noDataFound")}
                       </TableCell>
                     </TableRow>
                   ) : (
@@ -675,7 +677,7 @@ export default function StaffManagementPage() {
                               <svg className="w-4 h-4 mr-1 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                               </svg>
-                              Not Assigned
+                              {t("common.notAssigned")}
                             </span>
                           )}
                         </TableCell>
@@ -748,7 +750,11 @@ export default function StaffManagementPage() {
             {filteredStaff.length > itemsPerPage && (
               <div className="mt-6 flex items-center justify-between">
                 <div className="text-sm text-gray-600">
-                  Showing {startIndex + 1} to {Math.min(endIndex, filteredStaff.length)} of {filteredStaff.length} staff members
+                  {tWithParams("staff.pagination.showing", {
+                    start: startIndex + 1,
+                    end: Math.min(endIndex, filteredStaff.length),
+                    total: filteredStaff.length
+                  })}
                 </div>
                 <div className="flex items-center gap-2">
                   <Button
@@ -758,7 +764,7 @@ export default function StaffManagementPage() {
                     disabled={currentPage === 1}
                   >
                     <ChevronLeft className="h-4 w-4" />
-                    Previous
+                    {t("staff.pagination.previous")}
                   </Button>
                   
                   {/* Page numbers */}
@@ -802,7 +808,7 @@ export default function StaffManagementPage() {
                     onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                     disabled={currentPage === totalPages}
                   >
-                    Next
+                    {t("staff.pagination.next")}
                     <ChevronRight className="h-4 w-4" />
                   </Button>
                 </div>
@@ -815,17 +821,17 @@ export default function StaffManagementPage() {
         <Dialog open={isAddingStaff} onOpenChange={setIsAddingStaff}>
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
-              <DialogTitle>Add New Staff Member</DialogTitle>
+              <DialogTitle>{t("staff.addDialog.title")}</DialogTitle>
               <DialogDescription>
-                Enter the details for the new staff member. Default password is OMstaff123.
+                {t("staff.addDialog.subtitle")}
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 mt-4">
               <div className="space-y-2">
-                <Label htmlFor="staffId">OM ID *</Label>
+                <Label htmlFor="staffId">{t("staff.addDialog.omIdLabel")}</Label>
                 <Input
                   id="staffId"
-                  placeholder="e.g., OM01"
+                  placeholder={t("staff.addDialog.omIdPlaceholder")}
                   value={newStaff.staffId}
                   onChange={(e) => {
                     const value = e.target.value;
@@ -848,20 +854,20 @@ export default function StaffManagementPage() {
                 )}
               </div>
               <div className="space-y-2">
-                <Label htmlFor="name">Full Name *</Label>
+                <Label htmlFor="name">{t("staff.addDialog.nameLabel")}</Label>
                 <Input
                   id="name"
-                  placeholder="Enter staff member's full name"
+                  placeholder={t("staff.addDialog.namePlaceholder")}
                   value={newStaff.name}
                   onChange={(e) => setNewStaff({ ...newStaff, name: e.target.value })}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="email">Email Address *</Label>
+                <Label htmlFor="email">{t("staff.addDialog.emailLabel")}</Label>
                 <Input
                   id="email"
                   type="email"
-                  placeholder="Enter email address"
+                  placeholder={t("staff.addDialog.emailPlaceholder")}
                   value={newStaff.email}
                   onChange={(e) => {
                     setNewStaff({ ...newStaff, email: e.target.value });
@@ -881,7 +887,7 @@ export default function StaffManagementPage() {
               </div>
               <div className="bg-blue-50 p-3 rounded-md">
                 <p className="text-sm text-blue-800">
-                  <strong>Note:</strong> The staff member will need to change their password on first login.
+                  <strong>{t("common.note")}:</strong> {t("staff.addDialog.note")}
                 </p>
               </div>
             </div>
@@ -891,14 +897,14 @@ export default function StaffManagementPage() {
                 setNewStaff({ staffId: "", name: "", email: "" });
                 setValidationErrors({ staffId: "", email: "" });
               }}>
-                Cancel
+                {t("staff.addDialog.cancel")}
               </Button>
               <Button 
                 onClick={handleAddStaff} 
                 className="bg-black dark:bg-gray-700 hover:bg-gray-800 dark:hover:bg-gray-600 text-white"
                 disabled={isCheckingDuplicate || !!validationErrors.staffId || !!validationErrors.email}
               >
-                Add Staff Member
+                {t("staff.addDialog.addButton")}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -908,20 +914,20 @@ export default function StaffManagementPage() {
         <Dialog open={resetPasswordDialogOpen} onOpenChange={setResetPasswordDialogOpen}>
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
-              <DialogTitle>Reset Staff Password</DialogTitle>
+              <DialogTitle>{t("staff.resetPassword.title")}</DialogTitle>
               <DialogDescription>
-                Are you sure you want to reset the password for <strong>{selectedStaffForReset?.name}</strong>?
+                {tWithParams("staff.resetPassword.message", { name: selectedStaffForReset?.name })}
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-3 mt-4">
               <div className="bg-amber-50 p-3 rounded-md">
                 <p className="text-sm text-amber-800">
-                  A password reset link will be sent to:
+                  {t("staff.resetPassword.emailInfo")}
                 </p>
                 <p className="font-medium text-amber-900 mt-1">{selectedStaffForReset?.email}</p>
               </div>
               <p className="text-sm text-gray-600">
-                The staff member will receive an email with instructions to create a new password.
+                {t("staff.resetPassword.instructions")}
               </p>
               <div className="flex justify-end gap-2 mt-4">
                 <Button 
@@ -931,7 +937,7 @@ export default function StaffManagementPage() {
                     setSelectedStaffForReset(null);
                   }}
                 >
-                  Cancel
+                  {t("staff.resetPassword.cancel")}
                 </Button>
                 <Button 
                   onClick={() => {
@@ -945,10 +951,10 @@ export default function StaffManagementPage() {
                   {isResetting ? (
                     <>
                       <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                      Sending...
+                      {t("staff.resetPassword.sending")}
                     </>
                   ) : (
-                    "Send Reset Link"
+                    t("staff.resetPassword.sendButton")
                   )}
                 </Button>
               </div>
@@ -962,19 +968,19 @@ export default function StaffManagementPage() {
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2 text-red-600">
                 <AlertCircle className="h-5 w-5" />
-                Confirm Deletion
+                {t("staff.deleteDialog.title")}
               </DialogTitle>
               <DialogDescription className="pt-3">
                 <div className="space-y-3">
-                  <p>Are you sure you want to delete this staff member?</p>
+                  <p>{t("staff.deleteDialog.message")}</p>
                   {staffToDelete && (
                     <div className="bg-gray-50 p-3 rounded-md space-y-2">
                       <div className="flex items-center gap-2">
-                        <span className="font-medium">Name:</span>
+                        <span className="font-medium">{t("staff.deleteDialog.nameLabel")}</span>
                         <span>{staffToDelete.name}</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <span className="font-medium">OM ID:</span>
+                        <span className="font-medium">{t("staff.deleteDialog.omIdLabel")}</span>
                         {staffToDelete.staffId ? (
                           <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200">
                             <svg className="w-3.5 h-3.5 mr-1 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -985,18 +991,18 @@ export default function StaffManagementPage() {
                             </span>
                           </span>
                         ) : (
-                          <span className="text-gray-500 text-sm">Not Assigned</span>
+                          <span className="text-gray-500 text-sm">{t("common.notAssigned")}</span>
                         )}
                       </div>
                       <div className="flex items-center gap-2">
-                        <span className="font-medium">Email:</span>
+                        <span className="font-medium">{t("staff.deleteDialog.emailLabel")}</span>
                         <span>{staffToDelete.email}</span>
                       </div>
                     </div>
                   )}
                   <div className="bg-amber-50 border border-amber-200 p-3 rounded-md">
                     <p className="text-sm text-amber-800">
-                      <strong>Warning:</strong> This action cannot be undone. All data associated with this staff member will be permanently deleted.
+                      <strong>{t("common.warning")}:</strong> {t("staff.deleteDialog.warning")}
                     </p>
                   </div>
                 </div>
@@ -1011,7 +1017,7 @@ export default function StaffManagementPage() {
                 }}
                 disabled={isDeleting}
               >
-                Cancel
+                {t("staff.deleteDialog.cancel")}
               </Button>
               <Button
                 variant="destructive"
@@ -1022,10 +1028,10 @@ export default function StaffManagementPage() {
                 {isDeleting ? (
                   <>
                     <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                    Deleting...
+                    {t("staff.deleteDialog.deleting")}
                   </>
                 ) : (
-                  "Delete Staff Member"
+                  t("staff.deleteDialog.deleteButton")
                 )}
               </Button>
             </div>
@@ -1044,20 +1050,20 @@ export default function StaffManagementPage() {
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <Pencil className="h-5 w-5" />
-                Rename Staff Member
+                {t("staff.rename.title")}
               </DialogTitle>
               <DialogDescription>
-                Change the name for {staffToRename?.name}
+                {tWithParams("staff.rename.subtitle", { name: staffToRename?.name })}
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 mt-4">
               <div className="space-y-2">
-                <Label htmlFor="newStaffName">New Name</Label>
+                <Label htmlFor="newStaffName">{t("staff.rename.newNameLabel")}</Label>
                 <Input
                   id="newStaffName"
                   value={newStaffName}
                   onChange={(e) => setNewStaffName(e.target.value)}
-                  placeholder="Enter new name"
+                  placeholder={t("staff.rename.newNamePlaceholder")}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" && !isUpdating) {
                       handleRenameStaff();
@@ -1068,13 +1074,13 @@ export default function StaffManagementPage() {
               {staffToRename?.staffId && (
                 <div className="bg-blue-50 p-3 rounded-md">
                   <p className="text-sm text-blue-800">
-                    <strong>OM ID:</strong> {staffToRename.staffId} (will not change)
+                    <strong>OM ID:</strong> {tWithParams("staff.rename.omIdInfo", { id: staffToRename.staffId })}
                   </p>
                 </div>
               )}
               <div className="bg-amber-50 p-3 rounded-md">
                 <p className="text-sm text-amber-800">
-                  <strong>Note:</strong> The staff member's name will be updated across all reports and records.
+                  <strong>{t("common.note")}:</strong> {t("staff.rename.note")}
                 </p>
               </div>
             </div>
@@ -1088,7 +1094,7 @@ export default function StaffManagementPage() {
                 }}
                 disabled={isUpdating}
               >
-                Cancel
+                {t("staff.rename.cancel")}
               </Button>
               <Button 
                 onClick={handleRenameStaff}
@@ -1098,12 +1104,12 @@ export default function StaffManagementPage() {
                 {isUpdating ? (
                   <>
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    Updating...
+                    {t("staff.rename.updating")}
                   </>
                 ) : (
                   <>
                     <CheckCircle className="mr-2 h-4 w-4" />
-                    Update Name
+                    {t("staff.rename.updateButton")}
                   </>
                 )}
               </Button>

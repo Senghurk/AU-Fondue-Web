@@ -5,6 +5,7 @@ import { getBackendUrl } from "../config/api";
 import { useToast } from "../context/ToastContext";
 import { useAuth } from "../context/AuthContext";
 import { formatDate } from "../utils/dateFormatter";
+import { useTranslation } from "../hooks/useTranslation";
 import { 
   Shield, 
   UserPlus, 
@@ -42,6 +43,7 @@ import {
 } from "../../components/ui/table";
 
 export default function AdminManagementPage() {
+  const { t, tWithParams } = useTranslation();
   const backendUrl = getBackendUrl();
   const { toast } = useToast();
   const { user } = useAuth();
@@ -81,8 +83,8 @@ export default function AdminManagementPage() {
       console.error("Failed to fetch admins:", error);
       toast({
         variant: "error",
-        title: "Error",
-        description: "Failed to fetch admin list",
+        title: t("common.error"),
+        description: t("admins.messages.fetchError"),
       });
     } finally {
       setIsLoading(false);
@@ -116,7 +118,7 @@ export default function AdminManagementPage() {
 
   // Validate email format
   const validateEmail = (email) => {
-    if (!email) return "Email is required";
+    if (!email) return t("admins.messages.enterEmail");
     if (!email.toLowerCase().endsWith("@au.edu")) {
       return "Admin email must be an @au.edu address";
     }
@@ -164,7 +166,7 @@ export default function AdminManagementPage() {
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.message || error.error || "Failed to add admin");
+        throw new Error(error.message || error.error || t("admins.messages.addFailed"));
       }
 
       const addedAdmin = await response.json();
@@ -174,10 +176,10 @@ export default function AdminManagementPage() {
         title: (
           <div className="flex items-center gap-2">
             <CheckCircle className="h-4 w-4" />
-            Admin Added Successfully
+            {t("admins.messages.addSuccess")}
           </div>
         ),
-        description: `Admin with email ${addedAdmin.email} has been added`,
+        description: tWithParams("admins.messages.addSuccessDesc", { email: addedAdmin.email }),
       });
 
       // Reset form and refresh list
@@ -190,8 +192,8 @@ export default function AdminManagementPage() {
       console.error("Failed to add admin:", error);
       toast({
         variant: "error",
-        title: "Error",
-        description: error.message || "Failed to add admin",
+        title: t("common.error"),
+        description: error.message || t("admins.messages.addFailed"),
       });
     }
   };
@@ -209,7 +211,7 @@ export default function AdminManagementPage() {
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.message || error.error || "Failed to delete admin");
+        throw new Error(error.message || error.error || t("admins.messages.deleteFailed"));
       }
 
       const result = await response.json();
@@ -219,7 +221,7 @@ export default function AdminManagementPage() {
         title: (
           <div className="flex items-center gap-2">
             <CheckCircle className="h-4 w-4" />
-            Admin Deleted Successfully
+            {t("admins.messages.deleteSuccess")}
           </div>
         ),
         description: (
@@ -245,7 +247,7 @@ export default function AdminManagementPage() {
             Delete Failed
           </div>
         ),
-        description: error.message || "Failed to delete admin",
+        description: error.message || t("admins.messages.deleteFailed"),
       });
     } finally {
       setIsDeleting(false);
@@ -261,10 +263,10 @@ export default function AdminManagementPage() {
         title: (
           <div className="flex items-center gap-2">
             <AlertCircle className="h-4 w-4" />
-            Action Not Allowed
+            {t("admins.messages.actionNotAllowed")}
           </div>
         ),
-        description: "You cannot delete your own administrator account while logged in.",
+        description: t("admins.messages.cannotDeleteSelf"),
         duration: 5000,
       });
       return;
@@ -279,9 +281,9 @@ export default function AdminManagementPage() {
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Admin Management</h1>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">{t("admins.title")}</h1>
           <p className="text-gray-600 dark:text-gray-400 mt-2">
-            Manage system administrators with AU accounts (@au.edu)
+            {t("admins.subtitle")}
           </p>
         </div>
 
@@ -297,7 +299,7 @@ export default function AdminManagementPage() {
             <CardContent>
               <div className="text-2xl font-bold">{adminList.length}</div>
               <p className="text-xs text-muted-foreground">
-                Active administrators
+                {t("admins.stats.activeAdmins")}
               </p>
             </CardContent>
           </Card>
@@ -308,9 +310,9 @@ export default function AdminManagementPage() {
           <CardHeader>
             <div className="flex items-center justify-between">
               <div className="space-y-1">
-                <CardTitle>Administrator List</CardTitle>
+                <CardTitle>{t("admins.list.title")}</CardTitle>
                 <CardDescription>
-                  Manage administrators who have access to the system
+                  {t("admins.list.subtitle")}
                 </CardDescription>
               </div>
               <Button 
@@ -318,7 +320,7 @@ export default function AdminManagementPage() {
                 className="bg-black dark:bg-gray-700 hover:bg-gray-800 dark:hover:bg-gray-600 text-white"
               >
                 <UserPlus className="mr-2 h-4 w-4" />
-                Add Admin
+                {t("admins.list.addAdmin")}
               </Button>
             </div>
           </CardHeader>
@@ -329,7 +331,7 @@ export default function AdminManagementPage() {
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
                 <Input
                   type="text"
-                  placeholder="Search admins by name or email..."
+                  placeholder={t("admins.list.searchPlaceholder")}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-10"
@@ -342,11 +344,11 @@ export default function AdminManagementPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="w-[50px]">#</TableHead>
-                    <TableHead>Username</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Date Added</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    <TableHead className="w-[50px]">{t("admins.list.table.no")}</TableHead>
+                    <TableHead>{t("admins.list.table.username")}</TableHead>
+                    <TableHead>{t("admins.list.table.email")}</TableHead>
+                    <TableHead>{t("admins.list.table.dateAdded")}</TableHead>
+                    <TableHead className="text-right">{t("admins.list.table.actions")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -361,7 +363,7 @@ export default function AdminManagementPage() {
                   ) : paginatedAdmins.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={5} className="text-center py-8 text-gray-500">
-                        No administrators found
+                        {t("admins.noAdmins")}
                       </TableCell>
                     </TableRow>
                   ) : (
@@ -396,13 +398,13 @@ export default function AdminManagementPage() {
                                 size="sm"
                                 disabled
                                 className="opacity-50 cursor-not-allowed bg-gray-100 border-gray-300"
-                                title="You cannot delete your own account"
+                                title={t("admins.messages.cannotDeleteSelf")}
                               >
                                 <X className="h-4 w-4 text-gray-400" />
                               </Button>
                               <div className="absolute bottom-full right-0 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-md whitespace-nowrap invisible group-hover:visible transition-all duration-200 z-50">
                                 <div className="relative">
-                                  Cannot delete your own account
+                                  {t("admins.messages.cannotDeleteSelf")}
                                   <div className="absolute top-full right-4 w-0 h-0 border-l-4 border-l-transparent border-r-4 border-r-transparent border-t-4 border-t-gray-900"></div>
                                 </div>
                               </div>
@@ -413,7 +415,7 @@ export default function AdminManagementPage() {
                               size="sm"
                               onClick={() => confirmDelete(admin)}
                               disabled={adminList.length <= 1}
-                              title={adminList.length <= 1 ? "Cannot delete the last admin" : "Delete admin"}
+                              title={adminList.length <= 1 ? t("admins.messages.cannotDeleteLast") : t("admins.messages.deleteAdmin")}
                             >
                               <X className="h-4 w-4" />
                             </Button>
@@ -430,7 +432,7 @@ export default function AdminManagementPage() {
             {filteredAdmins.length > itemsPerPage && (
               <div className="mt-6 flex items-center justify-between">
                 <div className="text-sm text-gray-600">
-                  Showing {startIndex + 1} to {Math.min(endIndex, filteredAdmins.length)} of {filteredAdmins.length} admins
+                  {tWithParams("admins.pagination.showing", { start: startIndex + 1, end: Math.min(endIndex, filteredAdmins.length), total: filteredAdmins.length })}
                 </div>
                 <div className="flex items-center gap-2">
                   <Button
@@ -440,7 +442,7 @@ export default function AdminManagementPage() {
                     disabled={currentPage === 1}
                   >
                     <ChevronLeft className="h-4 w-4" />
-                    Previous
+                    {t("admins.pagination.previous")}
                   </Button>
                   
                   {/* Page numbers */}
@@ -486,7 +488,7 @@ export default function AdminManagementPage() {
                     onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                     disabled={currentPage === totalPages}
                   >
-                    Next
+                    {t("admins.pagination.next")}
                     <ChevronRight className="h-4 w-4" />
                   </Button>
                 </div>
@@ -502,26 +504,26 @@ export default function AdminManagementPage() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Shield className="h-5 w-5 text-blue-600" />
-              Add New Administrator
+              {t("admins.addDialog.title")}
             </DialogTitle>
             <DialogDescription>
-              Add a new administrator with an AU Microsoft account
+              {t("admins.addDialog.subtitle")}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <Label htmlFor="email">Admin Email *</Label>
+              <Label htmlFor="email">{t("admins.addDialog.emailLabel")}</Label>
               <Input
                 id="email"
                 type="email"
-                placeholder="username@au.edu"
+                placeholder={t("admins.addDialog.emailPlaceholder")}
                 value={newAdmin.email}
                 onChange={(e) => setNewAdmin({...newAdmin, email: e.target.value})}
                 className="mt-1"
               />
               {newAdmin.email && !newAdmin.email.toLowerCase().endsWith("@au.edu") && (
                 <p className="text-sm text-red-500 mt-1">
-                  Email must be an @au.edu address
+                  {t("admins.addDialog.emailHint")}
                 </p>
               )}
             </div>
@@ -529,12 +531,12 @@ export default function AdminManagementPage() {
               <div className="flex items-start gap-2">
                 <Shield className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
                 <div className="text-sm space-y-1">
-                  <p className="font-semibold text-blue-900">Microsoft Authentication</p>
+                  <p className="font-semibold text-blue-900">{t("admins.addDialog.authTitle")}</p>
                   <p className="text-blue-800">
-                    The admin's display name will be automatically fetched from their Microsoft account when they first log in.
+                    {t("admins.addDialog.authDesc1")}
                   </p>
                   <p className="text-blue-700 text-xs">
-                    Example: "SAI OAN HSENG HURK -" for u6440041@au.edu
+                    {t("admins.addDialog.authDesc2")}
                   </p>
                 </div>
               </div>
@@ -548,14 +550,14 @@ export default function AdminManagementPage() {
                 setNewAdmin({ email: "" });
               }}
             >
-              Cancel
+              {t("admins.addDialog.cancel")}
             </Button>
             <Button 
               onClick={handleAddAdmin}
               className="bg-black dark:bg-gray-700 hover:bg-gray-800 dark:hover:bg-gray-600 text-white"
               disabled={!newAdmin.email || !newAdmin.email.toLowerCase().endsWith("@au.edu")}
             >
-              Add Admin
+              {t("admins.addDialog.addButton")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -567,10 +569,10 @@ export default function AdminManagementPage() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-red-600">
               <AlertTriangle className="h-5 w-5" />
-              Confirm Delete Admin
+              {t("admins.messages.deleteConfirmTitle")}
             </DialogTitle>
             <DialogDescription className="space-y-2 pt-2">
-              <p>Are you sure you want to delete this administrator?</p>
+              <p>{t("admins.messages.deleteConfirmMessage")}</p>
               {adminToDelete && (
                 <div className="bg-gray-50 rounded-lg p-3 mt-2">
                   <p className="font-semibold">{adminToDelete.username}</p>
@@ -578,7 +580,7 @@ export default function AdminManagementPage() {
                 </div>
               )}
               <p className="text-sm text-red-600 font-medium pt-2">
-                This action cannot be undone!
+                {t("admins.messages.deleteConfirmWarning")}
               </p>
             </DialogDescription>
           </DialogHeader>
@@ -591,7 +593,7 @@ export default function AdminManagementPage() {
               }}
               disabled={isDeleting}
             >
-              Cancel
+              {t("common.cancel")}
             </Button>
             <Button 
               onClick={handleDeleteAdmin}
@@ -601,12 +603,12 @@ export default function AdminManagementPage() {
               {isDeleting ? (
                 <>
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  Deleting...
+                  {t("admins.messages.deleting")}...
                 </>
               ) : (
                 <>
                   <X className="mr-2 h-4 w-4" />
-                  Delete Admin
+                  {t("admins.messages.deleteButton")}
                 </>
               )}
             </Button>

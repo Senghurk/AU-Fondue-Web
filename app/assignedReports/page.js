@@ -8,11 +8,13 @@ import { usePasswordCheck } from "../hooks/usePasswordCheck";
 import { useAuth } from "../context/AuthContext";
 import { authenticatedFetch } from "../utils/apiHelper";
 import { formatDate, formatDateTime } from "../utils/dateFormatter";
+import { useTranslation } from "../hooks/useTranslation";
 
 export default function AssignedReportsPage() {
   // Check if password needs to be changed
   usePasswordCheck();
   const { user, isAdmin } = useAuth();
+  const { t, tWithParams } = useTranslation();
   const backendUrl = getBackendUrl();
   const sastoken =
     "?sv=2024-11-04&ss=bfqt&srt=co&sp=rwdlacupiytfx&se=2027-07-16T22:11:38Z&st=2025-07-16T13:56:38Z&spr=https,http&sig=5xb1czmfngshEckXBdlhtw%2BVe%2B5htYpCnXyhPw9tnHk%3D";
@@ -201,7 +203,7 @@ export default function AssignedReportsPage() {
         await fetchReports();
       } catch (error) {
         console.error("Error fetching data:", error);
-        setError("Failed to load assigned reports. Please try refreshing the page.");
+        setError(t("assignedReports.error"));
       } finally {
         setLoading(false);
       }
@@ -371,7 +373,7 @@ export default function AssignedReportsPage() {
     if (!resolutionType) {
       setUpdateMessage({
         type: "error",
-        text: "Please select a remark before updating the report.",
+        text: t("assignedReports.messages.selectRemark"),
       });
       return;
     }
@@ -380,7 +382,7 @@ export default function AssignedReportsPage() {
     if (status === "COMPLETED" && resolutionType !== "OK") {
       setUpdateMessage({
         type: "error",
-        text: "When status is COMPLETED, remark must be OK.",
+        text: t("assignedReports.messages.completedMustBeOk"),
       });
       return;
     }
@@ -388,7 +390,7 @@ export default function AssignedReportsPage() {
     if ((status === "PENDING" || status === "IN PROGRESS") && resolutionType === "OK") {
       setUpdateMessage({
         type: "error",
-        text: "OK remark can only be used with COMPLETED status.",
+        text: t("assignedReports.messages.okOnlyWithCompleted"),
       });
       return;
     }
@@ -436,7 +438,7 @@ export default function AssignedReportsPage() {
       // Show success message right before closing modal
       setUpdateMessage({
         type: "success",
-        text: "Report updated successfully",
+        text: t("assignedReports.messages.completeSuccess"),
       });
 
       // Close modal after showing success message
@@ -448,7 +450,7 @@ export default function AssignedReportsPage() {
       console.error("Error updating report:", error);
       setUpdateMessage({
         type: "error",
-        text: error instanceof Error ? `Failed to update the report: ${error.message}` : "Failed to update the report",
+        text: error instanceof Error ? `${t("assignedReports.messages.completeFailed")}: ${error.message}` : t("assignedReports.messages.completeFailed"),
       });
     } finally {
       setIsUpdating(false);
@@ -475,7 +477,7 @@ export default function AssignedReportsPage() {
         // Show success message
         setUpdateMessage({
           type: "success",
-          text: "Report deleted successfully",
+          text: t("assignedReports.messages.deleteSuccess"),
         });
 
         // Refresh the reports list
@@ -494,7 +496,7 @@ export default function AssignedReportsPage() {
       console.error("Delete error:", error);
       setUpdateMessage({
         type: "error",
-        text: error instanceof Error ? `Failed to delete report: ${error.message}` : "Failed to delete report",
+        text: error instanceof Error ? `${t("assignedReports.messages.deleteFailed")}: ${error.message}` : t("assignedReports.messages.deleteFailed"),
       });
       setTimeout(() => setUpdateMessage(null), 3000);
     } finally {
@@ -698,13 +700,13 @@ export default function AssignedReportsPage() {
         />
       )}
 
-      <h1 className="text-3xl font-bold mb-6">Assigned Reports</h1>
+      <h1 className="text-3xl font-bold mb-6">{t("assignedReports.title")}</h1>
 
       {/* Loading State */}
       {loading && (
         <div className="flex justify-center items-center py-12">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-          <span className="ml-3 text-gray-600">Loading assigned reports...</span>
+          <span className="ml-3 text-gray-600">{t("assignedReports.loading")}</span>
         </div>
       )}
 
@@ -731,7 +733,7 @@ export default function AssignedReportsPage() {
                 <div className="relative">
                   <input
                     type="text"
-                    placeholder="Search reports..."
+                    placeholder={t("assignedReports.searchPlaceholder")}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
@@ -749,11 +751,11 @@ export default function AssignedReportsPage() {
                   onChange={(e) => setStatusFilter(e.target.value)}
                   className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200"
                 >
-                  <option value="">All Status</option>
-                  <option value="PENDING">Pending</option>
-                  <option value="IN_PROGRESS">In Progress</option>
-                  <option value="RF">RF</option>
-                  <option value="PR">PR</option>
+                  <option value="">{t("assignedReports.allStatuses")}</option>
+                  <option value="PENDING">{t("assignedReports.status.pending")}</option>
+                  <option value="IN_PROGRESS">{t("assignedReports.status.inProgress")}</option>
+                  <option value="RF">{t("common.rf")}</option>
+                  <option value="PR">{t("common.pr")}</option>
                 </select>
               </div>
 
@@ -769,7 +771,7 @@ export default function AssignedReportsPage() {
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
-                  Clear
+                  {t("common.clear")}
                 </button>
               )}
             </div>
@@ -779,7 +781,7 @@ export default function AssignedReportsPage() {
               <div className="mt-3 flex flex-wrap gap-2">
                 {searchQuery && (
                   <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800">
-                    Search: "{searchQuery}"
+                    {t("common.search")}: "{searchQuery}"
                     <button
                       onClick={() => setSearchQuery("")}
                       className="ml-2 hover:text-blue-600"
@@ -790,8 +792,8 @@ export default function AssignedReportsPage() {
                 )}
                 {statusFilter && (
                   <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-green-100 text-green-800">
-                    Status: {
-                      statusFilter === "IN_PROGRESS" ? "In Progress" : statusFilter
+                    {t("common.status")}: {
+                      statusFilter === "IN_PROGRESS" ? t("assignedReports.status.inProgress") : statusFilter
                     }
                     <button
                       onClick={() => setStatusFilter("")}
@@ -813,20 +815,20 @@ export default function AssignedReportsPage() {
                 onClick={() => toggleCategory('Recent')}
               >
                 <div className="flex items-center gap-3">
-                  <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200">Recent Reports</h2>
+                  <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200">{t("assignedReports.recentReports")}</h2>
                   <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-purple-100 text-purple-700 border border-purple-200">
-                    {recentReports.length} {recentReports.length === 1 ? 'report' : 'reports'}
+                    {tWithParams("assignedReports.reportCount", { count: recentReports.length })}
                   </span>
                   <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700 border border-green-200">
                     <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.707-10.293a1 1 0 00-1.414-1.414l-3 3a1 1 0 000 1.414l3 3a1 1 0 001.414-1.414L9.414 11H13a1 1 0 100-2H9.414l1.293-1.293z" clipRule="evenodd" />
                     </svg>
-                    Latest
+                    {t("common.latest")}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-sm text-gray-600 font-medium">
-                    {collapsedCategories['Recent'] ? 'Show' : 'Hide'}
+                    {collapsedCategories['Recent'] ? t("common.show") : t("common.hide")}
                   </span>
                   <svg 
                     className={`w-5 h-5 text-gray-600 transition-transform duration-200 ${
@@ -856,7 +858,7 @@ export default function AssignedReportsPage() {
                               {report.description?.substring(0, 45)}...
                             </h3>
                             <p className="text-xs text-gray-500 font-medium">
-                              Report #{report.id}
+                              {tWithParams("assignedReports.reportCard.reportNumber", { id: report.id })}
                             </p>
                           </div>
                           <div className="ml-4 flex-shrink-0 flex flex-col gap-1">
@@ -878,7 +880,7 @@ export default function AssignedReportsPage() {
                             </div>
                             <div>
                               <p className="font-medium text-gray-900 dark:text-gray-100 text-sm">{report.customLocation}</p>
-                              <p className="text-gray-500 text-xs">Location</p>
+                              <p className="text-gray-500 text-xs">{t("assignedReports.reportCard.location")}</p>
                             </div>
                           </div>
                           <div className="flex items-center text-sm">
@@ -889,7 +891,7 @@ export default function AssignedReportsPage() {
                             </div>
                             <div>
                               <p className="font-medium text-gray-900 dark:text-gray-100 text-sm">{report.reportedBy?.username}</p>
-                              <p className="text-gray-500 text-xs">Reported by</p>
+                              <p className="text-gray-500 text-xs">{t("assignedReports.reportCard.reportedBy")}</p>
                             </div>
                           </div>
                           <div className="flex items-center text-sm">
@@ -900,7 +902,7 @@ export default function AssignedReportsPage() {
                             </div>
                             <div>
                               <p className="font-medium text-gray-900 dark:text-gray-100 text-sm">{report.assignedTo?.name}</p>
-                              <p className="text-gray-500 text-xs">Assigned to</p>
+                              <p className="text-gray-500 text-xs">{t("assignedReports.reportCard.assignedTo")}</p>
                             </div>
                           </div>
                           <div className="flex items-center text-sm">
@@ -999,7 +1001,7 @@ export default function AssignedReportsPage() {
                                   <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                                     <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                                   </svg>
-                                  Details
+                                  {t("assignedReports.reportCard.viewDetails")}
                                 </div>
                               </button>
                             </div>
@@ -1008,13 +1010,13 @@ export default function AssignedReportsPage() {
                               <button
                                 onClick={(e) => handleDeleteClick(report, e)}
                                 className="w-full bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-xl font-semibold transition-all duration-200 shadow-sm hover:shadow-md text-sm"
-                                title="Delete Report"
+                                title={t("assignedReports.reportCard.deleteReport")}
                               >
                                 <div className="flex items-center justify-center gap-2">
                                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                   </svg>
-                                  Delete Report
+                                  {t("assignedReports.reportCard.deleteReport")}
                                 </div>
                               </button>
                             )}
@@ -1031,7 +1033,7 @@ export default function AssignedReportsPage() {
           {/* Categorized Groups */}
           {Object.keys(groupedReports).length === 0 && recentReports.length === 0 ? (
             <div className="col-span-full text-center py-12">
-              <p className="text-gray-500 text-lg">No assigned reports found.</p>
+              <p className="text-gray-500 text-lg">{t("assignedReports.noReports")}</p>
             </div>
           ) : (
             Object.entries(groupedReports)
@@ -1080,7 +1082,7 @@ export default function AssignedReportsPage() {
                                   {report.description?.substring(0, 45)}...
                                 </h3>
                                 <p className="text-xs text-gray-500 font-medium">
-                                  Report #{report.id}
+                                  {tWithParams("assignedReports.reportCard.reportNumber", { id: report.id })}
                                 </p>
                               </div>
                               <div className="ml-4 flex-shrink-0 flex flex-col gap-1">
@@ -1102,7 +1104,7 @@ export default function AssignedReportsPage() {
                                 </div>
                                 <div>
                                   <p className="font-medium text-gray-900 dark:text-gray-100 text-sm">{report.customLocation}</p>
-                                  <p className="text-gray-500 text-xs">Location</p>
+                                  <p className="text-gray-500 text-xs">{t("assignedReports.reportCard.location")}</p>
                                 </div>
                               </div>
                               <div className="flex items-center text-sm">
@@ -1113,7 +1115,7 @@ export default function AssignedReportsPage() {
                                 </div>
                                 <div>
                                   <p className="font-medium text-gray-900 dark:text-gray-100 text-sm">{report.reportedBy?.username}</p>
-                                  <p className="text-gray-500 text-xs">Reported by</p>
+                                  <p className="text-gray-500 text-xs">{t("assignedReports.reportCard.reportedBy")}</p>
                                 </div>
                               </div>
                               <div className="flex items-center text-sm">
@@ -1124,7 +1126,7 @@ export default function AssignedReportsPage() {
                                 </div>
                                 <div>
                                   <p className="font-medium text-gray-900 dark:text-gray-100 text-sm">{report.assignedTo?.name}</p>
-                                  <p className="text-gray-500 text-xs">Assigned to</p>
+                                  <p className="text-gray-500 text-xs">{t("assignedReports.reportCard.assignedTo")}</p>
                                 </div>
                               </div>
                               <div className="flex items-center text-sm">
@@ -1232,7 +1234,7 @@ export default function AssignedReportsPage() {
                                 <button
                                   onClick={(e) => handleDeleteClick(report, e)}
                                   className="w-full bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-xl font-semibold transition-all duration-200 shadow-sm hover:shadow-md text-sm"
-                                  title="Delete Report"
+                                  title={t("assignedReports.reportCard.deleteReport")}
                                 >
                                   <div className="flex items-center justify-center gap-2">
                                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1265,10 +1267,10 @@ export default function AssignedReportsPage() {
                 <div className="flex justify-between items-center">
                   <div>
                     <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                      {modalType === "update" ? "Update Report" : "Report Details"}
+                      {modalType === "update" ? t("assignedReports.updateReport") : t("reportDetails.title")}
                     </h2>
                     <p className="text-sm text-gray-600 mt-1">
-                      Report #{selectedReport.id} - {selectedReport.category}
+                      {tWithParams("assignedReports.reportCard.reportNumber", { id: selectedReport.id })} - {selectedReport.category}
                     </p>
                   </div>
                   <button
@@ -1304,7 +1306,7 @@ export default function AssignedReportsPage() {
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                           </div>
-                          Update Status
+                          {t("assignedReports.updateStatus")}
                         </label>
                         <div className="relative">
                           <select
@@ -1312,9 +1314,9 @@ export default function AssignedReportsPage() {
                             onChange={(e) => setStatus(e.target.value)}
                             className="w-full px-5 py-4 text-base bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 rounded-xl shadow-sm appearance-none cursor-pointer transition-all duration-200 hover:border-blue-400 dark:hover:border-blue-500 hover:shadow-md focus:outline-none focus:ring-4 focus:ring-blue-100 dark:focus:ring-blue-900/20 focus:border-blue-500 dark:focus:border-blue-400 font-medium text-gray-900 dark:text-gray-100"
                           >
-                            <option value="PENDING" className="py-2">Pending</option>
-                            <option value="IN PROGRESS" className="py-2">In Progress</option>
-                            <option value="COMPLETED" className="py-2">Completed</option>
+                            <option value="PENDING" className="py-2">{t("assignedReports.status.pending")}</option>
+                            <option value="IN PROGRESS" className="py-2">{t("assignedReports.status.inProgress")}</option>
+                            <option value="COMPLETED" className="py-2">{t("assignedReports.status.completed")}</option>
                           </select>
                           <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
                             <svg className="w-5 h-5 text-blue-500 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1332,7 +1334,7 @@ export default function AssignedReportsPage() {
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
                             </svg>
                           </div>
-                          Remark* <span className="text-red-500 text-sm">(Required)</span>
+                          {t("assignedReports.remark")}* <span className="text-red-500 text-sm">({t("common.required")})</span>
                         </label>
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
                           <label className={`flex items-center gap-3 border-2 rounded-xl px-4 py-3 cursor-pointer transition-all duration-200 ${
@@ -1466,7 +1468,7 @@ export default function AssignedReportsPage() {
                         onClick={() => setIsModalOpen(false)}
                         className="flex-1 bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 px-6 py-3 rounded-xl font-semibold hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500 transition-all duration-200 shadow-sm hover:shadow-md"
                       >
-                        Cancel
+                        {t("common.cancel")}
                       </button>
                       <button
                         onClick={handleUpdate}
@@ -1487,7 +1489,7 @@ export default function AssignedReportsPage() {
                             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                               <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                             </svg>
-                            Update Report
+                            {t("assignedReports.updateReport")}
                           </div>
                         )}
                       </button>
@@ -1498,23 +1500,23 @@ export default function AssignedReportsPage() {
                     {/* DETAILS VIEW */}
                     <div className="space-y-3">
                       <p>
-                        <strong>Description:</strong> {selectedReport.description}
+                        <strong>{t("reportDetails.fields.description")}:</strong> {selectedReport.description}
                       </p>
                       <p>
-                        <strong>Category:</strong> {selectedReport.category}
+                        <strong>{t("reportDetails.fields.category")}:</strong> {selectedReport.category}
                       </p>
                       <p>
-                        <strong>Location:</strong> {selectedReport.customLocation}
+                        <strong>{t("reportDetails.fields.location")}:</strong> {selectedReport.customLocation}
                       </p>
                       <p>
-                        <strong>Reported By:</strong>{" "}
+                        <strong>{t("reportDetails.fields.reportedBy")}:</strong>{" "}
                         {selectedReport.reportedBy?.username}
                       </p>
                       <p>
-                        <strong>Status:</strong> {selectedReport.status}
+                        <strong>{t("common.status")}:</strong> {selectedReport.status}
                       </p>
                       <p>
-                        <strong>Assigned To:</strong>{" "}
+                        <strong>{t("reportDetails.fields.assignedTo")}:</strong>{" "}
                         {selectedReport.assignedTo?.name}
                       </p>
                       <p>
@@ -1570,7 +1572,7 @@ export default function AssignedReportsPage() {
 
                     {/* Update history */}
                     <hr className="my-4" />
-                    <h3 className="font-semibold mb-2">Update History</h3>
+                    <h3 className="font-semibold mb-2">{t("reportDetails.updateHistory")}</h3>
                     {updates.length === 0 ? (
                       <p className="text-gray-500">No updates yet.</p>
                     ) : (
@@ -1590,7 +1592,7 @@ export default function AssignedReportsPage() {
                               </p>
                             )}
                             <p>
-                              <strong>Updated At:</strong>{" "}
+                              <strong>{t("common.updatedAt")}:</strong>{" "}
                               {formatDateTime(update.updateTime)}
                             </p>
                             {update.photoUrls?.length > 0 && (
@@ -1599,7 +1601,7 @@ export default function AssignedReportsPage() {
                                   <img
                                     key={i}
                                     src={toInlineUrl(photo)}
-                                    alt={`Update Photo ${i + 1}`}
+                                    alt={tWithParams("assignedReports.updatePhoto", { number: i + 1 })}
                                     className="w-20 h-20 object-cover rounded border cursor-pointer hover:opacity-75"
                                     onClick={() => openMediaViewer(photo, "image")}
                                   />
@@ -1674,7 +1676,7 @@ export default function AssignedReportsPage() {
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full overflow-hidden">
             <div className="bg-gradient-to-r from-red-500 to-red-600 px-6 py-4">
-              <h3 className="text-xl font-bold text-white">Confirm Delete</h3>
+              <h3 className="text-xl font-bold text-white">{t("assignedReports.deleteConfirm.title")}</h3>
             </div>
             <div className="p-6">
               <div className="flex items-start gap-4 mb-6">
@@ -1688,7 +1690,7 @@ export default function AssignedReportsPage() {
                     Are you sure you want to delete this report?
                   </p>
                   <p className="text-sm text-gray-600">
-                    Report #{reportToDelete?.id}: {reportToDelete?.description?.substring(0, 50)}...
+                    {tWithParams("assignedReports.reportCard.reportNumber", { id: reportToDelete?.id })}: {reportToDelete?.description?.substring(0, 50)}...
                   </p>
                   <p className="text-sm text-red-600 mt-2 font-medium">
                     This action cannot be undone.
@@ -1701,7 +1703,7 @@ export default function AssignedReportsPage() {
                   disabled={isDeleting}
                   className="flex-1 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-semibold py-2.5 px-4 rounded-xl transition-all duration-200"
                 >
-                  Cancel
+                  {t("assignedReports.deleteConfirm.cancel")}
                 </button>
                 <button
                   onClick={handleDeleteConfirm}
@@ -1718,7 +1720,7 @@ export default function AssignedReportsPage() {
                       Deleting...
                     </div>
                   ) : (
-                    'Delete Report'
+                    t("assignedReports.deleteConfirm.delete")
                   )}
                 </button>
               </div>

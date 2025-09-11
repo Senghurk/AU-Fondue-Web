@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
+import { useTranslation } from "../hooks/useTranslation";
 import { getBackendUrl } from "../config/api";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card";
@@ -19,6 +20,7 @@ export default function LoginPage() {
   const { login } = useAuth();
   const { setLightTheme } = useTheme();
   const { toast, clearAllToasts } = useToast();
+  const { t, tWithParams } = useTranslation();
   const [loginType, setLoginType] = useState(null); // null, 'admin', 'staff'
   const [staffCredentials, setStaffCredentials] = useState({
     omId: '',
@@ -60,22 +62,22 @@ export default function LoginPage() {
         if (popupError.code === 'auth/popup-closed-by-user') {
           toast({
             variant: "error",
-            title: "Sign-in Cancelled",
-            description: "Sign-in popup was closed. Please try again.",
+            title: t('login.messages.signInCancelled'),
+            description: t('login.messages.signInCancelledDesc'),
           });
           return;
         } else if (popupError.code === 'auth/cancelled-popup-request') {
           toast({
             variant: "error",
-            title: "Popup Error",
-            description: "Another sign-in popup is already open.",
+            title: t('login.messages.popupError'),
+            description: t('login.messages.popupErrorDesc'),
           });
           return;
         } else if (popupError.code === 'auth/popup-blocked') {
           toast({
             variant: "error",
-            title: "Popup Blocked",
-            description: "Sign-in popup was blocked by your browser. Please allow popups for this site.",
+            title: t('login.messages.popupBlocked'),
+            description: t('login.messages.popupBlockedDesc'),
           });
           return;
         }
@@ -90,8 +92,8 @@ export default function LoginPage() {
       if (!adminEmail) {
         toast({
           variant: "error",
-          title: "Authentication Failed",
-          description: "Could not retrieve email from Microsoft account",
+          title: t('login.messages.authFailed'),
+          description: t('login.messages.noEmail'),
         });
         setIsLoading(false);
         return;
@@ -101,8 +103,8 @@ export default function LoginPage() {
       if (!adminEmail.endsWith("@au.edu")) {
         toast({
           variant: "error",
-          title: "Invalid Email Domain",
-          description: "Only @au.edu email addresses are allowed for administrators",
+          title: t('login.messages.invalidDomain'),
+          description: t('login.messages.invalidDomainDesc'),
         });
         // Sign out from Firebase
         await auth.signOut();
@@ -134,8 +136,8 @@ export default function LoginPage() {
         console.log("Admin authentication failed:", backendResult.message);
         toast({
           variant: "error",
-          title: "Access Denied",
-          description: backendResult.message || "Admin authentication failed.",
+          title: t('login.messages.accessDenied'),
+          description: backendResult.message || t('login.messages.adminAuthFailed'),
         });
         setIsLoading(false);
         return;
@@ -155,10 +157,10 @@ export default function LoginPage() {
         title: (
           <div className="flex items-center gap-2">
             <CheckCircle className="h-4 w-4" />
-            Login Successful!
+            {t('login.messages.loginSuccess')}
           </div>
         ),
-        description: `Welcome back, ${name}!`,
+        description: tWithParams('login.messages.welcomeBack', { name }),
       });
       
       // Update auth context with user data from backend
@@ -183,19 +185,12 @@ export default function LoginPage() {
       console.error("Login failed:", error);
       setIsLoading(false);
       
-      let errorMessage = "Login failed: ";
-      if (error.message && error.message.includes('Failed to fetch')) {
-        errorMessage += "Cannot connect to server. Please check your internet connection or contact support.";
-      } else if (error.message && error.message.includes('Backend check failed')) {
-        errorMessage += "Server authentication error. Please try again or contact support.";
-      } else {
-        errorMessage += error.message || "An unknown error occurred";
-      }
+      let errorMessage = error.message || "";
       
       toast({
         variant: "error",
-        title: "Login Error",
-        description: errorMessage,
+        title: t('login.messages.connectionError'),
+        description: t('login.messages.connectionErrorDesc'),
       });
       
       // Sign out from Firebase if login failed
@@ -217,12 +212,12 @@ export default function LoginPage() {
           title: (
             <div className="flex items-center gap-2">
               <AlertCircle className="h-4 w-4" />
-              Missing Information
+              {t('login.messages.missingInfo')}
             </div>
           ),
           description: !staffCredentials.omId.trim() 
-            ? "Please enter your Staff ID." 
-            : "Please enter your password.",
+            ? t('login.messages.enterStaffId') 
+            : t('login.messages.enterPassword'),
         });
         setIsLoading(false);
         return;
@@ -253,14 +248,14 @@ export default function LoginPage() {
             title: (
               <div className="flex items-center gap-2">
                 <AlertCircle className="h-5 w-5 text-red-600" />
-                Security Alert
+                {t('login.messages.securityAlert')}
               </div>
             ),
             description: (
               <div className="space-y-1">
-                <p className="font-semibold text-red-700">Default password no longer valid!</p>
-                <p className="text-sm">Your password has been changed. Please use your new password to login.</p>
-                <p className="text-xs text-gray-600 mt-2">For security reasons, the default password cannot be used after you've set a new password.</p>
+                <p className="font-semibold text-red-700">{t('login.messages.defaultPasswordInvalid')}</p>
+                <p className="text-sm">{t('login.messages.passwordChanged')}</p>
+                <p className="text-xs text-gray-600 mt-2">{t('login.messages.securityReason')}</p>
               </div>
             ),
             duration: 8000, // Show for longer since it's important
@@ -271,10 +266,10 @@ export default function LoginPage() {
             title: (
               <div className="flex items-center gap-2">
                 <X className="h-4 w-4" />
-                Login Failed
+                {t('login.messages.loginFailed')}
               </div>
             ),
-            description: result.message || "Staff login failed.",
+            description: result.message || t('login.messages.staffLoginFailed'),
           });
         }
         setIsLoading(false);
@@ -307,10 +302,10 @@ export default function LoginPage() {
           title: (
             <div className="flex items-center gap-2">
               <AlertCircle className="h-4 w-4" />
-              Password Change Required
+              {t('login.messages.passwordChangeRequired')}
             </div>
           ),
-          description: "You must change your password before continuing.",
+          description: t('login.messages.mustChangePassword'),
         });
         
         login(userData);
@@ -327,10 +322,10 @@ export default function LoginPage() {
           title: (
             <div className="flex items-center gap-2">
               <CheckCircle className="h-4 w-4" />
-              Login Successful!
+              {t('login.messages.loginSuccess')}
             </div>
           ),
-          description: `Welcome back, ${userData.name}!`,
+          description: tWithParams('login.messages.welcomeBack', { name: userData.name }),
         });
         
         login(userData);
@@ -346,8 +341,8 @@ export default function LoginPage() {
       console.error("Staff login failed:", error);
       toast({
         variant: "error",
-        title: "Connection Error",
-        description: "Login failed: " + (error.message || "Unable to connect to server"),
+        title: t('login.messages.connectionError'),
+        description: t('login.messages.connectionErrorDesc'),
       });
     } finally {
       setIsLoading(false);
@@ -374,13 +369,13 @@ export default function LoginPage() {
                 </svg>
               </div>
               <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-800 to-blue-800 bg-clip-text text-transparent mb-3">
-                AU Fondue
+                {t('login.title')}
               </h1>
               <p className="text-gray-600 text-lg">
-                Maintenance Management System
+                {t('login.subtitle')}
               </p>
               <p className="text-gray-500 text-sm mt-2">
-                Choose your access level to continue
+                {t('login.chooseAccess')}
               </p>
             </div>
 
@@ -401,8 +396,8 @@ export default function LoginPage() {
                             <Shield className="h-6 w-6" />
                           </div>
                           <div>
-                            <h3 className="text-xl font-semibold">Administrator</h3>
-                            <p className="text-blue-100 text-sm">Full system access & management</p>
+                            <h3 className="text-xl font-semibold">{t('login.admin.title')}</h3>
+                            <p className="text-blue-100 text-sm">{t('login.admin.subtitle')}</p>
                           </div>
                         </div>
                         <svg className="w-5 h-5 opacity-70 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -425,8 +420,8 @@ export default function LoginPage() {
                             <Users className="h-6 w-6 text-gray-600" />
                           </div>
                           <div>
-                            <h3 className="text-xl font-semibold text-gray-800">OM Staff</h3>
-                            <p className="text-gray-600 text-sm">Operational maintenance tasks</p>
+                            <h3 className="text-xl font-semibold text-gray-800">{t('login.staff.title')}</h3>
+                            <p className="text-gray-600 text-sm">{t('login.staff.subtitle')}</p>
                           </div>
                         </div>
                         <svg className="w-5 h-5 text-gray-400 group-hover:text-gray-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -443,14 +438,11 @@ export default function LoginPage() {
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                     </svg>
-                    <span>Secured by enterprise-grade authentication</span>
+                    <span>{t('login.securedBy')}</span>
                   </div>
                   <div className="text-center mt-3">
                     <p className="text-xs text-gray-400 leading-relaxed">
-                      By accessing this system, you agree to our{" "}
-                      <a href="#" className="text-blue-600 hover:text-blue-700 hover:underline transition-colors">Terms of Service</a>
-                      {" "}and{" "}
-                      <a href="#" className="text-blue-600 hover:text-blue-700 hover:underline transition-colors">Privacy Policy</a>
+                      {t('login.termsText')}
                     </p>
                   </div>
                 </div>
@@ -460,7 +452,7 @@ export default function LoginPage() {
             {/* Footer */}
             <div className="text-center mt-6">
               <p className="text-sm text-gray-500">
-                Assumption University © 2024
+                {t('login.copyright')}
               </p>
             </div>
           </div>
@@ -488,8 +480,8 @@ export default function LoginPage() {
                 <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-600 border-t-transparent absolute top-0"></div>
               </div>
               <div className="text-center">
-                <p className="text-lg font-semibold text-gray-800">Logging in as Admin...</p>
-                <p className="text-sm text-gray-600 mt-1">Authenticating your credentials</p>
+                <p className="text-lg font-semibold text-gray-800">{t('login.admin.loggingIn')}</p>
+                <p className="text-sm text-gray-600 mt-1">{t('login.admin.authenticating')}</p>
               </div>
             </div>
           </div>
@@ -504,7 +496,7 @@ export default function LoginPage() {
               className="mb-6 p-2 hover:bg-white/20 transition-colors"
             >
               <ArrowLeft className="h-5 w-5 mr-2" />
-              Back to login options
+              {t('login.backToLogin')}
             </Button>
 
             {/* Header */}
@@ -513,10 +505,10 @@ export default function LoginPage() {
                 <Shield className="w-10 h-10 text-white" />
               </div>
               <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-700 bg-clip-text text-transparent mb-3">
-                Administrator Login
+                {t('login.admin.loginTitle')}
               </h1>
               <p className="text-gray-600 text-lg">
-                Access the management dashboard
+                {t('login.admin.loginSubtitle')}
               </p>
             </div>
 
@@ -535,12 +527,12 @@ export default function LoginPage() {
                       {isLoading ? (
                         <>
                           <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent mr-3"></div>
-                          Logging in...
+                          {t('login.admin.loggingIn')}
                         </>
                       ) : (
                         <>
                           <Shield className="h-6 w-6 mr-3 flex-shrink-0" />
-                          Continue as Administrator
+                          {t('login.admin.continueAs')}
                         </>
                       )}
                     </Button>
@@ -555,9 +547,9 @@ export default function LoginPage() {
                         </svg>
                       </div>
                       <div>
-                        <h4 className="text-blue-800 font-semibold text-sm">Microsoft Authentication Required</h4>
+                        <h4 className="text-blue-800 font-semibold text-sm">{t('login.admin.microsoftAuth')}</h4>
                         <p className="text-blue-700 text-sm mt-1">
-                          Sign in with your @au.edu Microsoft account. Only registered administrators can access the dashboard.
+                          {t('login.admin.microsoftDesc')}
                         </p>
                       </div>
                     </div>
@@ -571,7 +563,7 @@ export default function LoginPage() {
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                         </svg>
                       </div>
-                      <p className="text-xs text-gray-600">Secure Access</p>
+                      <p className="text-xs text-gray-600">{t('login.admin.secureAccess')}</p>
                     </div>
                     <div className="text-center">
                       <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-2">
@@ -579,7 +571,7 @@ export default function LoginPage() {
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                         </svg>
                       </div>
-                      <p className="text-xs text-gray-600">Enterprise Grade</p>
+                      <p className="text-xs text-gray-600">{t('login.admin.enterpriseGrade')}</p>
                     </div>
                   </div>
                 </div>
@@ -589,7 +581,7 @@ export default function LoginPage() {
             {/* Footer */}
             <div className="text-center mt-6">
               <p className="text-sm text-gray-500">
-                Assumption University © 2024
+                {t('login.copyright')}
               </p>
             </div>
           </div>
@@ -617,8 +609,8 @@ export default function LoginPage() {
                 <div className="animate-spin rounded-full h-12 w-12 border-4 border-gray-600 border-t-transparent absolute top-0"></div>
               </div>
               <div className="text-center">
-                <p className="text-lg font-semibold text-gray-800">Logging in as Staff...</p>
-                <p className="text-sm text-gray-600 mt-1">Verifying OM ID: {staffCredentials.omId}</p>
+                <p className="text-lg font-semibold text-gray-800">{t('login.staff.loggingIn')}</p>
+                <p className="text-sm text-gray-600 mt-1">{tWithParams('login.staff.verifying', { omId: staffCredentials.omId })}</p>
               </div>
             </div>
           </div>
@@ -633,7 +625,7 @@ export default function LoginPage() {
               className="mb-6 p-2 hover:bg-white/20 transition-colors"
             >
               <ArrowLeft className="h-5 w-5 mr-2" />
-              Back to login options
+              {t('login.backToLogin')}
             </Button>
 
             {/* Header */}
@@ -642,10 +634,10 @@ export default function LoginPage() {
                 <Users className="w-10 h-10 text-white" />
               </div>
               <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-600 to-gray-800 bg-clip-text text-transparent mb-3">
-                Staff Login
+                {t('login.staff.loginTitle')}
               </h1>
               <p className="text-gray-600 text-lg">
-                Access operational maintenance tasks
+                {t('login.staff.loginSubtitle')}
               </p>
             </div>
 
@@ -657,13 +649,13 @@ export default function LoginPage() {
                   <div className="space-y-5">
                     <div className="space-y-2">
                       <Label htmlFor="omId" className="text-sm font-semibold text-gray-700">
-                        OM ID
+                        {t('login.staff.omId')}
                       </Label>
                       <div className="relative">
                         <Input
                           id="omId"
                           type="text"
-                          placeholder="Enter your OM ID (e.g., OM01, OM12)"
+                          placeholder={t('login.staff.omIdPlaceholder')}
                           value={staffCredentials.omId}
                           onChange={(e) => setStaffCredentials({ ...staffCredentials, omId: e.target.value })}
                           className="text-lg py-4 pl-12 bg-gray-50 border-gray-200 focus:bg-white focus:border-blue-500 transition-all duration-200"
@@ -676,13 +668,13 @@ export default function LoginPage() {
 
                     <div className="space-y-2">
                       <Label htmlFor="password" className="text-sm font-semibold text-gray-700">
-                        Password
+                        {t('login.staff.password')}
                       </Label>
                       <div className="relative">
                         <Input
                           id="password"
                           type="password"
-                          placeholder="Enter your password"
+                          placeholder={t('login.staff.passwordPlaceholder')}
                           value={staffCredentials.password}
                           onChange={(e) => setStaffCredentials({ ...staffCredentials, password: e.target.value })}
                           className="text-lg py-4 pl-12"
@@ -703,9 +695,9 @@ export default function LoginPage() {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                           </svg>
                           <div className="text-sm">
-                            <p className="text-blue-800 dark:text-blue-300 font-medium">Default Password</p>
-                            <p className="text-blue-700 dark:text-blue-400">For new staff members: <span className="font-semibold">OMstaff123</span></p>
-                            <p className="text-blue-600 dark:text-blue-500 text-xs mt-1">You will be forced to change password on first login</p>
+                            <p className="text-blue-800 dark:text-blue-300 font-medium">{t('login.staff.defaultPassword')}</p>
+                            <p className="text-blue-700 dark:text-blue-400">{t('login.staff.defaultPasswordDesc')}</p>
+                            <p className="text-blue-600 dark:text-blue-500 text-xs mt-1">{t('login.staff.passwordChangeNote')}</p>
                           </div>
                         </div>
                     </div>
@@ -720,9 +712,9 @@ export default function LoginPage() {
                         </svg>
                       </div>
                       <div>
-                        <h4 className="text-amber-800 font-semibold text-sm">Staff Authentication</h4>
+                        <h4 className="text-amber-800 font-semibold text-sm">{t('login.staff.authNote')}</h4>
                         <p className="text-amber-700 text-sm mt-1">
-                          Use your Staff ID (e.g., OM01, OM02) and password to login.
+                          {t('login.staff.authDesc')}
                         </p>
                       </div>
                     </div>
@@ -745,12 +737,12 @@ export default function LoginPage() {
                       {isLoading ? (
                         <>
                           <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent mr-3"></div>
-                          Logging in...
+                          {t('login.staff.loggingIn')}
                         </>
                       ) : (
                         <>
                           <Users className="h-5 w-5 mr-3 flex-shrink-0" />
-                          Continue as OM Staff
+                          {t('login.staff.continueAs')}
                         </>
                       )}
                     </Button>
@@ -764,7 +756,7 @@ export default function LoginPage() {
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                         </svg>
                       </div>
-                      <p className="text-xs text-gray-600">Task Management</p>
+                      <p className="text-xs text-gray-600">{t('login.staff.taskManagement')}</p>
                     </div>
                     <div className="text-center">
                       <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-2">
@@ -772,7 +764,7 @@ export default function LoginPage() {
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                         </svg>
                       </div>
-                      <p className="text-xs text-gray-600">Real-time Updates</p>
+                      <p className="text-xs text-gray-600">{t('login.staff.realTimeUpdates')}</p>
                     </div>
                   </div>
                 </div>
@@ -782,7 +774,7 @@ export default function LoginPage() {
             {/* Footer */}
             <div className="text-center mt-6">
               <p className="text-sm text-gray-500">
-                Assumption University © 2024
+                {t('login.copyright')}
               </p>
             </div>
           </div>

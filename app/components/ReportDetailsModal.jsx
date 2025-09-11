@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "../hooks/useTranslation";
+
 export default function ReportDetailsModal({ 
   isOpen, 
   onClose, 
@@ -9,6 +11,8 @@ export default function ReportDetailsModal({
   showUpdateHistory = false,
   updateHistory = []
 }) {
+  const { t, tWithParams } = useTranslation();
+  
   if (!isOpen || !report) return null;
 
   return (
@@ -18,8 +22,8 @@ export default function ReportDetailsModal({
         <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4">
           <div className="flex justify-between items-center">
             <div>
-              <h2 className="text-2xl font-bold text-white">Report Details</h2>
-              <p className="text-blue-100 text-sm mt-1">Issue #{report.id}</p>
+              <h2 className="text-2xl font-bold text-white">{t("reportDetails.title")}</h2>
+              <p className="text-blue-100 text-sm mt-1">{tWithParams("reportDetails.issueNumber", { id: report.id })}</p>
             </div>
             <button
               onClick={onClose}
@@ -58,14 +62,14 @@ export default function ReportDetailsModal({
               <div className="space-y-6">
                 {/* Description */}
                 <div className="bg-gray-50 rounded-xl p-4">
-                  <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-2">Description</h3>
+                  <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-2">{t("reportDetails.fields.description")}</h3>
                   <p className="text-gray-900 text-base leading-relaxed">{report.description}</p>
                 </div>
 
                 {/* Details Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="bg-white border border-gray-200 rounded-xl p-4">
-                    <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Category</h4>
+                    <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">{t("reportDetails.fields.category")}</h4>
                     <div className="flex items-center">
                       <div className="w-3 h-3 bg-orange-500 rounded-full mr-2"></div>
                       <span className="text-gray-900 font-medium">{report.category}</span>
@@ -73,7 +77,7 @@ export default function ReportDetailsModal({
                   </div>
 
                   <div className="bg-white border border-gray-200 rounded-xl p-4">
-                    <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Location</h4>
+                    <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">{t("reportDetails.fields.location")}</h4>
                     <div className="flex items-center">
                       <svg className="w-4 h-4 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
@@ -84,7 +88,7 @@ export default function ReportDetailsModal({
                   </div>
 
                   <div className="bg-white border border-gray-200 rounded-xl p-4">
-                    <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Reported By</h4>
+                    <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">{t("reportDetails.fields.reportedBy")}</h4>
                     <div className="flex items-center">
                       <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-2">
                         <span className="text-blue-600 font-semibold text-sm">
@@ -97,7 +101,7 @@ export default function ReportDetailsModal({
 
                   {report.assignedTo && (
                     <div className="bg-white border border-gray-200 rounded-xl p-4">
-                      <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Assigned To</h4>
+                      <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">{t("reportDetails.fields.assignedTo")}</h4>
                       <div className="flex items-center">
                         <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mr-2">
                           <span className="text-green-600 font-semibold text-sm">
@@ -110,7 +114,7 @@ export default function ReportDetailsModal({
                   )}
 
                   <div className="bg-white border border-gray-200 rounded-xl p-4">
-                    <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Reported At</h4>
+                    <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">{t("reportDetails.fields.reportedAt")}</h4>
                     <div className="flex items-center">
                       <svg className="w-4 h-4 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -127,14 +131,14 @@ export default function ReportDetailsModal({
                 {/* Update History for Assigned Reports */}
                 {showUpdateHistory && updateHistory.length > 0 && (
                   <div className="bg-white border border-gray-200 rounded-xl p-4">
-                    <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-3">Update History</h3>
+                    <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-3">{t("reportDetails.updateHistory")}</h3>
                     <div className="space-y-3">
                       {updateHistory.map((update, index) => (
                         <div key={index} className="border-l-4 border-blue-200 pl-4 py-2">
                           <div className="flex justify-between items-start mb-1">
                             <div className="flex items-center gap-2">
                               <span className="text-sm font-medium text-gray-900">
-                                Status: {update.status}
+                                {tWithParams("reportDetails.statusUpdate", { status: update.status })}
                               </span>
                               {(update.resolutionType || update.remark) && (
                                 <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
@@ -166,7 +170,7 @@ export default function ReportDetailsModal({
                 {report.photoUrls?.length > 0 && (
                   <div>
                     <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-3">
-                      Photos ({report.photoUrls.length})
+                      {tWithParams("reportDetails.media.photos", { count: report.photoUrls.length })}
                     </h3>
                     <div className="grid grid-cols-2 gap-3">
                       {report.photoUrls.map((photo, i) => {
@@ -177,7 +181,7 @@ export default function ReportDetailsModal({
                           <div key={i} className="group relative">
                             <img
                               src={inlineUrl}
-                              alt={`Photo ${i + 1}`}
+                              alt={tWithParams("reportDetails.media.photoAlt", { number: i + 1 })}
                               className="w-full h-32 object-cover rounded-lg border-2 border-gray-200 cursor-pointer transition-all duration-200 group-hover:border-blue-300 group-hover:shadow-lg"
                               onClick={() => onMediaView(base, "image")}
                             />
@@ -196,7 +200,7 @@ export default function ReportDetailsModal({
                 {report.videoUrls?.length > 0 && (
                   <div>
                     <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-3">
-                      Videos ({report.videoUrls.length})
+                      {tWithParams("reportDetails.media.videos", { count: report.videoUrls.length })}
                     </h3>
                     <div className="grid grid-cols-2 gap-3">
                       {report.videoUrls.map((video, i) => {
@@ -233,8 +237,8 @@ export default function ReportDetailsModal({
                     <svg className="w-12 h-12 text-gray-400 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
-                    <p className="text-gray-500 font-medium">No media attached</p>
-                    <p className="text-gray-400 text-sm mt-1">This report doesn't contain any photos or videos</p>
+                    <p className="text-gray-500 font-medium">{t("reportDetails.media.noMedia")}</p>
+                    <p className="text-gray-400 text-sm mt-1">{t("reportDetails.media.noMediaDesc")}</p>
                   </div>
                 )}
               </div>
