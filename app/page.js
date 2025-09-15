@@ -70,10 +70,12 @@ export default function Home() {
       {/* Top Navigation Bar */}
       <header className="w-full px-4 sm:px-8 py-4 sm:py-5 flex justify-between items-center bg-white shadow-sm sticky top-0 z-50">
         <div className="flex items-center">
-          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 tracking-tight">
+          <a
+            href="/"
+            className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 tracking-tight hover:text-red-600 transition-colors"
+          >
             {t('landing.title')}
-            <span className="text-red-600 font-normal"> {t('landing.subtitle')}</span>
-          </h1>
+          </a>
         </div>
         <nav className="flex items-center gap-3 sm:gap-8">
           <a
@@ -112,67 +114,59 @@ export default function Home() {
           </p>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center mb-8 sm:mb-12 px-4 sm:px-0">
-          <Button
-            className="flex items-center gap-2 sm:gap-3 bg-red-600 hover:bg-red-700 text-white px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 w-full sm:w-auto"
-            onClick={() =>
-              window.open(
-                "https://play.google.com/store/apps/details?id=com.yourapp.au_fondue",
-                "_blank"
-              )
-            }
-          >
-            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M3,20.5V3.5C3,2.91 3.34,2.39 3.84,2.15L13.69,12L3.84,21.85C3.34,21.61 3,21.09 3,20.5M16.81,15.12L6.05,21.34L14.54,12.85L16.81,15.12M20.16,10.81C20.5,11.08 20.75,11.5 20.75,12C20.75,12.5 20.53,12.9 20.18,13.18L17.89,14.5L15.39,12L17.89,9.5L20.16,10.81M6.05,2.66L16.81,8.88L14.54,11.15L6.05,2.66Z" />
-            </svg>
-            {t('landing.hero.downloadApp')}
-          </Button>
 
-          <Button
-            className="flex items-center gap-2 bg-white hover:bg-gray-50 text-gray-700 border-2 border-gray-200 hover:border-gray-300 px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg rounded-lg shadow-md hover:shadow-lg transition-all duration-300 w-full sm:w-auto"
-            onClick={() => (window.location.href = "/Log-in")}
-          >
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-              />
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-              />
-            </svg>
-            {t('landing.hero.viewDemo')}
-          </Button>
-        </div>
+        {/* Platform Overview Cards - Moved up immediately after hero */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto mt-12 px-4">
+            <div className="bg-white p-6 rounded-xl shadow-md border-2 border-red-100 hover:border-red-300 transition-colors">
+              <div className="flex items-center justify-center mb-4">
+                <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
+                  <svg className="w-10 h-10 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                </div>
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-3">{t('landing.platforms.webDashboard.title')}</h3>
+              <div className="text-xs font-semibold text-red-600 mb-2">{t('landing.platforms.webDashboard.subtitle')}</div>
+              <p className="text-gray-600 text-sm leading-relaxed">{t('landing.platforms.webDashboard.description')}</p>
+            </div>
 
-        {/* Stats Section */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-8 max-w-4xl mx-auto px-4 sm:px-0">
-          <div className="text-center p-4 sm:p-6">
-            <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-red-600 mb-1 sm:mb-2">50%</div>
-            <div className="text-sm sm:text-base text-gray-600">{t('landing.stats.fasterResolution').replace('50% ', '')}</div>
+            <div className="bg-white p-6 rounded-xl shadow-md border-2 border-blue-100 hover:border-blue-300 transition-colors">
+              <div className="flex items-center justify-center mb-4">
+                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
+                  <svg className="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                  </svg>
+                </div>
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-3">{t('landing.platforms.mobileApp.title')}</h3>
+              <div className="text-xs font-semibold text-blue-600 mb-2">{t('landing.platforms.mobileApp.subtitle')}</div>
+              <p className="text-gray-600 text-sm leading-relaxed mb-5">{t('landing.platforms.mobileApp.description')}</p>
+              <div className="flex justify-center">
+                <a
+                  href="https://play.google.com/store/apps/details?id=edu.au.unimend.aufondue&hl=en"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-block"
+                >
+                  <div className="bg-black hover:bg-gray-800 text-white rounded-md px-4 py-2 transition-all duration-200 hover:shadow-lg flex items-center gap-3">
+                    <svg className="w-6 h-6" viewBox="0 0 24 24">
+                      <path fill="#00D4FF" d="M3,20.5V3.5C3,2.9 3.35,2.37 3.84,2.13L13.69,12L3.84,21.87C3.35,21.63 3,21.1 3,20.5Z"/>
+                      <path fill="#00FF94" d="M6.05,2.66L16.81,8.88L14.54,11.15L6.05,2.66Z"/>
+                      <path fill="#FFEA00" d="M16.81,15.12L6.05,21.34L14.54,12.85L16.81,15.12Z"/>
+                      <path fill="#FF4444" d="M20.16,10.81C20.5,11.08 20.75,11.5 20.75,12C20.75,12.5 20.53,12.9 20.18,13.18L17.89,14.5L15.39,12L17.89,9.5L20.16,10.81Z"/>
+                    </svg>
+                    <div className="flex flex-col">
+                      <span className="text-[9px] leading-none">{t('landing.platforms.mobileApp.getItOn')}</span>
+                      <span className="text-base font-medium -mt-0.5">{t('landing.platforms.mobileApp.googlePlay')}</span>
+                    </div>
+                  </div>
+                </a>
+              </div>
+            </div>
           </div>
-          <div className="text-center p-4 sm:p-6">
-            <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-red-600 mb-1 sm:mb-2">Next-Gen</div>
-            <div className="text-sm sm:text-base text-gray-600">{t('landing.stats.nextGen').replace('Next-Gen ', '')}</div>
-          </div>
-          <div className="text-center p-4 sm:p-6">
-            <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-red-600 mb-1 sm:mb-2">24/7</div>
-            <div className="text-sm sm:text-base text-gray-600">{t('landing.stats.realTimeMonitoring').replace('24/7 ', '')}</div>
-          </div>
-        </div>
       </div>
 
-      {/* What is AU Fondue Admin Section */}
+      {/* What is AU Fondue Section with Stats */}
       <section className="bg-gradient-to-b from-gray-50 to-white py-12 sm:py-20 px-4 sm:px-6">
         <div className="max-w-5xl mx-auto text-center">
           <div className="inline-flex items-center px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-blue-50 text-blue-700 text-xs sm:text-sm font-medium mb-4 sm:mb-6">
@@ -181,27 +175,46 @@ export default function Home() {
           <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6 text-gray-900">
             {t('landing.whatIs.title')}
           </h2>
-          <p className="text-base sm:text-lg md:text-xl text-gray-600 leading-relaxed max-w-4xl mx-auto px-2 sm:px-0">
+          <p className="text-base sm:text-lg md:text-xl text-gray-600 leading-relaxed max-w-4xl mx-auto px-2 sm:px-0 mb-8">
             {t('landing.whatIs.description')}
           </p>
+
+          {/* Stats Section */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-8 max-w-4xl mx-auto px-4 sm:px-0 mt-8">
+            <div className="text-center p-4 sm:p-6">
+              <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-red-600 mb-1 sm:mb-2">50%</div>
+              <div className="text-sm sm:text-base text-gray-600">{t('landing.stats.fasterResolution').replace('50% ', '')}</div>
+            </div>
+            <div className="text-center p-4 sm:p-6">
+              <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-red-600 mb-1 sm:mb-2">Next-Gen</div>
+              <div className="text-sm sm:text-base text-gray-600">{t('landing.stats.nextGen').replace('Next-Gen ', '')}</div>
+            </div>
+            <div className="text-center p-4 sm:p-6">
+              <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-red-600 mb-1 sm:mb-2">24/7</div>
+              <div className="text-sm sm:text-base text-gray-600">{t('landing.stats.realTimeMonitoring').replace('24/7 ', '')}</div>
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* Admin Features Section */}
+      {/* Admin Features Section - Web Platform */}
       <section
         id="features"
         className="bg-gradient-to-br from-gray-50 to-white py-24 px-6"
       >
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <div className="inline-flex items-center px-4 py-2 rounded-full bg-red-50 text-red-700 text-sm font-medium mb-6">
-              {t('landing.adminFeatures.title')}
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-red-50 text-red-700 text-sm font-medium mb-6">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+              {t('landing.features.webDashboard.badge')}
             </div>
             <h2 className="text-4xl md:text-5xl font-bold mb-6 text-gray-900">
               {t('landing.adminFeatures.subtitle')}
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              {t('landing.adminFeatures.description')}
+              {t('landing.features.webDashboard.description')}
             </p>
           </div>
 
@@ -236,8 +249,8 @@ export default function Home() {
                     desc: t('landing.adminFeatures.analytics.description'),
                   },
                   {
-                    title: t('landing.adminFeatures.notifications.title'),
-                    desc: t('landing.adminFeatures.notifications.description'),
+                    title: t('landing.features.dailyReports.title'),
+                    desc: t('landing.features.dailyReports.description'),
                   },
                 ],
               ].map((slide, slideIndex) => (
@@ -275,9 +288,9 @@ export default function Home() {
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                             </svg>
                           )}
-                          {feature.title === t('landing.adminFeatures.notifications.title') && (
+                          {feature.title === t('landing.features.dailyReports.title') && (
                             <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-5 5v-5zM10.07 2.82l3.46 3.46M12 10c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9 9 4.03 9 9zM10 8.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v1a1 1 0 001 1h4a1 1 0 001-1v-1m3-2V8a2 2 0 00-2-2H8a2 2 0 00-2 2v7m3-2h6m-6 4h6m2 0h.01M5 20h.01" />
                             </svg>
                           )}
                         </div>
@@ -315,18 +328,21 @@ export default function Home() {
         </div>
       </section>
 
-      {/* User Features Section */}
+      {/* User Features Section - Mobile App */}
       <section className="bg-gradient-to-br from-blue-50 to-indigo-50 py-24 px-6">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <div className="inline-flex items-center px-4 py-2 rounded-full bg-blue-100 text-blue-700 text-sm font-medium mb-6">
-              {t('landing.userFeatures.title')}
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-100 text-blue-700 text-sm font-medium mb-6">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+              </svg>
+              {t('landing.features.mobileApp.badge')}
             </div>
             <h2 className="text-4xl md:text-5xl font-bold mb-6 text-gray-900">
               {t('landing.userFeatures.subtitle')}
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              {t('landing.userFeatures.description')}
+              {t('landing.features.mobileApp.description')}
             </p>
           </div>
 
@@ -423,10 +439,10 @@ export default function Home() {
       </section>
 
       {/* About Section */}
-      <section id="about" className="bg-white py-24 px-6">
+      <section id="about" className="bg-gradient-to-b from-white to-gray-50 py-24 px-6">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <div className="inline-flex items-center px-4 py-2 rounded-full bg-gray-100 text-gray-700 text-sm font-medium mb-6">
+            <div className="inline-flex items-center px-4 py-2 rounded-full bg-red-50 text-red-700 text-sm font-medium mb-6">
               {t('landing.about.title')}
             </div>
             <h2 className="text-4xl md:text-5xl font-bold mb-6 text-gray-900">
@@ -437,145 +453,97 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-16">
-            <div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-6">
-                {t('landing.about.description1')}
+          {/* University and Project Information */}
+          <div className="bg-white rounded-3xl shadow-xl p-8 md:p-12 mb-16">
+            <div className="flex flex-col items-center mb-12">
+              <img
+                src="/VMES_logo.gif"
+                alt="VMES University Logo"
+                className="w-32 h-32 md:w-40 md:h-40 object-contain mb-6"
+              />
+              <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3">
+                Assumption University
               </h3>
-              <p className="text-gray-600 leading-relaxed mb-6">
-                {t('landing.about.description2')}
+              <p className="text-lg text-gray-600 text-center max-w-2xl">
+                Vincent Mary School of Engineering, Science and Technology
               </p>
-              <p className="text-gray-600 leading-relaxed mb-6">
-                {t('landing.about.description3')}
-              </p>
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
-                  <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                  </svg>
-                </div>
-                <div>
-                  <h4 className="font-semibold text-gray-900">{t('landing.about.innovationTitle')}</h4>
-                  <p className="text-sm text-gray-600">{t('landing.about.innovationSubtitle')}</p>
-                </div>
-              </div>
             </div>
-            <div className="bg-gradient-to-br from-red-50 to-blue-50 rounded-2xl p-8">
-              <div className="grid grid-cols-2 gap-6">
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+              <div>
+                <h3 className="text-2xl font-bold text-gray-900 mb-6">
+                  {t('landing.about.description1')}
+                </h3>
+                <p className="text-gray-600 leading-relaxed mb-6">
+                  {t('landing.about.description2')}
+                </p>
+                <p className="text-gray-600 leading-relaxed mb-6">
+                  {t('landing.about.description3')}
+                </p>
+              </div>
+              <div className="bg-gradient-to-br from-red-50 to-blue-50 rounded-2xl p-8 flex items-center justify-center">
                 <div className="text-center">
-                  <div className="text-3xl font-bold text-red-600 mb-2">2024</div>
-                  <div className="text-gray-600 text-sm">{t('landing.about.stats.yearDeveloped').replace('2024 ', '')}</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-blue-600 mb-2">100%</div>
-                  <div className="text-gray-600 text-sm">{t('landing.about.stats.auFocused').replace('100% ', '')}</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-green-600 mb-2">24/7</div>
-                  <div className="text-gray-600 text-sm">{t('landing.about.stats.support').replace('24/7 ', '')}</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-purple-600 mb-2">∞</div>
-                  <div className="text-gray-600 text-sm">{t('landing.about.stats.possibilities').replace('∞ ', '')}</div>
+                  <div className="flex items-center justify-center mb-4">
+                    <svg className="w-16 h-16 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    </svg>
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">{t('landing.aboutAU.builtForAU')}</h3>
+                  <p className="text-sm text-gray-600 max-w-xs">{t('landing.aboutAU.builtForAUDesc')}</p>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="bg-gradient-to-r from-gray-50 to-blue-50 rounded-2xl p-8 md:p-12">
-            <div className="text-center mb-8">
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                {t('landing.about.techStack.title')}
+          {/* Development Team Section */}
+          <div className="bg-gradient-to-r from-red-50 via-white to-blue-50 rounded-3xl p-8 md:p-12">
+            <div className="text-center mb-12">
+              <h3 className="text-3xl font-bold text-gray-900 mb-4">
+                {t('landing.team.title')}
               </h3>
-              <p className="text-gray-600 max-w-2xl mx-auto">
-                {t('landing.about.techStack.subtitle')}
+              <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+                {t('landing.team.subtitle')}
               </p>
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-              <div className="text-center">
-                <div className="w-16 h-16 bg-white rounded-lg shadow-md flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-12 h-12" viewBox="0 0 256 256" fill="none">
-                    <circle cx="128" cy="128" r="3" fill="#61DAFB"/>
-                    <ellipse cx="128" cy="128" rx="95" ry="35" stroke="#61DAFB" strokeWidth="8" fill="none"/>
-                    <ellipse cx="128" cy="128" rx="95" ry="35" stroke="#61DAFB" strokeWidth="8" fill="none" transform="rotate(60 128 128)"/>
-                    <ellipse cx="128" cy="128" rx="95" ry="35" stroke="#61DAFB" strokeWidth="8" fill="none" transform="rotate(120 128 128)"/>
-                  </svg>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {/* Developer 1 */}
+              <div className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
+                <div className="w-20 h-20 bg-gradient-to-br from-red-400 to-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span className="text-2xl font-bold text-white">SH</span>
                 </div>
-                <h4 className="font-medium text-gray-900">{t('landing.about.techStack.frontend').split(' - ')[0]}</h4>
-                <p className="text-sm text-gray-600">{t('landing.about.techStack.frontend').split(' - ')[1]}</p>
+                <h4 className="text-xl font-bold text-gray-900 text-center mb-2">
+                  {t('landing.team.developer1')}
+                </h4>
+                <p className="text-sm text-gray-600 text-center">{t('landing.team.roles.fullStack')}</p>
               </div>
-              <div className="text-center">
-                <div className="w-16 h-16 bg-white rounded-lg shadow-md flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-12 h-12" viewBox="0 0 256 256" fill="none">
-                    <circle cx="128" cy="128" r="128" fill="#68bd45"/>
-                    <path d="M128 64c-35.35 0-64 28.65-64 64 0 35.35 28.65 64 64 64 35.35 0 64-28.65 64-64 0-35.35-28.65-64-64-64z" fill="white"/>
-                    <path d="M200 128c0-39.76-32.24-72-72-72s-72 32.24-72 72 32.24 72 72 72 72-32.24 72-72z" fill="none" stroke="white" strokeWidth="4"/>
-                    <path d="M128 96c-17.67 0-32 14.33-32 32s14.33 32 32 32 32-14.33 32-32-14.33-32-32-32z" fill="#68bd45"/>
-                  </svg>
+
+              {/* Developer 2 */}
+              <div className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
+                <div className="w-20 h-20 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span className="text-2xl font-bold text-white">MT</span>
                 </div>
-                <h4 className="font-medium text-gray-900">{t('landing.about.techStack.backend').split(' - ')[0]}</h4>
-                <p className="text-sm text-gray-600">{t('landing.about.techStack.backend').split(' - ')[1]}</p>
+                <h4 className="text-xl font-bold text-gray-900 text-center mb-2">
+                  {t('landing.team.developer2')}
+                </h4>
+                <p className="text-sm text-gray-600 text-center">{t('landing.team.roles.frontend')}</p>
               </div>
-              <div className="text-center">
-                <div className="w-16 h-16 bg-white rounded-lg shadow-md flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-12 h-12" viewBox="0 0 256 256" fill="none">
-                    <path d="M230 128c0 17-8 33-22 43l-12-8c10-7 16-19 16-31 0-22-18-40-40-40-11 0-21 4-28 12l-8-6c10-11 24-18 40-18 29 0 54 23 54 52z" fill="#336791"/>
-                    <ellipse cx="100" cy="100" rx="8" ry="12" fill="#336791" transform="rotate(-15 100 100)"/>
-                    <ellipse cx="156" cy="100" rx="8" ry="12" fill="#336791" transform="rotate(15 156 100)"/>
-                    <path d="M128 200c-39 0-72-31-72-72 0-20 8-38 22-51l8 6c-11 10-18 25-18 41 0 33 27 60 60 60s60-27 60-60c0-16-7-31-18-41l8-6c14 13 22 31 22 51 0 41-33 72-72 72z" fill="#336791"/>
-                    <circle cx="128" cy="180" r="6" fill="#336791"/>
-                  </svg>
+
+              {/* Developer 3 */}
+              <div className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
+                <div className="w-20 h-20 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span className="text-2xl font-bold text-white">TH</span>
                 </div>
-                <h4 className="font-medium text-gray-900">{t('landing.about.techStack.database').split(' - ')[0]}</h4>
-                <p className="text-sm text-gray-600">{t('landing.about.techStack.database').split(' - ')[1]}</p>
-              </div>
-              <div className="text-center">
-                <div className="w-16 h-16 bg-white rounded-lg shadow-md flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-12 h-12" viewBox="0 0 256 256" fill="none">
-                    <path d="M80 80h96l16 32-16 32H80L64 112z" fill="#0078d4"/>
-                    <path d="M176 80h32l16 32-16 32h-32l-16-32z" fill="#40e0d0"/>
-                    <path d="M48 144h96l16 32-16 32H48l-16-32z" fill="#0078d4"/>
-                    <path d="M144 144h64l16 32-16 32h-64l-16-32z" fill="#40e0d0"/>
-                  </svg>
-                </div>
-                <h4 className="font-medium text-gray-900">{t('landing.about.techStack.cloud').split(' - ')[0]}</h4>
-                <p className="text-sm text-gray-600">{t('landing.about.techStack.cloud').split(' - ')[1]}</p>
+                <h4 className="text-xl font-bold text-gray-900 text-center mb-2">
+                  {t('landing.team.developer3')}
+                </h4>
+                <p className="text-sm text-gray-600 text-center">{t('landing.team.roles.frontend')}</p>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Call to Action Section */}
-      <section className="bg-gradient-to-r from-red-600 to-red-700 py-20 px-6 text-white">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-4xl md:text-5xl font-bold mb-6">
-            {t('landing.about.cta.title')}
-          </h2>
-          <p className="text-xl mb-8 opacity-90">
-            {t('landing.about.cta.subtitle')}
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button
-              className="bg-white hover:bg-gray-100 text-red-600 px-8 py-4 text-lg rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 font-semibold"
-              onClick={() => (window.location.href = "/Log-in")}
-            >
-              {t('landing.about.cta.getStarted')}
-            </Button>
-            <Button
-              className="bg-transparent border-2 border-white hover:bg-white hover:text-red-600 text-white px-8 py-4 text-lg rounded-lg transition-all duration-300 font-semibold"
-              onClick={() =>
-                window.open(
-                  "https://play.google.com/store/apps/details?id=com.yourapp.au_fondue",
-                  "_blank"
-                )
-              }
-            >
-              {t('landing.about.cta.downloadApp')}
-            </Button>
-          </div>
-        </div>
-      </section>
     </main>
   );
 }

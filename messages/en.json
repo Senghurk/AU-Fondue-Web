@@ -214,7 +214,6 @@
   },
   "landing": {
     "title": "AU Fondue",
-    "subtitle": "Admin",
     "nav": {
       "features": "Features",
       "about": "About",
@@ -223,7 +222,7 @@
     "hero": {
       "badge": "Campus Management Made Simple",
       "title": "Streamline Your Campus Operations",
-      "subtitle": "Transform how your university handles maintenance reports. From instant issue tracking to advanced analytics, AU Fondue Admin empowers your staff to resolve campus issues faster than ever before.",
+      "subtitle": "Transform how your university handles maintenance reports. From instant issue tracking to advanced analytics, AU Fondue empowers your admin and staff to resolve campus issues faster than ever before.",
       "cta": "Get Started",
       "downloadApp": "Download",
       "viewDemo": "View Demo"
@@ -234,9 +233,9 @@
       "realTimeMonitoring": "24/7 Real-time Monitoring"
     },
     "whatIs": {
-      "title": "What is AU Fondue Admin?",
+      "title": "What is AU Fondue?",
       "subtitle": "Powerful Campus Management",
-      "description": "AU Fondue Admin is the comprehensive backend platform designed specifically for university's Operation & Maintenance's Admin and staff to efficiently manage maintenance issue reports. From intelligent task assignment and real-time tracking to advanced analytics and seamless data export, our platform provides everything you need to revolutionize your campus operations and deliver exceptional service to your community."
+      "description": "AU Fondue is a comprehensive maintenance management system designed for Assumption University to streamline campus facility issue reporting and resolution."
     },
     "adminFeatures": {
       "title": "For Administrators",
@@ -316,6 +315,50 @@
         "subtitle": "Join us and try using AU Fondue today!",
         "getStarted": "Get Started Today",
         "downloadApp": "Download App"
+      }
+    },
+    "platforms": {
+      "webDashboard": {
+        "title": "Web Dashboard",
+        "subtitle": "FOR ADMINISTRATORS & OM STAFFS",
+        "description": "Manage reports, assign maintenance tasks, track progress, and generate analytics from your desktop browser"
+      },
+      "mobileApp": {
+        "title": "Mobile App",
+        "subtitle": "FOR EVERYONE WITH AU ACCOUNT",
+        "description": "Report issues instantly with photos, track repair status, and receive update from Admin & Staff",
+        "getItOn": "GET IT ON",
+        "googlePlay": "Google Play"
+      }
+    },
+    "features": {
+      "webDashboard": {
+        "badge": "Web Dashboard Features",
+        "description": "Access powerful management tools through our web dashboard. Perfect for administrators and maintenance supervisors on desktop computers."
+      },
+      "mobileApp": {
+        "badge": "Mobile App Features",
+        "description": "Available for everyone with an AU account. Report maintenance issues instantly from your Android phone. Download the app from Google Play Store to get started."
+      },
+      "dailyReports": {
+        "title": "Daily Maintenance Reports",
+        "description": "Comprehensive daily summaries of all maintenance activities, task completions, and pending issues."
+      }
+    },
+    "aboutAU": {
+      "builtForAU": "Built for AU",
+      "builtForAUDesc": "Exclusively designed and developed for Assumption University's campus maintenance needs"
+    },
+    "team": {
+      "title": "Meet Our Development Team",
+      "subtitle": "The team behind AU Fondue's development",
+      "developer1": "Sai Oan Hseng Hurk",
+      "developer2": "Min Thant Win",
+      "developer3": "Thaw Htut Soe",
+      "roles": {
+        "fullStack": "Full Stack Developer",
+        "frontend": "Frontend Developer",
+        "backend": "Backend Developer"
       }
     }
   },
