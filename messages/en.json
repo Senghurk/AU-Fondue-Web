@@ -1080,8 +1080,8 @@
     "history": "History"
   },
   "topbar": {
-    "auFondueStaff": "AU Fondue Staff",
-    "auFondueAdmin": "AU Fondue Admin",
+    "auFondueStaff": "Staff",
+    "auFondueAdmin": "Admin",
     "dashboard": "Dashboard",
     "home": "Home",
     "users": "Users",
